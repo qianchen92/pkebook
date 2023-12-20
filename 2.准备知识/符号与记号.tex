@@ -1,0 +1,43 @@
+\section{符号与记号}
+对于正整数$n$, 用$[n]$表示集合$\{1, \dots, n\}$.
+对于集合$X$, $|X|$表示其大小, $x \sample X$表示从$X$中均匀采样$x$, 
+$U_X$表示$X$上的均匀分布. 
+如果一个概率算法的运行时间是关于输入规模$n$的多项式函数$\mathsf{poly}(n)$, 则称其是概率多项式时间的算法, 
+简记为(probabilistic polynomial time, PPT).
+令$\mathcal{A}$是一个随机算法, $z \leftarrow \mathcal{A}(x;r)$
+表示$\mathcal{A}$在输入为$x$和随机带为$r$时输出$z$, 当上下文明确时, 常隐去随机带$r$简记为
+$z \leftarrow \mathcal{A}(x)$.  
+令$f(\cdot)$是关于$n$的函数, 如果对于任意的多项式$p(\cdot)$均存在常数$c$使得$n > c$时
+总有$f(n) < 1/p(n)$成立, 则称$f$是关于$n$的可忽略函数, 记为$\mathsf{negl}(n)$.  
+在本书中, $\kappa \in \mathbb{N}$表示计算安全参数, $\lambda \in \mathbb{N}$表示统计安全参数. 
+令$X = \{X_k\}_{k \in \mathbb{N}}$和$Y = \{Y_k\}_{k \in \mathbb{N}}$
+是两个由$k$索引的分布簇, 如果$X$和$Y$之间的统计距离是关于$\lambda$的可忽略函数, 
+则称$X$和$Y$统计不可区分, 记为$X \approx_s Y$; 
+如果任意PPT敌手区分$X$和$Y$的优势函数为$\mathsf{negl}(\kappa)$, 则称$X$和$Y$计算不可区分, 记为$X \approx_c Y$. 
+
+
+对于实数$x \in \mathbb{R}$, 令$\lfloor x \rfloor$表示$x$的下取整, 
+$\lfloor x \rceil := \lfloor x + 1/2\rfloor$表示与$x$最接近的整数.
+
+令$F$是带密钥的函数, $F_k(x)$表示函数$F$在密钥$k$控制下对$x$的求值, 也常记作$F(k, x)$.  
+
+\begin{table}[H]
+\begin{center}
+\caption{缩略词及其含义对照表}
+\begin{tabular}{ccc}
+\hline
+缩略词   & 英文表达 & 中文含义\\
+\hline
+CPA     & chosen-plaintext attack  		& 选择明文攻击\\
+CCA     & chosen-ciphertext attack 		& 选择密文攻击\\
+PKE     & public-key encryption    		& 公钥加密方案\\
+--      & hardcore function        		& 硬核函数\\ 
+--      & hardcore predicate       		& 硬核谓词\\  
+--      & oracle                   		& 谕言机\\
+--      & one-way trapdoor function 	& 单向陷门函数\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+

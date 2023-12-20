@@ -1,0 +1,245 @@
+\section{基于离散对数类问题的经典方案}
+\subsection{ElGamal PKE}
+1985年, ElGamal~\cite{ElGamal-IEEE-IT-1985}基于Diffie-Hellman构造了ElGamal PKE方案. 
+该方案设计简洁精巧, 对后续的研究有深远的影响. 
+\begin{definition}[ElGamal PKE]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$\mathsf{GenGroup}(1^\kappa) \rightarrow (\mathbb{G}, q, g)$, 
+	输出$pp$包含循环群描述, 同时包含对公钥空间$PK = \mathbb{G}$、私钥空间$SK = \mathbb{Z}_q$、
+	明文空间$M = \mathbb{G}$和密文空间$C = \mathbb{G}^2$. 
+
+\item $\mathsf{KeyGen}(pp)$: 随机选取$sk \in \mathbb{Z}_q$作为私钥, 计算公钥$pk:= g^{sk}$. 
+  
+\item $\mathsf{Encrypt}(pk, m)$: 以公钥$pk$和明文$m \in \mathbb{G}$为输入, 
+	随机选择$r \sample \mathbb{Z}_q$, 计算$c_0 = g^r$, $c_1 = pk^r \cdot m$, 输出密文$c = (c_1, c_2) \in C$. 
+
+\item $\mathsf{Decrypt}(sk, c)$: 以私钥$sk$和密文$c = (c_0, c_1)$为输入, 输出$m':= c_1/c_0^{sk}$.
+\end{itemize}
+\end{definition}
+
+\begin{trivlist}
+\item \textbf{正确性.} 以下公式~\ref{equation:ElGamal-PKE-correctness}说明方案具有完美正确性: 
+\begin{equation}\label{equation:ElGamal-PKE-correctness}
+	m' = c_1/c_0^{sk} = pk^r \cdot m/(g^r)^{sk} = m
+\end{equation}
+\end{trivlist}
+
+\begin{theorem}\label{theorem:ElGamal-PKE-CPA}
+如果DDH假设成立, 那么ElGamal PKE是IND-CPA安全的. 
+\end{theorem}
+
+\begin{proof}
+令$S_i$表示敌手在$\text{Game}_i$中成功概率. 以游戏序列的方式组织证明如下: 
+
+\begin{trivlist}
+\item $\text{Game}_0$: 该游戏是标准的IND-CPA游戏, 挑战者$\mathcal{CH}$和敌手$\mathcal{A}$交互如下: 
+\begin{itemize}
+	\item 初始化: $\mathcal{CH}$运行$\mathsf{Setup}(1^\kappa)$生成公开参数$pp$, 
+		同时运行$\mathsf{KeyGen}(pp)$生成公私钥对$(pk, sk)$. $\mathcal{CH}$将$(pp, pk)$发送给$\mathcal{A}$. 
+
+	\item 挑战: $\mathcal{A}$选择$m_0, m_1 \in \mathbb{G}$并发送给$\mathcal{CH}$. 
+		$\mathcal{CH}$选择随机比特$\beta \in \{0,1\}$, 随机选择$r \in \mathbb{Z}_q$, 
+		计算$c^* = (g^r, pk^r \cdot m_\beta)$并发送给$\mathcal{A}$.  
+
+	\item 猜测: $\mathcal{A}$输出对$\beta$的猜测$\beta'$. $\mathcal{A}$成功当且仅当$\beta' = \beta$. 
+\end{itemize} 
+根据定义, 我们有: 
+\begin{equation*}
+	\AdvA(\kappa) = |\Pr[S_0] - 1/2|
+\end{equation*}
+
+\item $\text{Game}_1$: 与$\text{Game}_0$的唯一不同在于挑战密文的生成方式, 
+	$\mathcal{CH}$不再计算$pk^r$作为会话密钥掩蔽$m_\beta$, 而是随机选取$z \sample \mathbb{Z}_q$, 用$g^z$作为会话密钥掩蔽$m_\beta$. 
+	挑战密文$c^* = (g^r, g^z \cdot m_\beta)$. 在$\text{Game}_1$中, 由于$r$和$z$均有挑战者从$\mathbb{Z}_q$中独立随机选取, 
+	因此挑战密文$c^*$在$\mathbb{G} \times \mathbb{G}$上均匀分布, 完美掩盖了$\beta$的信息. 
+	因此, 即使对于拥有无穷计算能力的敌手, 我们也有:   
+\begin{equation*}
+	\AdvA(\kappa) = |\Pr[S_1] - 1/2| = 0
+\end{equation*}
+\end{trivlist}
+
+\begin{lemma}
+如果DDH假设成立, 那么对于任意PPT敌手我们均有$|\Pr[S_0]-\Pr[S_1]| \leq \mathsf{negl}(\kappa)$. 
+\end{lemma}
+
+\begin{proof}
+证明的思路是反证. 若存在PPT敌手$\mathcal{A}$在$\text{Game}_0$和$\text{Game}_1$中成功的概率差不可忽略, 
+则可构造出PPT算法$\mathcal{B}$打破DDH困难问题. 
+令$\mathcal{B}$的DDH挑战实例为$(g, g^a, g^b, g^c)$, $\mathcal{B}$的目标是区分挑战实例是DDH四元组还是随机四元组.  
+为此$\mathcal{B}$扮演IND-CPA游戏中的挑战者与$\mathcal{A}$交互如下: 
+\begin{itemize}
+	\item 初始化: $\mathcal{B}$根据它的挑战实例生成$pp$, 令$pk = g^a$, 将$(pp, pk)$发送给$\mathcal{A}$. 
+		注意, $\mathcal{B}$并不知晓$a$ (这是符合逻辑的, 不然归约无意义).  
+
+	\item 挑战: $\mathcal{A}$选择$m_0, m_1 \in \mathbb{G}$并发送给$\mathcal{B}$.  
+		$\mathcal{B}$随机选择$\beta \sample \{0,1\}$, 
+		设置$c^* = (g^b, g^c \cdot m_\beta)$并发送给$\mathcal{A}$. 该设定隐式的设定$r = b$.   
+
+	\item 猜测: $\mathcal{A}$输出对$\beta$的猜测$\beta'$. 如果$\beta' = \beta$, $\mathcal{B}$输出1. 
+\end{itemize} 
+对上述交互分析可知, 如果$c = ab$, 那么$\mathcal{B}$完美的模拟了$\text{Game}_0$; 如果$c$在$\mathbb{Z}_q$中随机选择, 
+那么$\mathcal{B}$完美的模拟了$\text{Game}_1$. 
+因此, $\mathcal{B}$解决DDH挑战的优势$\mathsf{Adv}_\mathcal{B}^\text{DDH}(\kappa) = |\Pr[S_0]-\Pr[S_1]|$. 
+如果DDH假设成立, 我们有$|\Pr[S_0]-\Pr[S_1]| \leq \mathsf{negl}(\kappa)$. 
+\end{proof}
+综上, 定理得证. \qed
+\end{proof}
+
+\begin{note}[具有实际应用价值的同态]
+ElGamal PKE构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 明文空间是$\mathbb{G}$, 使用公钥$pk$对明文$m$的加密所得密文为$(g^r, pk^r \cdot m)$. 
+容易验证, ElGamal PKE相对于$\mathbb{G}$中的群运算``$\cdot$''同态, 然而, 这种类型的同态并无实际意义, 
+现实应用中需要的是相对于$\mathbb{Z}_q$上的模加运算``+''同态. 
+面向实际需求, ISO/IEC标准化了exponential ElGamal PKE方案. 
+该方案同样构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 所不同的是明文空间设定为$\mathbb{G}$的自然同构$\mathbb{Z}_q$, 
+使用公钥$pk$对明文$m$加密时, 首先计算$m$的自然同构映射结果$g^m$, 再如常加密, 最终密文为$(g^r, pk^r \cdot g^m)$. 
+容易验证, exponential ElGamal相对于$\mathbb{Z}_q$中的``+''运算同态. 
+\end{note}
+
+\subsection{Twisted ElGamal PKE}
+近半个世纪, 随着网络技术的飞速发展, 计算模式逐渐由集中式迁移分布式. 新型计算模式对加密方案的需求也从单一的机密性保护扩展到对隐私计算的支持. 
+上一节注记中提到的Exponential ElGamal PKE支持$\mathbb{Z}_p$上的模加运算``+''同态, 适用于密态计算场景. 
+在区块链和机器学习等涉及恶意敌手的计算场景中, 还需要加法同态加密方案具有零知识证明友好的特性, 即易与零知识证明协议进行套接, 
+证明密文加密的明文满足声称的约束关系, 如在指定的区间内. 
+
+当前最高效的零知识区间范围证明系统是构建在离散对数群上的Bulletproof~\cite{Bunz-BulletProof-SP-2018}, 其接受的断言类型为Pedersen承诺. 
+仅管exponential ElGamal PKE密文的第二项$pk^r \cdot g^m$也是Pedersen承诺的形式, 但是若证明者为密文发送方, 
+则其知晓承诺密钥$(pk, g)$之间的离散对数关系, 从而无法调用Bulletproof完成证明(合理性得不到保证). 
+
+\begin{center}
+\begin{tikzpicture}
+    \node [textnode, name=ElGamal] {ElGamal};
+    \node [textnode, name=C1, below of=ElGamal, xshift=-3em, yshift=-5em] {$g^r$};
+    \node [textnode, name=C2, below of=ElGamal, xshift=3em, yshift=-5em] {$pk^r g^m$};
+    \draw ($(ElGamal.south)$) edge[-] (C1); 
+    \draw ($(ElGamal.south)$) edge[-] (C2);  
+    \node[ellipse callout, color=red, draw, above of = C2, xshift=2em, yshift = 1em, 
+        callout absolute pointer={(C2.north)}, font=\scriptsize] {oblivious\\[-0.5em]trapdoor};  
+
+    \node [shapenode, right of = ElGamal, xshift=28em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
+    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=28em] {Bulletproof};
+    \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
+    \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
+
+    \draw (C2) edge[-] node[midway] {\redcross} (input.west);  
+\end{tikzpicture}
+\end{center}
+
+
+解决该问题有两种技术手段: 
+\begin{enumerate}
+\item 文献~\cite{Quisquis-ASIACRYPT-2019}中的方法: 证明者引入新的Pedersen承诺作为桥接, 并设计$\Sigma$协议证明新承诺的消息与明文的一致性, 再调用Bulletproof对桥接承诺进行证明. 
+	该方法的缺点是需要引入桥接承诺的额外的$\Sigma$协议, 增大了证明和验证的开销. 
+
+\begin{center}
+\begin{tikzpicture}
+    \node [textnode, name=ElGamal] {ElGamal};
+    \node [textnode, name=C1, below of=ElGamal, xshift=-3em, yshift=-5em] {$g^r$};
+    \node [textnode, name=C2, below of=ElGamal, xshift=3em, yshift=-5em] {$pk^r g^m$};
+    \draw ($(ElGamal.south)$) edge[-] (C1); 
+    \draw ($(ElGamal.south)$) edge[-] (C2);  
+
+
+    \node [shapenode, right of = ElGamal, xshift=28em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
+    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=28em] {Bulletproof};
+    \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
+    \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
+
+    \node [shapenode, draw = none, fill = orange, name=sigma, right of = C2, xshift=8em] {$\Sigma$ protocol}; 
+    \node [textnode, above of=sigma, yshift=2em] {consistency\\[-0.5em]proof}; 
+    \node [shapenode, draw=none, fill = darkgreen!30, name=commitment, right of = sigma, xshift=8em, minimum width=4em] {$g^r h^m$};
+    \node [textnode, above of=commitment, yshift=2em] {Pedersen\\[-0.5em]commitment};  
+
+    \draw (commitment) edge[-] (input); 
+    \draw (sigma) edge[->] (C2); 
+    \draw (sigma) edge[->] (commitment); 
+\end{tikzpicture}
+\end{center}
+
+\item 文献~\cite{Zether-FC-2020}中的方法: 结合待证明的ElGamal PKE密文对Bulletproof进行重新设计, 使用特制的$\Sigma$-Bulletproof完成证明. 
+	该方法的缺点是需要对Bulletproof进行定制化的改动, 不具备模块化.  
+\begin{center}
+\begin{tikzpicture}
+    \node [textnode, name=ElGamal] {ElGamal};
+    \node [textnode, name=C1, below of=ElGamal, xshift=-3em, yshift=-5em] {$g^r$};
+    \node [textnode, name=C2, below of=ElGamal, xshift=3em, yshift=-5em] {$pk^r g^m$};
+    \draw ($(ElGamal.south)$) edge[-] (C1); 
+    \draw ($(ElGamal.south)$) edge[-] (C2);  
+
+
+    \node [shapenode, right of = ElGamal, xshift=28em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
+    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=28em] {Bulletproof};
+    \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
+    \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
+
+    \node [shapenode, right of = ElGamal, xshift=14em, fill=magenta!30, yshift=-2.5em, minimum width=6em, minimum height=7em] {}; 
+    \node [textnode, name=sigma-bullet, right of = ElGamal, xshift=14em] {$\Sigma$-Bullet};
+    \node [textnode, name=input2, below of = sigma-bullet, yshift=-5em] {};
+    \draw (C2) edge[->] ($(input2.west)+(-3em, 0em)$); 
+    \draw ($(input.west)+(-1.8em, 2.5em)$) edge[->] ($(input2.east)+(3em, 2.5em)$);  
+\end{tikzpicture}
+\end{center}
+\end{enumerate}
+
+上述两种技术手段均存在不足. 针对这一问题, Chen等~\cite{Chen-ESORICS-2020}对exponential ElGamal PKE进行变形扭转, 将封装密文与会话密钥的位置对调, 
+同时更改同构映射编码的基底, 得到twisted ElGamal PKE. 
+新的加密方案与exponential ElGamal PKE的性能和安全性相当, 同样满足$\mathbb{Z}_q$上的模加同态; 
+特别的, 密文的第二部分恰好是标准的Pedersen承诺形态(承诺密钥陷门未知), 因此可无缝对接Bulletproof等区间范围证明, 具备零知识证明友好的特性. 
+
+\begin{definition}[Twisted ElGamal PKE]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$\mathsf{GenGroup}(1^\kappa) \rightarrow (\mathbb{G}, q, g)$, 
+	随机选取$\mathbb{G}$的另一生成元$h$,  
+	输出$pp$包含循环群和$h$的描述, 同时包含对公钥空间$PK = \mathbb{G}$、私钥空间$SK = \mathbb{Z}_q$、
+	明文空间$M = \mathbb{Z}_q$和密文空间$C = \mathbb{G}^2$. 
+
+\item $\mathsf{KeyGen}(pp)$: 随机选取$sk \in \mathbb{Z}_q$作为私钥, 计算公钥$pk:= g^{sk}$. 
+  
+\item $\mathsf{Encrypt}(pk, m)$: 以公钥$pk$和明文$m \in \mathbb{Z}_q$为输入, 
+	随机选择$r \sample \mathbb{Z}_q$, 计算$c_0 = pk^r$, $c_1 = pk^r \cdot h^m$, 输出密文$c = (c_1, c_2) \in C$. 
+
+\item $\mathsf{Decrypt}(sk, c)$: 以私钥$sk$和密文$c = (c_0, c_1)$为输入, 输出$m':= \log_h c_1/c_0^{sk^{-1}}$.
+\end{itemize}
+\end{definition} 
+
+\begin{center}
+\begin{tikzpicture}
+    \node [textnode, name=twisted_ElGamal] {twisted ElGamal};
+    \node [textnode, name=C1, below of=twisted_ElGamal, xshift=-3em, yshift=-3em] {$\blue{g^r}$};
+    \node [textnode, name=C2, below of=twisted_ElGamal, xshift=3em, yshift=-3em] {$\red{pk^r} g^m$};
+    \draw ($(ElGamal.south)$) edge[-, dashed] (C1); 
+    \draw ($(ElGamal.south)$) edge[-, dashed] (C2);  
+
+    \node [textnode, name=C1_new, below of=C1, yshift=-5em] {$\red{pk^r}$};
+    \node [textnode, name=C2_new, below of=C2, yshift=-5em] {$\blue{g^r} h^m$};
+    \draw (C1_new) edge[<-] (C2); 
+    \draw (C2_new) edge[<-] (C1); 
+    \draw ($(C2.south)+(0.5em, 0em)$) edge[->, dotted] ($(C2_new.north)+(0.5em, 0em)$); 
+
+    \node[ellipse callout, color=darkgreen, draw, above of = C2_new, xshift=3em, yshift = 0.5em, 
+        callout absolute pointer={(C2_new.north)+(1em, 0em)}, font=\scriptsize] {no\\[-0.5em]trapdoor};  
+
+    \node [shapenode, right of = twisted_ElGamal, xshift=28em, fill=blue!20, yshift=-5.3em, minimum width=6em, minimum height=7em] {};
+    \node [textnode, name=Bulletproof, right of = twisted_ElGamal, yshift=-2.8em, xshift=28em] {Bulletproof};
+    \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
+    \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
+
+    \draw (C2_new) edge[-] (input.west);  
+\end{tikzpicture}
+\end{center}
+
+\begin{trivlist}
+\item \textbf{正确性.} 以下公式~\ref{equation:twisted-ElGamal-PKE-correctness}说明方案具有完美正确性: 
+\begin{equation}\label{equation:twisted-ElGamal-PKE-correctness}
+	c_1/c_0^{sk^{-1}} = g^r \cdot h^m/(pk^r)^{sk^{-1}} = h^m
+\end{equation}
+\end{trivlist}
+
+\begin{theorem}\label{theorem:twisted-ElGamal-PKE-CPA}
+如果DDH假设成立, 那么twisted ElGamal PKE是IND-CPA安全的. 
+\end{theorem}
+证明与标准的ElGamal PKE证明类似, 我们留给作者作为练习. 
+
+\begin{note}
+为获得$\mathbb{Z}_q$上的加法同态, exponential ElGamal PKE和twisted ElGamal PKE均将明文空间设定为$\mathbb{Z}_q$, 加密时必须先进行同构编码, 
+解密时则在最后需要进行解码. 解码的过程等同于求解离散对数, 因此为了确保解密高效, 必须将明文空间限制在较小的范围内, 如$[2^{40}]$. 
+\end{note} 

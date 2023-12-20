@@ -1,0 +1,285 @@
+\section{基于格问题的经典方案}
+\subsection{Regev PKE}
+Regev~\cite{Regev-STOC-2005}中提出了LWE困难问题, 并基于该问题构造了一个公钥加密方案, 称为Regev PKE. 
+
+\begin{definition}[Regev PKE]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 以安全参数$\kappa$为输入, 生成随机矩阵$\mathbf{A} \in \mathbb{Z}_q^{\ell \times n}$作为公开参数. 
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 随机选取向量$\mathbf{s} \sample \mathbb{Z}_q^n$作为私钥, 
+	随机选取噪声向量$\mathbf{e} \sample \chi^\ell$ (其中$\chi^\ell = D_{\mathbb{Z}^\ell, r}$), 
+    计算$\mathbf{p} \leftarrow \mathbf{A} \cdot \mathbf{s} + \mathbf{e} \in \mathbb{Z}_q^\ell$作为公钥. 
+
+\item $\mathsf{Encrypt}(pk, m)$: 以公钥$pk = \mathbf{p}$和明文$m \in \{0,1\}$为输入, 
+	随机选取向量$\mathbf{r} \sample \{0,1\}^\ell$
+	计算$\mathbf{u}^T = \mathbf{r}^T \mathbf{A}$, $v = \mathbf{r}^T \mathbf{p} + m \cdot \lfloor q/2 \rceil$作为密文. 
+
+\item $\mathsf{Decrypt}(\mathbf{s}, c)$: 以私钥$sk = \mathbf{s}$和密文$c = (\mathbf{u}, v)$, 
+    计算$y = v - \mathbf{u}^T\mathbf{s} \in \mathbb{Z}_q$, 若$y$接近0则输出0, 
+    若$y$接近$\lfloor q/2 \rceil$则输出1.    
+\end{itemize}
+\end{definition}
+
+\begin{trivlist}
+\item \textbf{正确性.} 观察以下等式: 
+\begin{eqnarray*}
+y &=& v - \mathbf{u}^T\mathbf{s}\\
+  &=& \mathbf{r}^T \mathbf{p} + m \cdot \lfloor q/2 \rceil - \mathbf{r}^T \mathbf{A} \mathbf{s}\\
+  &=& \mathbf{r}^T (\mathbf{A} \mathbf{s}+\mathbf{e}) + m \cdot \lfloor q/2 \rceil - \mathbf{r}^T \mathbf{A}\mathbf{s}\\
+  &=& \mathbf{r}^T\mathbf{e}+m \cdot \lfloor q/2 \rceil
+\end{eqnarray*}
+由上述推导可知, 当累计误差$|\langle \mathbf{r}, \mathbf{e} \rangle|\leq q/4$时解密正确. 
+因此, 在参数选取时应令$q$的取值相对于误差分布$\chi$和$\ell$相对大. 比如, 当$\chi = D_{\mathbb{Z}, r}$是离散Gaussian分布时, 
+$\langle \mathbf{r}, \mathbf{e} \rangle$是参数至多为$r \sqrt{\ell}$的亚Gaussian分布, 
+其尺寸小于$r \sqrt{\ell \ln (1/\varepsilon)/\pi}$的概率至少为$1-2\varepsilon$.  
+为了确保解密错误的概率可忽略, 可设定$r = \Theta(\sqrt{n})$, $q = \tilde{O}(n)$, 对应LWE错误率$\alpha = r/q = 1/\tilde{O}(n)$. 
+\end{trivlist}
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}
+\node[rectanglenode, name=A, minimum width=6em, minimum height=12em, fill=red!30] {$\mathbf{A} \in \mathbb{Z}_q^{\ell \times n}$}; 
+
+\node[textnode, name=product1, left of = A, xshift=-4em] {$\times$}; 
+\node[rectanglenode, name=r, left of = product1, xshift=-2em, 
+	minimum width=2em, minimum height=12em, fill=yellow!30] {$\mathbf{r}$};
+\node[textnode, above of = r, yshift=7em] {$\{0,1\}^\ell$};
+\draw ($(r.south)+(-2em, 0em)$) edge[<->] node[fill=white] {$\ell$} ($(r.north)+(-2em, 0em)$); 
+
+\node[textnode, name=product2, above of = A, yshift=7em] {$\times$}; 
+\node[rectanglenode, name=sk, above of = product2, yshift=2em, 
+	minimum width=6em, minimum height=2em, fill=blue!30] {$\mathbf{s}^T$}; 
+\draw ($(sk.west)+(0em, 2em)$) edge[<->] node[fill=white] {$n$} ($(sk.east)+(0em, 2em)$); 
+
+\node[textnode, name=add1, right of = A, xshift=4em] {$+$}; 
+\node[rectanglenode, name=e, right of = add1, xshift=2em, 
+	minimum width=2em, minimum height=12em, fill=blue!30] {$\mathbf{e}$}; 
+\node[textnode, above of = e, yshift=7em] {$\chi^\ell$};
+
+\node[textnode, name=get1, right of = e, xshift=2em] {$=$}; 
+\node[rectanglenode, name=pk, right of = get1, xshift=2em, 
+	minimum width=2em, minimum height=12em, fill=purple] {$\mathbf{p}$}; 
+\node[textnode, above of = pk, yshift=7em] {$\mathbb{Z}_q^\ell$};
+
+\node[textnode, name=get2, below of = A, yshift=-7em] {$=$}; 
+\node[rectanglenode, name=u, below of = get2, yshift=-2em, 
+	minimum width=6em, minimum height=2em, fill=gray!30] {$\mathbf{u}$}; 
+
+\node[textnode, name=get3, below of = pk, yshift=-7em] {$+ m \cdot \lfloor q/2 \rceil = $}; 
+\node[rectanglenode, name=v, below of = get3, yshift=-2em, 
+	minimum width=2em, minimum height=2em, fill=gray!30] {$v$}; 
+\end{tikzpicture}
+\end{center}
+\caption{Regev PKE加密方案示意图}
+\end{figure}
+
+\begin{theorem}
+如果判定性LWE假设成立, 则Regev PKE是IND-CPA安全的. 
+\end{theorem}
+
+\begin{proof}
+令$S_i$表示敌手在$\text{Game}_i$中成功概率. 以游戏序列的方式组织证明如下:
+\begin{trivlist}
+\item $\text{Game}_0$: 该游戏是标准的IND-CPA游戏. 
+	挑战者$\mathcal{CH}$和敌手$\mathcal{A}$交互如下: 
+	\begin{itemize}
+		\item 初始化: $\mathcal{CH}$运行$\mathsf{Setup}(1^\kappa)$生成公开参数$\mathbf{A} \in \mathbb{Z}_q^{\ell \times n}$, 
+			同时生成公私钥对, 其中私钥$sk$为随机向量$\mathbf{s} \in \mathbb{Z}_q^n$, 
+			公钥$pk$为$\mathbf{p} = \mathbf{A}\mathbf{s}+\mathbf{e} \in \mathbb{Z}_q^\ell$, 
+			其中$\mathbf{e} \leftarrow \chi^\ell$.  
+
+		\item 挑战: $\mathcal{A}$选取$(m_0, m_1)$发送给$\mathcal{CH}$. 
+			$\mathcal{CH}$随机选取$\mathbf{r} \sample \{0,1\}^\ell$, $\beta \sample \{0,1\}$,  
+			计算$\mathbf{u} = \mathbf{r}^T \mathbf{A}$, 
+			$v = \mathbf{r}^T \mathbf{p} + m_\beta \cdot \lfloor q/2 \rceil$, 
+			发送$(\mathbf{u}, v)$给$\mathcal{A}$作为挑战密文. 
+
+		\item 猜测: $\mathcal{A}$输出对$\beta$的猜测$\beta'$. $\mathcal{A}$成功当且仅当$\beta = \beta'$. 
+	\end{itemize} 
+根据定义, 我们有: 
+\begin{equation*}
+\AdvA(\kappa) = |\Pr[S_0] - 1/2|
+\end{equation*}  
+
+\item $\text{Game}_1$: 与$\text{Game}_0$惟一不同的是$\mathcal{CH}$生成公钥的方式由
+	计算$\mathbf{A}\mathbf{s}+\mathbf{e}$变为随机选取$\mathbb{Z}_q^\ell$上的向量. 
+	在$\text{Game}_1$中, $\vec{\mathbf{A}} = \mathbf{A} \mid \mathbf{p}$是$\mathbb{Z}_q^{\ell \times n}$上的随机矩阵, 
+	容易验证$f_{\vec{\mathbf{A}}}(\mathbf{r}) = \mathbf{r}^T \vec{\mathbf{A}}$是从$\{0,1\}^\ell$到$\mathbb{Z}_q^{n+1}$
+	的universal hash, 由参数选取$\ell > n \log q$和剩余哈希引理(leftover hash lemma)可知, 
+	函数的输出服从$\mathbb{Z}_q^{n+1}$上的均匀分布. 因此, 挑战密文完美掩盖了$\beta$的信息. 
+	因此, 即使对于拥有无穷计算能力的敌手, 我们也有: 
+\begin{equation*}
+\AdvA(\kappa) = |\Pr[S_1] - 1/2| = 0
+\end{equation*} 
+\end{trivlist}
+
+\begin{claim}
+如果判定性LWE假设成立, 那么对于任意PPT敌手均有$|\Pr[S_0] - \Pr[S_1]| \leq \mathsf{negl}(\kappa)$. 
+\end{claim}
+
+\begin{proof}
+证明的思路是反证. 若存在PPT敌手$\mathcal{A}$在$\text{Game}_0$和$\text{Game}_1$中成功的概率差不可忽略, 
+则可构造出PPT算法$\mathcal{B}$打破LWE困难问题. 令$\mathcal{B}$的LWE挑战实例为$(\mathbf{A}, \mathbf{p})$, 
+$\mathcal{B}$的目标是区分挑战实例是随机采样还是LWE采样. 为此$\mathcal{B}$扮演IND-CPA游戏中的挑战者与$\mathcal{A}$交互如下: 
+\begin{itemize}
+	\item 初始化: $\mathcal{B}$发送$(\mathbf{A}, \mathbf{p})$给$\mathcal{A}$. 
+		该操作将$pk$隐式地设定为$\mathbf{p}$. 
+
+	\item 挑战: $\mathcal{A}$选取$(m_0, m_1)$发送给$\mathcal{CH}$. 
+		$\mathcal{CH}$随机选取$\mathbf{r} \sample \{0,1\}^\ell$, $\beta \sample \{0,1\}$,  
+		计算$\mathbf{u} = \mathbf{r}^T \mathbf{A}$, 
+		$v = \mathbf{r}^T \mathbf{p} + m_\beta \cdot \lfloor q/2 \rceil$, 
+		发送$(\mathbf{u}, v)$给$\mathcal{A}$作为挑战密文. 
+
+	\item 猜测: $\mathcal{A}$输出对$\beta$的猜测$\beta'$. 如果$\beta = \beta'$, $\mathcal{B}$输出1. 
+\end{itemize} 
+对上述交互分析可知, 如果$\mathbf{p}$是LWE采样, 那么$\mathcal{B}$完美模拟了$\text{Game}_0$; 
+如果$\mathbf{p}$是随机采样, 那么$\mathcal{B}$完美模拟了$\text{Game}_1$. 
+因此, $\mathcal{B}$解决LWE挑战的优势$\mathsf{Adv}_\mathcal{B}^\text{LWE}(\kappa) = |\Pr[S_0] - \Pr[S_1]|$. 
+如果LWE假设成立, 我们有$|\Pr[S_0] - \Pr[S_1]| \leq \mathsf{negl}(\kappa)$. \qed
+\end{proof}
+综上, 定理得证. \qed
+\end{proof}
+
+\begin{remark}
+Regev PKE和Goldwasser-Micali PKE在设计上有异曲同工之处, 均采用的是有损加密思想, 即公钥存在正常和有损这两种计算不可区分的类型, 
+正常公钥生成的密文可以正确解密, 而有损公钥生成的密文丢失了明文的全部信息. 
+在安全性证明时, 利用两种类型公钥的计算不可区分性以及有损加密的性质, 即可完成IND-CPA安全的论证.   
+\end{remark}
+
+\subsection{GPV PKE}
+Gentry, Peikert和Vaikuntanathan~\cite{GPV-STOC-2008}同样基于LWE假设设计出一个PKE方案, 称为GPV PKE. 
+
+\begin{trivlist}
+\item GPV PKE由以下4个多项式时间算法组成: 
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 以安全参数$\kappa$为输入, 生成随机矩阵$\mathbf{A} \in \mathbb{Z}_q^{\ell \times n}$作为公开参数. 
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 随机选取噪声向量$\mathbf{r} \sample D_{\mathbb{Z}^\ell, r}$作为私钥, 
+    计算$\mathbf{u}^T \leftarrow \mathbf{r}^T\mathbf{A}$作为公钥. 从编码的角度, $\mathbf{u}$可以理解为$\mathsf{e}$
+    相对于$\mathbf{A}$的syndrome. 
+
+\item $\mathsf{Encrypt}(pk, m)$: 以公钥$pk = \mathbf{u}$和明文$m \in \{0,1\}$为输入, 
+	随机选取向量$\mathbf{s} \sample \mathbb{Z}_q^n$和$\mathbf{e} \sample \chi^\ell$, 随机选取$e \sample \chi$, 
+	计算$\mathbf{p} = \mathbf{A}\mathbf{s}+\mathbf{e} \in \mathbb{Z}_q^\ell$, 
+	$v = \mathbf{u}^T \mathbf{s} + e + m \cdot \lfloor q/2 \rceil$作为密文. 
+
+\item $\mathsf{Decrypt}(\mathbf{r}, c)$: 以私钥$sk = \mathbf{r}$和密文$c = (\mathbf{p}, v)$, 
+    计算$y = v - \mathbf{r}^T\mathbf{p} \in \mathbb{Z}_q$, 若$y$接近0则输出0, 
+    若$y$接近$\lfloor q/2 \rceil$则输出1.    
+\end{itemize}
+\end{trivlist}
+
+\begin{trivlist}
+\item \textbf{正确性.} 观察以下等式: 
+\begin{eqnarray*}
+y &=& v - \mathbf{r}^T\mathbf{p}\\
+  &=& \mathbf{u}^T \mathbf{s} + e + m \cdot \lfloor q/2 \rceil - \mathbf{r}^T(\mathbf{A}\mathbf{s}+\mathbf{e})\\
+  &=& \mathbf{u}^T \mathbf{s} + e + m \cdot \lfloor q/2 \rceil - \mathbf{u}^T\mathbf{s} - \mathbf{r}^T\mathbf{e}\\
+  &=& m \cdot \lfloor q/2 \rceil + e - \mathbf{r}^T\mathbf{e}
+\end{eqnarray*}
+由上述推导可知, 当累计误差$|\langle e - \mathbf{r}^T\mathbf{e} \rangle|\leq q/4$时解密正确. 
+通过恰当的参数选择, 可确保累计误差以接近1的绝对优势概率小于等于$q/4$, 更多细节请参考~\cite{GPV-STOC-2008}
+\end{trivlist}
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}
+\node[rectanglenode, name=A, minimum width=6em, minimum height=12em, fill=red!30] {$\mathbf{A} \in \mathbb{Z}_q^{\ell \times n}$}; 
+
+\node[textnode, name=product1, left of = A, xshift=-4em] {$\times$}; 
+\node[rectanglenode, name=r, left of = product1, xshift=-2em, 
+	minimum width=2em, minimum height=12em, fill=blue!30] {$\mathbf{r}$};
+\node[textnode, above of = r, yshift=7em] {$D_{\mathbb{Z}^\ell, r}$};
+\draw ($(r.south)+(-2em, 0em)$) edge[<->] node[fill=white] {$\ell$} ($(r.north)+(-2em, 0em)$); 
+
+\node[textnode, name=product2, above of = A, yshift=7em] {$\times$}; 
+\node[rectanglenode, name=sk, above of = product2, yshift=2em, 
+	minimum width=6em, minimum height=2em, fill=yellow!30] {$\mathbf{s}^T$}; 
+\draw ($(sk.west)+(0em, 2em)$) edge[<->] node[fill=white] {$n$} ($(sk.east)+(0em, 2em)$); 
+
+\node[textnode, name=add1, right of = A, xshift=4em] {$+$}; 
+\node[rectanglenode, name=e, right of = add1, xshift=2em, 
+	minimum width=2em, minimum height=12em, fill=yellow!30] {$\mathbf{e}$}; 
+\node[textnode, above of = e, yshift=7em] {$\chi^\ell$};
+
+\node[textnode, name=get1, right of = e, xshift=2em] {$=$}; 
+\node[rectanglenode, name=pk, right of = get1, xshift=2em, 
+	minimum width=2em, minimum height=12em, fill=gray!30] {$\mathbf{p}$}; 
+\node[textnode, above of = pk, yshift=7em] {$\mathbb{Z}_q^\ell$};
+
+\node[textnode, name=get2, below of = A, yshift=-7em] {$=$}; 
+\node[rectanglenode, name=u, below of = get2, yshift=-2em, 
+	minimum width=6em, minimum height=2em, fill=purple] {$\mathbf{u}$}; 
+
+\node[textnode, name=add2, right of = u, xshift=4em] {$+$}; 
+\node[rectanglenode, name=e_star, right of = add2, xshift=2em, 
+	minimum width=2em, minimum height=2em, fill=yellow!30] {$e$}; 
+
+\node[textnode, name=get3, below of = pk, yshift=-7em] {$+ m \cdot \lfloor q/2 \rceil = $}; 
+\node[rectanglenode, name=v, below of = get3, yshift=-2em, 
+	minimum width=2em, minimum height=2em, fill=gray!30] {$v$}; 
+\end{tikzpicture}
+\end{center}
+\caption{GPV PKE加密方案示意图}
+\end{figure}
+
+\begin{theorem}
+如果判定性LWE假设成立, 则GPV PKE是IND-CPA安全的. 
+\end{theorem}
+
+\begin{proof}
+令$S_i$表示敌手在$\text{Game}_i$中成功概率. 以游戏序列的方式组织证明如下:
+\begin{trivlist}
+\item $\text{Game}_0$: 该游戏是标准的IND-CPA游戏. 
+	挑战者$\mathcal{CH}$和敌手$\mathcal{A}$交互如下: 
+	\begin{itemize}
+		\item 初始化: $\mathcal{CH}$运行$\mathsf{Setup}(1^\kappa)$生成公开参数$\mathbf{A} \in \mathbb{Z}_q^{\ell \times n}$, 
+			同时生成公私钥对, 其中私钥$sk$为随机向量$\mathbf{r} \in D_{\mathbb{Z}^\ell, r}$, 
+			公钥$pk$为$\mathbf{u} = \mathbf{r}^T\mathbf{A}$.  
+
+		\item 挑战: $\mathcal{A}$选取$(m_0, m_1)$发送给$\mathcal{CH}$. 
+			$\mathcal{CH}$随机选取$\mathbf{s} \sample \mathbb{Z}_q^n$, 
+			随机选取$\mathbf{e} \sample \chi^\ell$和$e \sample \chi$, $\beta \sample \{0,1\}$,  
+			计算$\mathbf{p} = \mathbf{A}\mathbf{s}+\mathbf{e} \in \mathbb{Z}_q^\ell$, 
+			$v = \mathbf{u}^T \mathbf{s} + e + m_\beta \cdot \lfloor q/2 \rceil$作为密文. 
+			发送$(\mathbf{u}, v)$给$\mathcal{A}$作为挑战密文. 
+
+		\item 猜测: $\mathcal{A}$输出对$\beta$的猜测$\beta'$. $\mathcal{A}$成功当且仅当$\beta = \beta'$. 
+	\end{itemize} 
+根据定义, 我们有: 
+\begin{equation*}
+\AdvA(\kappa) = |\Pr[S_0] - 1/2|
+\end{equation*}  
+
+\item $\text{Game}_1$: 与$\text{Game}_0$惟一不同的是$\mathcal{CH}$生成公钥的方式由
+	计算$\mathbf{u}^T = \mathbf{r}^T \mathbf{A}$变为随机选取$\mathbf{u} \sample \mathbb{Z}_q^n$上的向量. 
+	在$\text{Game}_1$中, $(\mathbf{A}, \mathbf{p} = \mathbf{A}\mathbf{s}+\mathbf{e}, \mathbf{u}, \mathbf{u}^T\mathbf{s}+x)$
+	恰好构成$\ell+1$个LWE采样结果. 有LWE假设立刻可知, 敌手在$\text{Game}_1$中的视角计算意义下隐藏了$\beta$的信息, 
+	因此基于LWE假设有: 
+\begin{equation*}
+\AdvA(\kappa) = |\Pr[S_1] - 1/2| \leq \mathsf{negl}(\kappa)
+\end{equation*}
+\end{trivlist} 
+
+\begin{claim}
+对于任意的敌手$\mathcal{A}$(即使拥有无穷计算能力), 均有$|\Pr[S_0] - \Pr[S_1]| \leq \mathsf{negl}(\kappa)$ 
+\end{claim}
+
+\begin{proof}
+根据$\ell \geq 2n \log q$的参数选择可知, 公钥$\mathbf{u}$的分布与$\mathbb{Z}_q^n$上的均匀分布统计不可区分, 
+因此敌手在$\text{Game}_0$和$\text{Game}_1$中的视图统计不可区分, 
+从而$|\Pr[S_0] - \Pr[S_1]| \leq \mathsf{negl}(\kappa)$. \qed
+\end{proof}
+
+综上, 定理得证. \qed
+\end{proof}
+
+\begin{remark}
+Regev PKE和GPV PKE在形式上相似, 构造使用了相同的元素$\mathbf{A}, \mathbf{s}, \mathbf{r}, \mathbf{e}, \mathbf{p}, \mathbf{u}, v$, 
+但用途含义不完全相同, 构造互为对偶. Regev PKE中, $\mathbf{p}$为公钥, $(\mathbf{s}, \mathbf{e})$为私钥, $\mathbf{u}$为密文; 
+GPV PKE中$\mathbf{p}$为密文, $(\mathbf{s}, \mathbf{e})$为加密随机数, $\mathbf{u}$为公钥. 
+感兴趣的读者可以参考Micciancio~\cite{Micciancio-PKC-2010}了解更多格密码学中的对偶性. 
+Regev PKE中, 公钥空间是稀疏的; GPV PKE中, 公钥空间是稠密的, 正是利用公钥空间的稠密性, 
+我们可以借助随机谕言机将GPV PKE升级为身份加密方案GPV IBE. 
+\end{remark}

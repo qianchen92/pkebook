@@ -1,0 +1,91 @@
+% !TEX TS-program = XeLaTeX
+\newcommand{\path}{/Users/yuchen/Documents/Research/PaperEngine}
+
+\newif\ifChinese
+\Chinesetrue
+%\Chinesefalse
+
+\input{\path/paper/mybooksetting}
+
+\begin{document}
+
+\frontmatter
+
+\title{公钥加密的设计方法}
+
+\author{
+	陈宇\thanks{山东大学. Email: \blue{\texttt{yuchen.prc@gmail.com}}} 
+    \and
+    秦宝东\thanks{西安邮电大学. Email: \blue{\texttt{qinbaodong@xupt.edu.cn}}}
+}
+
+\date{}
+
+\maketitle
+
+\include{前言} % 前言章节 preface.tex
+
+% \thispagestyle{empty}
+% \newpage
+
+\tableofcontents % 目录页
+
+\mainmatter
+
+% \chapter*{前言}\normalsize
+%   \addcontentsline{toc}{chapter}{前言}
+
+\newpage
+\pagestyle{plain}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\chapter{公钥加密的概述}
+\include{1.概述/背景与起源}
+\include{1.概述/发展历程简介}
+
+\chapter{准备知识}
+\include{2.准备知识/符号与记号}
+\include{2.准备知识/可证明安全方法}
+\include{2.准备知识/困难问题}
+\include{2.准备知识/信息论工具}
+\include{2.准备知识/公钥加密基本安全模型}
+
+\chapter{经典公钥加密方案回顾}
+\include{3.经典方案/基于整数分解类问题的经典方案}
+\include{3.经典方案/基于离散对数类问题的经典方案}
+\include{3.经典方案/基于格问题的经典方案}
+
+\chapter{通用构造方法}
+\include{4.通用构造方法/单向陷门函数类}
+\include{4.通用构造方法/(可提取)哈希证明系统类}
+\include{4.通用构造方法/程序混淆类}
+\include{4.通用构造方法/统一构造框架}
+
+\chapter{公钥加密的安全性增强}
+\include{5.安全性增强/抗泄漏安全}
+\include{5.安全性增强/抗篡改安全}
+\include{5.安全性增强/消息依赖密钥安全}
+
+
+\chapter{公钥加密的功能性扩展}
+\include{6.功能性扩展/确定性公钥加密}
+\include{6.功能性扩展/可搜索公钥加密}
+\include{6.功能性扩展/保序公钥加密}
+
+\chapter{标准化及工程实践}
+
+\appendix
+
+\backmatter
+
+\include{后记}  % 后记.tex
+
+
+
+
+\bibliographystyle{alpha}
+\bibliography{\path/bib/mycrypto}
+
+\end{document}
+

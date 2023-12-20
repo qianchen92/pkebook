@@ -1,0 +1,107 @@
+\section{信息论工具}
+\subsection{熵的概念}
+Shannon在1948年开创了信息论这一全新领域, 其工作的开创性不啻于Einstein关于引力场理论的工作, 
+一举奠定了学科的基础, 解答了最初所有最重要的问题.  
+ 
+Shannon的信息论关注的重点是``消息''和它们在(有噪)信道中的传播. 
+容易直观理解的是, 消息所包含的信息量取决于消息令人感到意外的程度(如果消息平平无奇, 那么它包含的信息为0). 
+相比而言, 稍显反直觉的是随机消息包含最多的信息. 
+
+信息论中最重要的概念是熵(entropy). 熵量化了期望的意义下消息包含的信息量, 单位通常是比特.    
+从概率论的角度看, 熵是对随机变量不确定性的测度.  
+以下令令$X$是定义在$\Omega$上的随机变量.
+\begin{definition}[熵]
+$X$的熵刻画了平均意义下$X$取值的(不)可预测性: 
+\begin{equation*}
+    \entropy(X) = - \sum_{\omega \in \Omega} \Pr[X = \omega] \log \Pr[X = \omega]
+\end{equation*} 
+\end{definition} 
+
+\begin{remark}
+一个消息的熵就是消息所包含信息的比特数, 用编码的语言刻画, 就是编码该消息所需的最短比特数.
+\end{remark}
+
+密码方案/协议的安全性分析均是针对恶意敌手展开的. 
+敌手单次正确预测某随机变量(如私钥)值的概率与密码方案/协议的安全性紧密相关. 显然, 敌手的最佳策略是猜测最大似然值. 
+在本章中, 我们用大写字母$X$表示随机变量, 用小写字母$x$表示$X$的取值, 用花体字母$\mathcal{X}$表示$X$的支撑集. 
+
+一个随机变量$X$的最大可预测性是$\max_{\omega \in \Omega} \Pr[X = \omega]$. 
+最大可预测性对应最小熵(min-entropy), 严格定义如下:  
+\begin{definition}[最小熵]
+$X$的最小熵刻画了$X$的最大可预测性: 
+\begin{equation*}
+    \minentropy(X) = - \log \left(\max_{\omega \in \Omega} \Pr[X = \omega]\right)
+\end{equation*} 
+\end{definition} 
+\begin{remark}
+最小熵可以看做``最坏情形''(worst-case)的熵.
+\end{remark}
+
+在很多场景中, 随机变量$X$与另一随机变量$Y$相关, 并且敌手知晓$Y$的取值.  
+因此, Dodis等~\cite{DORS-SIAM-2008}引入了平均最小熵(average min-entropy)来刻画$X|Y$的(不)可预测性:
+\begin{equation}\label{equation:average-min-entropy}  
+    \avminentropy(X|Y) = - \log\left(\mathbb{E}_{y \leftarrow Y} \left[2^{−\minentropy(X|Y =y)}\right]\right)
+                       = - \log\left(\mathbb{E}_{y \leftarrow Y} \left[\max_{\omega \in \Omega}\Pr[X=\omega|Y =y]\right]\right)
+\end{equation}
+
+以下浅释平均最小熵的定义直觉. 考虑一对变量$X$和$Y$(两者可能相关). 
+如果敌手知晓$Y$的取值$y$, 则$X$在敌手视角中的可预测性是$\max_{x} \Pr[X = x|Y = y]$. 
+在平均的意义下(对$Y$做期望), 敌手成功预测$X$的概率为 
+$\mathbb{E}_{y \leftarrow Y}[\max_x \Pr[X = x|Y = y]]$. 
+
+平均最小熵的定义在对$Y$做加权平均的前提下($Y$的取值不受敌手控制)测度$X$最坏情形下的可预测性
+(敌手知晓$y$后对$X$的预测是恶意行为). 一个微妙的细节是平均最小熵的定义~\eqref{equation:average-min-entropy}
+先对预测成功的概率做期望后再取对数, 
+那能否交换$\log$和$\expect$的次序呢? 定义平均最小熵$\expect_{y \leftarrow Y}[\minentropy(X|Y = y)]$是否合理呢?
+交换次序后的定义失去了原本的意义. 
+考虑以下的例子, 令$X$和$Y$都是定义在$\Omega = \{0,1\}^{1000}$上的随机变量, 
+$Y$是$\Omega$上的随机分布, 当$Y$的取值$y$的首bit为0时, $X$的取值与$y$相同, 否则随机分布. 
+因此对于$Y$的半数取值$y$, $\minentropy(X | Y = y) = 0$, 对另外半数取值, $\minentropy(X|Y=y)=1000$, 
+所以$\expect_{y \leftarrow Y}[\minentropy(X|Y=y)]=500$. 
+然而, 声称$X$具有500比特的安全性显然不符合逻辑. 
+事实上, 知晓$Y$取值$y$的敌手直接输出$y$, 既能够以大于$1/2$的概率猜对$X$的取值. 
+平均最小熵标准的定义准确刻画了至少$1/2$得可预测性, 因为$\avminentropy(X|Y)$略小于1.
+我们也可以从数学的角度解释如下, $\expect$是线性算子, 而$\log$是非线性算子, 因此次序交换后意义不同.  
+
+平均最小熵和最小熵之间存在何种关系呢? 
+Dodis等~\cite{DORS-SIAM-2008}证明了如下的cChainning Lemma, 建立了两者之间的关系, 给出了平均最小熵的一个下界. 
+\begin{lemma}[Chainning Lemma]\label{lemma:chainning-lemma}
+令$X$、$Y$和$Z$是三个随机变量(可任意相关), 其中$Y$的支撑集包含至多$2^r$个元素. 
+我们有$\avminentropy(X|(Y,Z)) \geq \minentropy(X|Z) - r$. 
+特别的, 当$Z$为空时, 上述不等式简化为: $\avminentropy(X|Y) \geq \minentropy(X) - r$. 
+\end{lemma}
+
+\subsection{随机性提取}
+随机性是密码学的主旋律, 几乎所有已知密码方案/协议都离不开均匀随机采样. 
+然而, 均匀无偏的完美信源并不易得, 很多场景下存在的是有偏的弱信源. 如何在信源有偏的情况下进行均匀随机采样呢? 这就是随机性提取器所要完成的工作. 
+
+\begin{definition}[强随机性提取器]
+令$X$是最小熵$\minentropy(X) \geq n$的随机变量,  
+$\mathsf{ext}: \mathcal{X} \times \mathcal{S} \rightarrow \mathcal{Y}$是一个可高效计算的函数. 
+我们称$\mathsf{ext}$是对信源$X$的$(n, \epsilon)$-强随机性提取器当且仅当以下成立:
+\begin{equation*}
+    \Delta((\mathsf{ext}(X, S), S), (Y, S)) \leq \epsilon,
+\end{equation*} 
+其中$S$是定义在$\mathcal{S}$上的均匀随机变量, $Y$是定义在$\mathcal{Y}$上的均匀随机变量. 
+\end{definition}
+
+类比于平均最小熵和最小熵之间的关系, 当信源$X$与另一变量$Z$相关时, 我们需要引入平均强随机性提取器来对信源$X$进行萃取.  
+\begin{definition}[平均强随机性提取器]
+令$(X, Z)$是满足约束$\avminentropy(X|Z) \geq n$的任意变量对, 
+$\mathsf{ext}: \mathcal{X} \times \mathcal{S} \rightarrow \mathcal{Y}$是一个可高效计算的函数. 
+我们称$\mathsf{ext}$是对信源$X$的平均意义$(n, \epsilon)$-强随机性提取器当且仅当以下成立:
+\begin{equation*}
+    \Delta((\mathsf{ext}(X, S), S, Z), (Y, S, Z)) \leq \epsilon,
+\end{equation*} 
+其中$S$是定义在$\mathcal{S}$上的均匀随机变量, $Y$是定义在$\mathcal{Y}$上的均匀随机变量. 
+\end{definition}
+
+Dodis等~\cite{DORS-SIAM-2008}的Leftover Hash Lemma(剩余哈希引理)证明了任何强随机性提取性在适当的参数设定下都是平均强随机性提取器. 
+作为一个特例, Dodis等证明了任何一族一致哈希函数(universal hash functions)都是平均强随机性提取器.
+
+\begin{lemma}[Leftover Hash Lemma]\label{lemma:leftover-hash-lemma} 
+令$X$和$Z$是满足约束$\avminentropy(X|Z) \geq n$的任意变量对, 
+$\mathcal{H} = \{h_s: \mathcal{X} \rightarrow \mathcal{Y}\}_{s \leftarrow S}$是一族一致哈希函数. 
+那么当$n \geq \log |\mathcal{Y}| + 2\log(1/\epsilon)$时, 
+$\mathsf{ext}(x, s) := h_s(x)$是$(n, \epsilon)$-平均强随机性提取器.
+\end{lemma}

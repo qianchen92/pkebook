@@ -1,0 +1,1946 @@
+\section{单向陷门函数类}
+
+\subsection{单向陷门函数}
+单向陷门函数(TDF)是单向函数(OWF)在Cryptomania中的对应, 简言之, 其正向计算容易, 逆向计算困难但在有陷门信息辅助时同样容易. 
+\begin{definition}[单向陷门函数]
+TDF由以下四个多项式时间算法组成: 
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 系统生成算法以安全参数$\kappa$为输入, 输出公开参数$pp$, 
+	其中$pp$包含对定义域$D$, 值域$R$, 求值公钥空间$EK$、求逆陷门空间$TD$和单向陷门函数族
+	$f: EK \times D \rightarrow R$的描述. 换言之, $f$是由求值公钥索引的函数族.  
+	不失一般性, $D$支持高效的随机采样, 即存在PPT算法$\mathsf{SampDom}$可以从$D$中随机选取一个元素.   
+	在多数情况下, $D$和$R$是与求值公钥无关的(该性质也被称为index-independent), 
+	但在有些情形下, $D$和$R$是由求值公钥索引的空间簇. 
+	为了叙述简洁, 以下均假设$D$和$R$是单一空间. 空间簇的情形由单一集合的情形自然推广得到.   
+
+\item $\mathsf{KeyGen}(pp)$: 以公共参数$pp$为输入, 输出密钥对$(ek, td)$, 
+	其中$ek$为求值公钥, $td$为求逆陷门. 
+
+\item $\mathsf{Eval}(ek, x)$: 以求值公钥$ek$和定义域元素$x \in D$为输入, 输出$y \leftarrow f_{ek}(x)$.  
+
+\item $\mathsf{TdInv}(td, y)$: 以求逆陷门$td$和值域元素$y \in R$为输入, 输出$x \in D$或特殊符号$\bot$指示$y$不存在原像.       
+\end{itemize}
+\end{definition}
+
+定义以下两条性质: 
+\begin{itemize}
+\item 单射: $\forall ek$, 称$f_{ek}$是单射的当且仅当$x \neq x' \Rightarrow f_ek(x) \neq f_{ek}(x')$. 
+\item 置换: $\forall ek$, $\text{Img}(f_ek) = D = R$.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}
+    \node [name=Setup, textnode] {$\mathsf{Setup}(1^\kappa) \rightarrow pp$}; 
+    \node [name=KeyGen, textnode, below of = Setup, yshift=-2em] {$\mathsf{KeyGen}(pp) \rightarrow (ek, td)$}; 
+
+    \node [name=domain, circlenode, fill=gray!50, minimum size=4em, 
+        below of = KeyGen, yshift=-6em, xshift=-8em, label=below:\scriptsize{$\{0,1\}^{n(\kappa)}$}] {$D$}; 
+    \node [name=range, circlenode, fill=blue!20, minimum size=4em, 
+        below of = KeyGen, yshift=-6em, xshift=8em, label=below:\scriptsize{$\{0,1\}^{m(\kappa)}$}] {$R$}; 
+
+    \node [name=x1, circlenode, fill=black, right of = domain, xshift=1em, yshift=1em, 
+        minimum size=0.1em, inner sep=0em] {};
+    \node [name=y1, circlenode, fill=black, left of = range, xshift=-1em, yshift=1em, 
+        minimum size=0.1em, inner sep=0em] {}; 
+    \draw (x1) edge[->, color=blue, bend left=30] node[above] {$\mathsf{Eval}(ek, x)$} node[below] {$f_{ek}$} (y1);
+
+    \node [name=x2, circlenode, fill=black, right of = domain, xshift=1em, yshift=-1em, 
+        minimum size=0.1em, inner sep=0em] {};
+    \node [name=y2, circlenode, fill=black, left of = range, xshift=-1em, yshift=-1em, 
+        minimum size=0.1em, inner sep=0em] {}; 
+    \draw (y2) edge[->, color=red, bend left=30] node[above] {$f_{ek}^{-1}$} node[below] {$\mathsf{TdInv}(td, y)$} (x2);
+\end{tikzpicture}
+\end{center}
+
+\begin{trivlist}
+\item \textbf{正确性.} $\forall \kappa \in \mathbb{N}$, $\forall pp \leftarrow \mathsf{Setup}(1^\kappa)$, 
+	$\forall (ek, td) \leftarrow \mathsf{KeyGen}(pp)$和$\forall x \in D$和$y = \mathsf{Eval}(ek, x)$, 有: 
+	\begin{equation*}
+		\Pr[\mathsf{TdInv}(td, y) \in f_{ek}^{-1}(y)] = 1
+	\end{equation*}
+\end{trivlist}
+
+\begin{trivlist}
+\item \textbf{单向性.} 定义单向陷门函数敌手$\mathcal{A}$的优势函数如下:
+\begin{displaymath}
+	\AdvA(\kappa) =
+		\Pr \left[ x \in f_{ek}^{-1}(y^*): 
+			\begin{array}{ll}
+         		& pp \leftarrow \mathsf{Setup}(1^\kappa);\\
+				& (ek, td) \leftarrow \mathsf{KeyGen}(pp);\\
+         		& x^* \sample D, y^* \leftarrow \mathsf{Eval}(ek, x^*);\\
+         		& x \leftarrow \mathcal{A}(pp, ek, y^*)
+			\end{array} 
+		\right],
+\end{displaymath}	 
+如果对于任意的PPT敌手$\mathcal{A}$, 其优势函数均是可忽略的, 则称该陷门函数是单向的. 
+\end{trivlist}
+
+\begin{remark}
+\begin{enumerate}
+\item 不失一般性, 假定$D$和$R$均存在经典表示, 分别是$\{0,1\}^{n(\kappa)}$和$\{0,1\}^{m(\kappa)}$, 
+	其中$n(\cdot)$和$m(\cdot)$是关于$\kappa$的多项式函数. 
+	容易验证, 长度函数不能过大, 如果$n(\cdot)$或$m(\cdot)$是超多项式函数, 则函数无法高效计算; 
+	长度函数也不能过小, 如果$n(\cdot)$或$m(\cdot)$是亚线性函数, 则函数不可能满足单向性. 
+
+\item 在抽象定义中, 只限定了$\mathsf{TDFInv}(td, \cdot)$在输入为像集元素时返回原像, 而未限定其输入为非像集元素时的行为. 
+	在具体构造时, $\mathsf{TDFInv}(td, \cdot)$在输入为非像集元素时的行为往往需要精心设定, 以方便安全性证明. 
+
+\item 在单向性的定义中, 敌手$\mathcal{A}$仅观察到$ek$和$y^*$的信息. 
+	$x^* \sample D$可以放宽至$x^*$选自$D$上的高最小熵分布, 即$\mathsf{H}_{\infty}(x^*) \geq \omega(\log \kappa)$.
+\end{enumerate}
+\end{remark}
+
+在展示如何使用单向陷门函数构造公钥方案之前, 先展示一个基于单向陷门置换的构造. 该构造并不安全, 但对得到正确的构造很有启发意义. 
+
+\begin{construction}[朴素的TDF-based PKE(不安全)]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$\text{TDP}.\mathsf{Setup}(1^\kappa)$生成公开参数$pp$, 
+	其中明文空间和密文空间均为单向陷门置换的定义域$D$. 
+
+\item $\mathsf{KeyGen}(pp)$: 运行$\text{TDP}.\mathsf{KeyGen}(pp) \rightarrow (ek, td)$, 
+	其中$ek$作为加密公钥, $td$作为解密私钥. 
+
+\item $\mathsf{Encrypt}(ek, m)$: 以公钥$ek$和明文$m \in D$为输入, 运行$\text{TDP}.\mathsf{Eval}(ek, m)$
+	计算$c \leftarrow f_{ek}(m)$作为密文.  
+
+\item $\mathsf{Decrypt}(td, c)$: 以私钥$td$和密文$c \in D$为输入, 运行$\text{TDP}.\mathsf{TdInv}(td, c)$
+	计算$m \leftarrow f_{ek}^{-1}(c)$恢复明文. 
+\end{itemize}
+\end{construction}
+
+上述构造来自Diffie和Hellman的经典论文~\cite{DH-IEEE-IT-1976}, 原始的RSA公钥加密方案就是该构造的具体实例化. 
+该构造的想法直观, 利用单向陷门置换将明文转化为密文, 同时利用陷门可以求逆从密文中恢复明文. 
+但其仅仅满足较弱的OW-CPA安全, 并不满足现在公认的最低要求IND-CPA安全, 
+因此其也被成为公钥加密的textbook构造\footnote{textbook指其仅适合作为以科普为目的教学.}.
+朴素构造不满足IND-CPA安全的根本原因是加密算法是确定型的而非概率型的, 因此敌手可以通过``加密-比较''即可打破IND-CPA安全. 
+因此, 强化朴素构造的第一步是选择定义域中的随机元素$x$, 计算其函数值$f_{ek}(x)$作为封装密文, 再用$x$作为会话密钥掩蔽明文. 
+强化构造仍然不满足IND-CPA安全性, 原因是$f_{ek}(\cdot)$是公开可计算函数, 其函数值泄漏了原像信息, 使得原像在敌手的视角中不再伪随机. 
+针对性的强化方法是计算$x$的hardcore function值作为会话密钥. 
+
+以下首先介绍hardcore function的概念. 
+\begin{definition}[hardcore function]
+称多项式时间可计算的确性型函数$\mathsf{hc}: D \rightarrow K$是函数$f: D \rightarrow R$的hardcore function当且仅当: 
+\begin{equation*}
+	(f(x^*), \mathsf{hc}(x^*)) \approx_c (f(x^*), U_K) 
+\end{equation*} 
+其中概率空间建立在$x^* \sample D$的随机带上. 以安全实验的方式可如下定义, 即对于任意PPT敌手$\mathcal{A}$, 其安全优势可忽略: 
+\begin{displaymath}
+	\AdvA(\kappa) =
+		\Pr \left[ \beta'=\beta: 
+			\begin{array}{l}
+         		pp \leftarrow \mathsf{Setup}(1^\kappa);\\
+         		x^* \sample D, y^* \leftarrow f(x^*);\\
+         		k_0^* \leftarrow \mathsf{hc}(x^*), k_1^* \sample K, \beta \sample \{0,1\};\\
+         		\beta' \leftarrow \mathcal{A}(pp, ek, y^*, k_\beta^*);
+			\end{array} 
+		\right] - \frac{1}{2}
+\end{displaymath}	
+\end{definition}  
+
+\begin{center}
+\begin{tikzpicture}
+\node [name=domain, circlenode, fill=gray!50, minimum size=3.5em] {$D$}; 
+\node [name=range, circlenode, fill=blue!20, minimum size=3.5em, right of = domain, xshift=9em] {$R$}; 
+\node [name=K, circlenode, fill=magenta, minimum size=3.5em, above of = domain, yshift=9em] {$K$};
+\draw (domain) edge[->] node[auto] {$f$} (range);
+\draw (domain) edge[->] node[right] {$\mathsf{hc}$} (K); 
+\end{tikzpicture}
+\end{center}
+
+\begin{theorem}[Goldreich-Levin Theorem] 
+如果$f: \{0,1\}^n \rightarrow \{0,1\}^m$是单向函数, 
+那么$\mathsf{GL}(x) = \bigoplus_{i=1}^n x_i r_i$是从$\{0,1\}^n$到$\{0,1\}$的单比特输出硬核函数, 或称为硬核谓词. 
+\end{theorem}
+
+\begin{remark}
+Goldreich-Levin定理是现代密码学中极为重要的结论, 它的意义在于通过显式构造硬核函数, 建立起单向性与伪随机性之间的关联. 
+从另一个角度理解, $\mathsf{GL}$硬核谓词可以看做一个计算意义下的随机性提取器, 
+对$x|f(x)$的计算熵进行随机性提取, 萃取出伪随机的一比特. 
+还需要特别说明的是, 到目前为止尚不知晓如何针对任意单向函数$f$设计一个确定型的硬核谓词. 
+$\mathsf{GL}$是相对于$g(x, r):=f(x)||r$的硬核谓词, 或者可以将$r \sample \{0,1\}^n$理解为硬核谓词的描述, 
+将$\mathsf{GL}$理解为$f$的随机性硬核谓词. 
+本书中采用第二种观点.  
+
+另一方面, $\mathsf{GL}$硬核谓词是通用的(universal), 即构造对于任意单向函数均成立. 强通用性的代价是效率较低, 输出仅是单比特. 
+当单向函数具有特殊的结构(如函数是置换)或者依赖额外困难假设(如判定性假设、差异输入程序混淆假设)时, 存在更高效的构造. 
+\end{remark}
+
+以下我们展示如何基于单射的单向陷门函数构造构造KEM方案. 
+\begin{construction}[TDF-based KEM]\label{construction:TDF-based-KEM}
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$\text{TDF}.\mathsf{Setup}(1^\kappa)$生成公开参数$pp$. 
+	$pp$中不仅包含单向陷门函数$f_{ek}: D \rightarrow R$的描述, 
+	还包括相应硬核函数$\mathsf{hc}: D \rightarrow K$的描述.  
+	KEM方案的密文空间是TDF的定义域$D$, 密钥空间是硬核函数的值域$K$. 
+
+\item $\mathsf{KeyGen}(pp)$: 运行$\text{TDF}.\mathsf{KeyGen}(pp) \rightarrow (ek, td)$, 
+	其中$ek$作为封装公钥$pk$, $td$作为解封装私钥$sk$. 
+
+\item $\mathsf{Encaps}(pk, m)$: 以公钥$pk=ek$为输入, 随机选取$x \sample D$, 
+	运行$\text{TDF}.\mathsf{Eval}(ek, x)$计算$c \leftarrow f_{ek}(m)$作为封装密文, 
+	计算$k \leftarrow \mathsf{hc}(x)$作为会话密钥.  
+
+\item $\mathsf{Decaps}(sk, c)$: 以私钥$sk=td$和密文$c$为输入, 运行$\text{TDF}.\mathsf{TdInv}(td, c)$
+	计算$x \leftarrow f_{ek}^{-1}(c)$, 输出$k \leftarrow \mathsf{hc}(x)$. 
+\end{itemize}
+\end{construction}
+\begin{trivlist}
+\item \textbf{正确性.} 由单向陷门函数的单射性质和求逆算法的正确性可知, 上述KEM构造满足正确性. 
+\end{trivlist}
+
+\begin{theorem}
+如果$f_{ek}$是一族单射单向陷门函数, 那么上述KEM构造是IND-CPA安全的. 
+\end{theorem}
+
+\begin{proof}
+证明的思路是单一归约, 即若存在敌手$\mathcal{A}$打破KEM方案的IND-CPA安全性, 
+则存在敌手$\mathcal{B}$打破$\mathsf{hc}$的伪随机性, 进而与$f_{ek}$的单向性矛盾. 
+令$\mathcal{B}$的挑战实例为$(pp, ek, y^*, k_\beta^*)$, 其中$pp$为单射单向陷门函数的公开参数, 
+$ek$为随机生成的求值密钥, $y^* \leftarrow f_{ek}(x^*)$是随机选取原像$x^*$的像, 
+$k_0^* \leftarrow \mathsf{hc}(x^*)$, $k_1^* \sample K$
+$\mathcal{B}$的目标是判定$\beta=0$抑或$\beta=1$. $\mathcal{B}$与$\mathcal{A}$交互如下: 
+\begin{itemize}
+\item 初始化: $\mathcal{B}$根据$pp$生成KEM方案的公开参数, 并设定公钥$pk:=ek$, 将$(pp, ek)$发送给$\mathcal{A}$. 
+\item 挑战: $\mathcal{B}$设定$c^*:=y^*$, 将$(c^*, k_\beta^*)$发送给$\mathcal{A}$. 
+\item 猜测: $\mathcal{A}$输出$\beta'$, $\mathcal{B}$将$\beta'$转发给它自身的挑战者.
+\end{itemize}
+容易验证, $\mathcal{B}$完美地模拟了KEM方案中的挑战者, $\mathcal{B}$成功当且仅当$\mathcal{A}$成功. 因此我们有: 
+\begin{equation*}
+\AdvA^\text{KEM}(\kappa) = \AdvB^\text{hc}(\kappa)
+\end{equation*}
+由$f_{ek}$的单向性可知, $\mathsf{hc}$伪随机, 从KEM构造满足IND-CPA安全性. \qed
+\end{proof}
+
+以上的结果展示了单射单向陷门函数蕴含IND-CPA的公钥加密. \blue{需要确认TDF与CCA PKE之间是否存在分离}
+一个自然的问题是, 单向陷门函数需要满足何种性质才能蕴含IND-CCA的公钥加密. 
+以下, 我们按照时间先后顺序依次介绍单向陷门函数的三个增强版本, 并展示如何基于这些增强版本的单向陷门函数构造IND-CCA的公钥加密. 
+
+\subsection{有损陷门函数}
+\begin{center}
+    天之道, 损有余而补不足, 是故虚胜实, 不足胜有余. \\
+                \hfill --- 宋 $\cdot$ 黄裳《九阴真经》
+\end{center}
+
+理想世界中的镜中月和水中花体现的是信息完美复刻, 而现实世界中更多的现象体现的却是信息有损, 如拍照、录音, 无论设备和手段多么先进, 
+都无法做到完美复刻信源信息, 只能做到尽可能的高保真. 
+单射函数可以形象的理解为理想世界中信息无损的编码过程, 那么什么形式的函数刻画了现实世界中信息有损的编码过程呢? 
+Peikert和Waters~\cite{PW-STOC-2008}正是基于上述的思考, 在2008年开创性提出了有损陷门函数的概念. 
+简言之, 有损陷门函数有两种模式, 即正常和有损模式. 
+在单射模式下, 函数是单射的, 像完全保留了原像的全部信息; 
+在有损模式下, 函数是有损的, 像在信息论意义下丢失了原像的部分信息. 两种模式之间的关联是计算不可区分. 
+
+\begin{definition}[有损陷门函数LTDF]
+有损陷门函数LTDF由$n$和$\tau$两个参数刻画, 包含以下五个多项式时间算法: 
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 系统生成算法以安全参数$\kappa$为输入, 输出公开参数$pp$, 
+	其中$pp$包含对定义域$X$和值域$Y$的描述. 其中$|X| = 2^{n(\kappa)}$.  
+
+\item $\mathsf{GenInjective}(pp)$: 以公共参数$pp$为输入, 输出密钥对$(ek, td)$, 其中$ek$为求值公钥, $td$为求逆陷门. 
+	该算法输出的$ek$定义了从$X$到$Y$的单射函数$f_{ek}$, 拥有对应$td$可以对$f_{ek}$进行高效求逆.  
+
+\item $\mathsf{GenLossy}(pp)$: 以公共参数$pp$为输入, 输出密钥对$(ek, \bot)$, 
+	其中$ek$为求值公钥, $\bot$表示陷门不存在无法求逆. 
+	该算法输出的$ek$定义了从$D$到$R$的有损函数$f_{ek}$, 像集的大小至多为$2^{\tau(\kappa)}$.  
+
+\item $\mathsf{Eval}(ek, x)$: 以求值公钥$ek$和定义域元素$x \in X$为输入, 输出$y \leftarrow f_{ek}(x)$.  
+
+\item $\mathsf{TdInv}(td, y)$: 以求逆陷门$td$和值域元素$y \in Y$为输入, 输出$x \in X$或特殊符号$\bot$指示$y$不存在原像.       
+\end{itemize}
+
+\begin{trivlist}
+\item \textbf{模式不可区分性.} $\mathsf{GenInjective}(pp)$和$\mathsf{GenLossy}(pp)$的第一个输出构成的分布在计算意义下不可区分, 
+	即任意PPT敌手无法判定求值公钥$ek$属于单射模式还是有损模式. 
+\end{trivlist}
+\end{definition}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+\node [textnode, name=injective] {单射模式\\$\mathsf{GenInjective}(pp) \rightarrow (ek, td)$}; 
+\node [shapenode, name=domain1, circle, draw=gray!50, fill=gray!50, minimum size=4em, right of = injective, xshift=12em] {$X$}; 
+\node [shapenode, name=range1, circle, draw=blue!20, fill=blue!20, minimum size=4em, right of = domain1, xshift=12em] {$Y$}; 
+\node [shapenode, name=x, circle, draw=black, fill=black, right of = domain1, inner sep =0, minimum size=0.1em, xshift=1em] {};
+\node [shapenode, name=y, circle, draw=black, fill=black, left of = range1, inner sep = 0, minimum size=0.1em, xshift=-1em] {}; 
+\draw (x) edge[->] node[auto] {$f_{ek}$} (y);
+\draw (y) edge[->, bend left=-45, red] node[above] {$f_{ek}^{-1}$} (x);
+
+\node [name=indistinguishable, below of=injective, yshift=-1em] {$\approx_c$};
+
+\draw ($(indistinguishable.east)+(4em, 0em)$) edge[dashed] ($(indistinguishable.east)+(22em, 0em)$);
+
+\node [textnode, name = lossy, below of=indistinguishable, yshift=-4em] 
+    {$\mathsf{GenLossy}(pp) \rightarrow (ek, \bot)$\\有损模式};  
+\node [shapenode, name=domain2, circle, draw=gray!50, fill=gray!50, minimum size=4em, 
+    right of = lossy, xshift=12em] {$X$}; 
+\node [shapenode, name=range2, circle, draw=blue!20, fill=blue!20, minimum size=4em, 
+    right of = domain2, xshift=12em] {\quad$Y$}; 
+\node [shapenode, name=image, circle, draw=blue!60, fill=blue!60, minimum size=1em, left of = range2, xshift=-1em] {}; 
+
+\node [shapenode, draw=black, circle, fill=black, name=xlossy, right of = domain2, 
+    inner sep=0, minimum size=0.1em, xshift=1em] {};
+\node [shapenode, draw=black, circle, fill=black, name=ylossy, left of = range2, 
+    inner sep=0, minimum size=0.1em, xshift=-1em] {}; 
+\draw (xlossy) edge[connect] node[auto] {$f_{ek}$} (ylossy);
+
+\node [shapenode, draw=black, circle, fill=black, name=x1, right of = domain2, inner sep = 0, 
+    minimum size=0.1em, xshift=0.4em, yshift=1.5em] {};
+\node [shapenode, draw=black, circle, fill=black, name=x2, right of = domain2, inner sep = 0, 
+    minimum size=0.1em, xshift=0.8em, yshift=0.75em] {};
+
+\node [shapenode, draw=black, circle, fill=black, name=x3, right of = domain2, inner sep = 0, 
+    minimum size=0.1em, xshift=0.8em, yshift=-0.75em] {};
+\node [shapenode, draw=black, circle, fill=black, name=x4, right of = domain2, inner sep = 0,  
+    minimum size=0.1em, xshift=0.4em, yshift=-1.5em] {};
+
+\draw (x1) edge[-, bend left=45] (ylossy);
+\draw (x2) edge[-, bend left=30] (ylossy);
+\draw (x3) edge[-, bend left=-30] (ylossy);
+\draw (x4) edge[-, bend left=-45] (ylossy);
+
+\node [textnode, name=domainsize, below of = domain2, yshift=-4em] {$2^n$}; 
+\node [textnode, right of = domainsize, xshift=6em] {$\gg$}; 
+\node [textnode, name=imagesize, below of = image, yshift=-4em] {$2^{\tau}$};
+\end{tikzpicture}
+\end{center}
+\caption{有损陷门函数(LTDF)示意图}
+\end{figure}
+
+相比常规的单向陷门函数, 有损陷门函数额外具备一个计算不可区分的有损模式, 这正是其威力的来源. 
+在利用有损陷门函数设计密码方案/协议时, 通常按照如下的步骤:
+\begin{enumerate}
+	\item 在单射模式下完成密码方案/协议的功能性构造(功能性通常需要函数单射可逆)
+	\item 在有损模式下完成密码方案/协议的安全性论证(论证通常在信息论意义下进行)
+	\item 利用单射模式和有损模式的计算不可区分性证明密码方案/协议在正常模式下计算安全性. 
+\end{enumerate} 
+
+细心的读者可能已经发现了有损陷门函数的定义中并没有显式的要求函数在单射模式下具备单向性, 
+这是因为单射和有损模式的计算不可区分性已经隐式的保证了这一点. 以下进行严格证明, 具体展示应用有损陷门函数设计密码方案/协议的过程. 
+
+\begin{theorem}
+令$\mathcal{F}$是一族$(n, \tau)$-LTDF, 当$n - \tau \geq \omega(\log \lambda)$时, 
+$\mathcal{F}$的单射模式构成一族单射单向陷门函数.  
+\end{theorem}
+
+\begin{proof}
+证明通过游戏序列组织. 
+\begin{trivlist}
+\item $\text{Game}_0$: 该游戏是标准的单射单向陷门函数安全游戏. 挑战者$\mathcal{CH}$和敌手$\mathcal{A}$交互如下:
+\begin{itemize}
+\item 初始化: $\mathcal{CH}$运行$pp \leftarrow \mathsf{Setup}(\kappa)$, 
+    $(ek, td) \leftarrow \mathsf{GenInjective}(pp)$, 发送$(pp, ek)$给$\mathcal{A}$. 
+
+\item 挑战阶段: $\mathcal{CH}$随机选择$x^* \sample X$, sends $y^* \leftarrow f_{ek}(x^*)$给$\mathcal{A}$. 
+    
+\item 猜测阶段: $\mathcal{A}$输出$x'$, $\mathcal{A}$赢得游戏当且仅当$x' = x^*$. 
+\end{itemize}
+根据定义, 我们有: 
+\begin{equation*}
+	\AdvA(\kappa) = \Pr[S_0]
+\end{equation*}
+
+\item $\text{Game}_1$: 该游戏与上一个游戏完全相同, 唯一不同的是将单射模式切换到有损模式 
+\begin{itemize}
+\item 初始化: $\mathcal{CH}$运行\redul{$(ek, \bot) \leftarrow \mathsf{GenLossy}(pp)$}生成求值公钥$ek$. 
+\end{itemize}
+根据定义, 我们有: 
+\begin{equation*}
+	\AdvA(\kappa) = \Pr[S_1]
+\end{equation*}
+\end{trivlist}
+
+\begin{claim}
+单射和有损两种模式的计算不可区分性保证了$|\Pr[S_0] - \Pr[S_1]| \leq \mathsf{negl}(\kappa)$.  
+\end{claim}
+
+\begin{proof}
+我们利用反证法完成归约论证: 若$|\Pr[S_0] - \Pr[S_1]|$不可忽略, 则可构造出PPT的敌手$\mathcal{B}$打破模式的不可区分性. 
+$\mathcal{B}$在收到模式不可区分性的挑战$(pp, ek)$后, 将$(pp, ek)$发送给$\mathcal{A}$, 
+随后随机选取$x^* \sample X$, 计算并发送$y^* \leftarrow f_{ek}(x^*)$给$\mathcal{A}$. 
+当收到$\mathcal{A}$的输出$x'$后, 若$x' = x^*$, $\mathcal{B}$输出`1', 否则输出`0'. 
+分析可知, 当$ek$来自单射模式时, $\mathcal{B}$完美的模拟了$\text{Game}_0$; 
+当$ek$来自有损模式时, $\mathcal{B}$完美的模拟了$\text{Game}_1$. 
+因此, 我们有: 
+\begin{equation*}
+|\Pr[\mathcal{B}(ek)=1: ek \leftarrow \mathsf{GenInjective}(pp)] - 
+\Pr[\mathcal{B}(ek)=1: ek \leftarrow \mathsf{GenLossy}(pp)]| = |\Pr[S_0] - \Pr[S_1]| 
+\end{equation*} 
+其中$pp \leftarrow \mathsf{Setup}(1^\kappa)$. \qed
+\end{proof}
+
+\begin{claim}
+对于任意的敌手$\mathcal{A}$(即使拥有无穷计算能力), 其在$\textup{Game}_1$中的优势也是可忽略的. 
+\end{claim}
+
+\begin{proof}
+$\textup{Game}_1$处于有损模式, 因此由Chainning Lemma~\ref{lemma:chainning-lemma}可知, $x^*$
+的平均条件最小熵$\avminentropy(x^*|y^*) \geq n - \tau \geq \omega(\log \kappa)$, 从而断言得证. \qed
+\end{proof}
+
+综合以上, 定理得证! \qed
+\end{proof}
+
+\begin{remark}
+有损陷门函数相比标准单向陷门函数多了有损模式, 也正因为如此, 其具有标准单向陷门函数很多不具备的优势. 
+
+在安全方面, 根据上述论证容易验证只要参数设置满足一定约束, 则有损(陷门)函数在泄漏模型下仍然安全. 
+具体的, 在敌手获得关于原像任意长度为$\ell$有界泄漏的情形下, 
+只要$n - \tau - \ell \geq \omega(\log \kappa)$, 则单向性依然成立. 
+因此, 有损(陷门)函数是构造抗泄漏单向函数的重要工具~\cite{Komargodski-TCC-2016, Chen-ASIACRYPT-2018}. 
+
+在效率方面, 令$\mathcal{H}$是一族从$X$到$\{0,1\}^{m(\kappa)}$
+的对独立哈希函数族(pairwise-independent hash family), 
+只要$n - \tau - m \geq \omega(\log \kappa)$, 
+那么从$\mathcal{H}$中随机选择的$h$即构成单向函数的多比特输出hardcore function. 
+论证的方式是应用Leftover Hash Lemma~\ref{lemma:leftover-hash-lemma}和对独立哈希函数族构成强随机性提取器的事实, 
+得到hardcore function输出和均匀随机输出不可区分的结论.   
+\end{remark}
+
+有损陷门函数还有一个非平凡的扩展, 称为全除一(ABO, All-But-One)有损陷门函数. 
+简言之, ABO-TDF存在一个分支集合(branch set), 记为$B$. 求值密钥$ek$和分支值$b \in B$共同定义了从$X$到$Y$的函数$f_{ek, b}$, 
+该函数当且仅当$b$等于某特定一个分支值时有损, 在其它分支均单射可逆. 严格定义如下:  
+
+\begin{definition}[全除一有损陷门函数]
+ABO-TDF由$n$和$\tau$两个参数刻画, 包含以下五个多项式时间算法: 
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 系统生成算法以安全参数$\kappa$为输入, 输出公开参数$pp$, 
+	其中$pp$包含对定义域$X$、值域$Y$和分支集合$B$的描述. 其中$|X| = 2^{n(\kappa)}$.  
+
+\item $\mathsf{Gen}(pp, b^*)$: 以公共参数$pp$和给定分支值$b^* \in B$为输入, 输出密钥对$(ek, td)$, 其中$ek$为求值公钥, $td$为求逆陷门. 
+	该算法输出的$ek$和分支值$b \in B$定义了从$X$到$Y$的函数$f_{ek, b}$. 
+	当$b \neq b^*$时, $f_{ek,b}$单射且拥有对应$td$可高效求逆; 当$b = b^*$时, $f_{ek, b^*}$有损, 
+	像集的大小至多为$2^{\tau(\kappa)}$, $b^*$因此称为有损分支.  
+
+\item $\mathsf{Eval}(ek, b, x)$: 以求值公钥$ek$、分支值$b \in B$和定义域元素$x \in X$为输入, 
+	输出$y \leftarrow f_{ek, b}(x)$.  
+
+\item $\mathsf{TdInv}(td, b, y)$: 以求逆陷门$td$、分支值$b \in B$和值域元素$y \in Y$为输入, 
+	输出$x \in X$或特殊符号$\bot$指示$y$不存在原像.       
+\end{itemize}
+
+\begin{trivlist}
+\item \textbf{有损分支隐藏性.} 该性质刻画的安全要求是求值公钥不泄漏有损分支的信息. 
+	严格定义类似公钥加密的不可区分安全或是承诺的隐藏性, 即$\forall b_0, b_1 \in B$, 我们有:
+	\begin{equation*}
+		\mathsf{Gen}(pp, b_0) \approx_c \mathsf{Gen}(pp, b_1)
+	\end{equation*}
+	其中$pp \leftarrow \mathsf{Setup}(1^\kappa)$. 
+\end{trivlist}
+\end{definition}
+
+
+\begin{center}
+\begin{tikzpicture}
+\node [textnode, name=Gen] {$\mathsf{Gen}(\lambda, b^*) \rightarrow (ek, td)$};
+
+\node [textnode, name=dummy, below of=Gen, yshift=-3cm] {$\dots$}; 
+\node [textnode, name=F1, left of=dummy, xshift=-5em, yshift=4em] {$f_{ek, b_1}(\cdot)$}; 
+\node [textnode, name=F2, left of=dummy, xshift=-3em, yshift=2.5em] {$f_{ek, b_2}(\cdot)$}; 
+\node [textnode, name=F3, right of=dummy, xshift=3em, yshift=2.5em] {$f_{ek, \red{b^*}}(\cdot)$}; 
+\node [textnode, name=F4, right of=dummy, xshift=5em, yshift=4em] {$f_{ek, b_i}(\cdot)$};  
+
+\draw (Gen) edge[connect] (F1);
+\draw (Gen) edge[connect] (F2);
+\draw (Gen) edge[connect, dashed, color=red] (F3);
+\draw (Gen) edge[connect] (F4);
+\draw (Gen) edge[connect] (dummy);
+
+\node [textnode, name=hidden, right of = Gen, xshift=18em, yshift=0em] {$b^*$隐藏于$ek$}; 
+
+\node [textnode, below of = hidden, yshift=-4em]{
+\begin{minipage}{\textwidth}
+\begin{displaymath}
+f_{ek,b}(\cdot) = \left\{
+\begin{array}{ll}
+    \text{有损} & b = b^*\\
+    \text{单射可逆} & b \neq b^*\\
+\end{array} \right.
+\end{displaymath}
+\end{minipage}
+}; 
+
+\end{tikzpicture}
+\end{center}
+
+\begin{remark}
+ABO-TDF可以理解为LTDF的扩展, 分支集合由$\{0,1\}$延拓至$\{0,1\}^b$. 
+LTDF已经有较为丰富的应用, 如IND-CPA的公钥加密方案、不经意传输、抗碰撞哈希函数等; LTDF与ABO-TDF结合有着更强的应用, 如IND-CCA的公钥加密方案. 
+IND-CCA的公钥加密方案构造原理蕴含在如何基于LTDF和ABO-LTDF构造更高级的单向陷门函数中(将在章节中阐述), 为了避免重复, 此处不再详述. 
+\end{remark}
+
+以下展示如何给出LTDF和ABO-TDF的具体构造. 构造的难点是需要巧妙设计密钥对生成算法, 
+使其可以工作在单射可逆和有损两个模式, 且两种模式在计算意义下不可区分. 
+设计的思路是令定义域$X$是向量空间, 输入$x$是向量空间中的元素, 求值公钥$ek$是刻画线性变换的矩阵, 
+函数求值$f(ek, x)$的过程就是对输入进行线性变换, 当$ek$满秩时, 函数单射可逆; 当$ek$非满秩时, 函数有损. 
+隐藏$ek$工作模式的思路则是对其``加密''. 我们称上述技术路线为矩阵式方法. 
+
+下面展示矩阵式构造的一个具体例子, 以剥丝抽茧的方式阐明设计思想和关键技术.
+
+\begin{trivlist}
+\item \textbf{隐藏矩阵生成.} 最简单的满秩矩阵是单位阵, 最简单的非满秩矩阵是全零阵, 两者之间差异显著, 
+	为了保证计算不可区分性, 思路是生成一个伪随机的隐藏矩阵(concealer matrix)$\mathbf{M}$对其加密. 
+	我们期望$\mathbf{M}$满足如下结构: $\mathbf{M}$的所有行向量均处于同一个一维子空间, 
+	后面可以看到子空间的描述将作为陷门信息使用. 
+	具体的, 隐藏矩阵生成算法$\mathsf{GenConcealMatrix}(n)$细节如下: 
+\begin{enumerate}
+\item 随机选择$\mathbf{r} = (r_1, \dots, r_n) \sample \mathbb{Z}_p^n$和
+	$\mathbf{s} = (s_1, \dots, s_m, 1) \sample \mathbb{Z}_p^n \times \{1\}$ 
+
+\item 计算张量积$\mathbf{V} = \mathbf{r} \otimes \mathbf{s} = 
+	\mathbf{r}^t \mathbf{s} \in \mathbb{Z}_p^{n \times (n+1)}$
+
+\begin{displaymath} 
+\mathbf{V} = \left( \begin{array}{cccc|c}
+r_1s_1 & r_1s_2 & \ldots & r_1s_n & r_1 \\
+r_2s_1 & r_2s_2 & \ldots & r_2s_n & r_2\\
+\vdots & \vdots & \vdots & \vdots & \vdots\\
+r_ns_1 & r_ns_2 & \ldots & r_ns_n & r_n\\
+\end{array} \right)
+\end{displaymath}
+
+\item 输出$\mathbf{M} = g^{\mathbf{V}} \in \mathbb{G}^{n \times (m+1)}$作为隐藏矩阵, 
+	$\mathbf{s}$作为陷门信息. 
+
+\begin{displaymath} 
+\mathbf{M} = \left( \begin{array}{cccc|c}
+g^{r_1s_1} & g^{r_1s_2} & \ldots & g^{r_1s_n} & g^{r_1} \\
+g^{r_2s_1} & g^{r_2s_2} & \ldots & g^{r_2s_n} & g^{r_2}\\
+\vdots & \vdots & \vdots & \vdots & \vdots\\
+g^{r_ns_1} & g^{r_ns_2} & \ldots & g^{r_ns_n} & g^{r_n}\\
+\end{array} \right)
+\end{displaymath}
+
+\end{enumerate}
+
+\item 算法前两步的作用是生成特定结构: 通过张量积确保$\mathbf{V}$中所有行向量均处于
+	向量$(s_1, \dots, s_n, 1)$张成的一维子空间中. 
+	当前向量定义在有限域$\mathbb{F}_p$上, 而$ek$矩阵不可以定义在有限域$\mathbb{F}_p$上, 
+	否则存在高效的算法判定$ek$对应的矩阵是否满秩. 令$\mathbb{G}$是$p$阶循环群, 其中DDH假设成立. 
+	可以证明, 如果$ek$矩阵定义在$\mathbb{G}$上, 那么满秩和非满秩无法有效判定. 
+	因此, 算法的第三步利用从$\mathbb{F}_p$到$\mathbb{G}$的同构映射$\phi: t \rightarrow g^t$
+	将$\mathbb{V}$中的所有元素从$\mathbb{F}_p$提升到$\mathbb{G}$中.  
+\end{trivlist} 
+
+
+\begin{remark}
+如果将$\mathbf{s}$截断为$\mathbf{s}' = (s_1, \dots, s_n)$, 
+那么$g^{\mathbf{r} \otimes \mathbf{s}'} = (g^{r_i \cdot s_j}) \in \mathbb{G}^{n \times n}$ 
+恰好是Naor-Reingold基于DDH假设的伪随机合成器构造(pseudorandom synthesizer) 
+\begin{itemize}
+    \item 伪随机合成器$f(r,s)$是满足如下性质的函数: 令$r_1, \dots, r_n$和$s_1, \dots, s_m$
+       独立随机分布, 当输入$(r, s)$取遍$(r_i, s_j)$组合时, 输出伪随机. 
+
+    \item Naor和Reingold证明了从$\mathbb{Z}_p \times \mathbb{Z}_p$映射到$\mathbb{G}$的
+       函数$f(r,s) = g^{rs}$是基于DDH假设的伪随机合成器.  
+\end{itemize}
+\end{remark}
+
+\begin{lemma}
+如果DDH假设成立, 那么由$\mathsf{GenConcealMatrix}(n)$生成的矩阵$\mathbf{M} = g^\mathbf{V}$在
+$\mathbb{G}^{n \times (n+1)}$上伪随机.  
+\end{lemma}
+
+\begin{proof}
+证明的过程分为两个步骤, 我们首先在一行上从左至右逐个列元素进行混合论证, 证明其与$\mathbf{G}^{n+1}$上的随机向量计算不可区分, 
+再利用该结论从上到下逐行进行混合论证, 从而证明隐藏矩阵$\mathbf{M}$在$\mathbf{G}^{n \times (n+1)}$上伪随机分布. 
+\begin{itemize}
+\item 逐列论证: 令$r \sample \mathbb{Z}_p$, $\mathbf{s} \sample \mathbb{Z}_p^n$, $\mathbf{t} \sample \mathbb{Z}_p^n$, 
+	证明如下两个分布计算不可区分: 
+	\begin{equation*}
+    	(g^\mathbf{s}, g^r, \mathbf{y} = g^{r\cdot \mathbf{s}}) \approx_c (g^\mathbf{s}, g^r, \mathbf{y} = g^{\mathbf{t}}) 
+	\end{equation*}
+	证明的方法是设计如下的游戏序列进行混合论证:
+\begin{displaymath}
+\begin{array}{cccccc}
+    \text{Hyb}_0: g^{\mathbf{s}} & g^{rs_1}      & \dots         & g^{rs_n}      & g^r\\
+    \text{Hyb}_1: g^{\mathbf{s}} & \red{g^{t_1}} & \dots         & g^{rs_n}      & g^r\\
+    \text{Hyb}_j: g^{\mathbf{s}} & g^{t_1}       & \red{g^{t_j}} & g^{rs_n}      & g^r\\
+    \text{Hyb}_n: g^{\mathbf{s}} & g^{t_1}       & \dots         & \red{g^{t_n}} & g^r
+\end{array}
+\end{displaymath}
+基于DDH假设, 可以证明任意两个相邻的游戏中定义的分布簇均计算不可区分, 利用hybrid lemma立刻可得: $\text{Hyb}_0 \approx_c \text{Hyb}_1$. 
+
+\item 逐行论证: 基于上述结果, 我们再逐行变换, 每次将一行替换成$\mathbf{G}^{n+1}$上的随机向量, 再次利用hybrid lemma即可证明
+\begin{equation}\label{equation:ConcealMatrix}
+    (g^\mathbf{s}, \mathbf{M}) \approx_c (g^\mathbf{s}, U_{\mathbb{G}^{n \times (n+1)}})
+\end{equation}
+\end{itemize}
+综上, $\mathbf{M}$在$\mathbb{G}^{n \times (n+1)}$上伪随机分布. \qed
+\end{proof}
+
+\begin{remark}
+公式~\eqref{equation:ConcealMatrix}事实上证明了比引理更强的结果, 即在敌手观察到$g^\mathbf{s}$的情形下, 
+$\mathbf{M}$仍与$\mathbb{G}^{n \times (n+1)}$上随机矩阵计算不可区分.  
+在以上两个步骤的证明过程中, 横向的归约损失是$n$, 纵向的归约损失为$n$, 因此证明的总归约损失是$n^2$. 
+可以利用DDH类假设的随机自归约性质(random self-reducibility)将归约损失降为$n$\blue{(to be confirmed)}. 
+\end{remark}
+
+以下首先展示基于DDH假设的LTDF构造. 
+\begin{construction}[DDH-based LTDF]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$\mathsf{GenGroup}(1^\kappa) \rightarrow (\mathbb{G}, g, p)$, 
+	其中$\mathbb{G}$是一个阶为素数$p$的循环群, 生成元为$g$. 输出$pp = (\mathbb{G}, g, p)$. 
+	$pp$还包括了定义域$X = \{0,1\}^n$和值域$Y = \mathbb{G}$的描述. 
+
+\item $\mathsf{GenInjective}(n)$: 运行$\mathsf{GenConcealMatrix}(n) \rightarrow (g^{\mathbf{V}}, \mathbf{s})$, 
+	输出$g^{\mathbf{Z}} = g^{\mathbf{V}+\mathbf{I}'}$作为公钥$ek$, 
+	其中$\mathbf{I}' \in \mathbb{Z}_p^{n \times (n+1)}$
+	由$n$阶单位阵在最右侧补上全零列扩展得来(即$(\mathbf{e}_1, \dots, \mathbf{e}_n, \mathbf{0})$), 
+	输出$\mathbf{s}$作为函数的陷门$td$. 
+
+\begin{displaymath} 
+g^\mathbf{Z} = \left( \begin{array}{cccc|c}
+g^{r_1s_1\red{+1}} & g^{r_1s_2} & \ldots & g^{r_1s_n} & g^{r_1} \\
+g^{r_2s_1} & g^{r_2s_2\red{+1}} & \ldots & g^{r_2s_n} & g^{r_2}\\
+\vdots & \vdots & \vdots & \vdots & \vdots\\
+g^{r_ns_1} & g^{r_ns_2} & \ldots & g^{r_ns_n\red{+1}} & g^{r_n}\\
+\end{array} \right)
+\end{displaymath}
+
+\item $\mathsf{GenLossy}(n)$: $\mathsf{GenConcealMatrix}(n) \rightarrow g^{\mathbf{V}}$, 
+    输出$g^\mathbf{Z} = g^{\mathbf{V}}$作为公钥$ek$, 陷门$td$为$\bot$. 
+
+\begin{displaymath} 
+g^\mathbf{Z} = \left( \begin{array}{cccc|c}
+g^{r_1s_1} & g^{r_1s_2} & \ldots & g^{r_1s_n} & g^{r_1} \\
+g^{r_2s_1} & g^{r_2s_2} & \ldots & g^{r_2s_n} & g^{r_2}\\
+\vdots & \vdots & \vdots & \vdots & \vdots\\
+g^{r_ns_1} & g^{r_ns_2} & \ldots & g^{r_ns_n} & g^{r_n}\\
+\end{array} \right)
+\end{displaymath}
+
+\item $\mathsf{Eval}(ek, \mathbf{x})$: 以$ek = g^\mathbf{Z}$和$\mathbf{x} \in \{0,1\}^n$为输入, 
+    计算$\mathbf{y} \leftarrow g^{\mathbf{x}\mathbf{Z}} \in \mathbb{G}^{n+1}$. 
+
+\item $\mathsf{TdInv}(td, \mathbf{y})$: 解析$td = \mathbf{s} = (s_1, \dots, s_n)$, 对每个$i \in [n]$, 
+    计算$a_i = y_i/y_{n+1}^{s_i}$并输出$x_i \in \{0,1\}$ s.t. $a_i = g^{x_i}$. 
+\end{itemize}
+\end{construction}
+
+\begin{theorem}
+基于DDH假设, 上述构造是一族$(n, \log p)$-LTDF. 
+\end{theorem}
+
+\begin{proof}
+单射可逆模式的正确性由算法$\mathsf{TdInv}$的正确性保证. 
+在有损模式下, 所有输出$\mathbf{y}$都具有$g^{c\mathbf{s}}$的形式, 
+其中$c = \langle \mathbf{x}, \mathbf{r} \rangle \in \mathbb{Z}_p$. 
+向量$\mathbf{s}$被$ek$固定, 因此$\text{Img}(f_{ek}) \leq p$. 
+
+单射可逆模式和有损模式的计算不可区分性由$\mathsf{GenConcealMatrix}$输出的伪随机性(引理~\ref{equation:ConcealMatrix})保证. \qed
+\end{proof}
+
+
+下面展示如何基于DDH假设构造ABO-LTDF. 
+\begin{construction}[DDH-based ABO-LTDF]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$\mathsf{GenGroup}(1^\kappa) \rightarrow (\mathbb{G}, g, p)$, 
+	其中$\mathbb{G}$是一个阶为素数$p$的循环群, 生成元为$g$. 输出$pp = (\mathbb{G}, g, p)$. 
+	$pp$还包括定义域$X = \{0,1\}^n$、值域$Y = \mathbb{G}$和分支集合$B = \mathbb{Z}_p$的描述. 
+
+\item $\mathsf{Gen}(pp, b^*)$: 运行$\mathsf{GenConcealMatrix}(n) \rightarrow (g^{\mathbf{V}}, \mathbf{s})$, 
+	输出$g^{\mathbf{Z}} = g^{\mathbf{V} - b^*\mathbf{I}'}$作为公钥$ek$, 
+	其中$\mathbf{I}' = (\mathbf{e}_1, \dots, \mathbf{e}_n, \mathbf{0}) \in \mathbb{Z}_p^{n \times (n+1)}$, 
+	输出$(b^*, \mathbf{s})$作为陷门$td$. 
+
+\item $\mathsf{Eval}(ek, b, \mathbf{x})$: 以$ek = g^\mathbf{Z}$和$\mathbf{x} \in \{0,1\}^n$为输入, 
+    计算$\mathbf{y} \leftarrow g^{\mathbf{x}(\mathbf{Z}+b(\mathbf{e}_1, \dots, \mathbf{e}_n, \mathbf{0}))} 
+    \in \mathbb{G}^{n+1}$, 记为$y \leftarrow f(ek, b, x)$或$y \leftarrow f_{ek, b}(x)$. 
+
+\item $\mathsf{TdInv}(td, b, \mathbf{y})$: 解析$td$为$\mathbf{s} = (s_1, \dots, s_n)$, 对每个$i \in [n]$, 
+    计算$a_i = y_i/y_{n+1}^{s_i}$并输出$x_i \in \{0,1\}$ s.t. $a_i = g^{(b-b^*)x_i}$. 
+\end{itemize}
+\end{construction}
+
+\begin{center}
+\begin{tikzpicture}
+\node [textnode, name = domain] {$\mathbf{x} \in \mathbb{Z}_2^n$};
+
+\node [textnode, name = ek, right of = domain, xshift=15em, yshift=7em] 
+	{$\mathsf{Gen}(pp, b^*) \rightarrow (\blue{ek}, \mathbf{s})$}; 
+
+\node [textnode, name = GenConceal, right of = domain, xshift = 10.5em, yshift=5em] {$\mathsf{GenConcealMatrix}(n) = g^\mathbf{V}$}; 
+\node [textnode, name = matrix, below of = GenConceal, yshift=-4em, color = blue] 
+{\begin{minipage}{0.50\textwidth} 
+\begin{displaymath} 
+\left( \begin{array}{cccc|c}
+g^{r_1s_1} & g^{r_1s_2} & \ldots & g^{r_1s_n} & g^{r_1} \\
+g^{r_2s_1} & g^{r_2s_2} & \ldots & g^{r_2s_n} & g^{r_2} \\
+\vdots & \vdots & \vdots & \vdots & \vdots\\
+g^{r_ns_1} & g^{r_ns_2} & \ldots & g^{r_ns_n} & g^{r_n} \\
+\end{array} \right)
+\end{displaymath}
+\end{minipage}};  
+
+\draw ($(GenConceal.south)+(0, 0.3em)$) edge[->] ($(matrix.north)+(0, -1em)$); 
+
+\node [textnode, name = pseudorandom, below of  = GenConceal, yshift = -9em] 
+{$\text{DDH} \Rightarrow \approx_c U_{\mathbb{G}^{n \times (n+1)}}$};
+
+\node [textnode, name = minus, right of = matrix, xshift=12em, yshift=0em, color = blue] 
+    {$-b^*(\mathbf{e}_1, \dots, \mathbf{e}_n, \mathbf{0})$};
+
+\node [textnode, name = times, right of = domain, xshift=2em, color = red] {$\times$}; 
+\node [textnode, name = plus, below of = minus, yshift=-1.5em, color = red] 
+    {$+b(\mathbf{e}_1, \dots, \mathbf{e}_n, \mathbf{0})$};  
+\node [textnode, name = image, below of = plus, yshift=-2em, color = darkgreen] {$\rightarrow \mathbf{y} \in \mathbb{G}^{n+1}$}; 
+
+\end{tikzpicture}
+\end{center}
+
+
+\begin{theorem}
+基于DDH假设, 上述构造是一族分支集合为$B = \mathbb{Z}_p$的$(n, \log p)$-ABO-TDF. 
+\end{theorem}
+
+\begin{proof}
+容易验证, 当$b \neq b^*$时, $\mathbf{V}+(b-b^*)\mathbf{I}'$矩阵满秩, $f_{ek, b}$单射且可高效求逆; 
+当$b = b^*$时, 矩阵$\mathbf{V}+(b-b^*)\mathbf{I}'$的秩为1, $\text{Img}(f_{ek, b}) \leq p$. 
+有损分支隐藏性由$\mathsf{GenConcealMatrix}$输出的伪随机性(引理~\ref{equation:ConcealMatrix})保证. \qed
+\end{proof}
+
+\begin{remark}
+为了确保求逆算法的高效性, 以上构造有两个重要的设定: (1) 首先在ConcealMatrix设置了辅助列$(g^{r_1}, \dots, g^{r_n})^T$, 
+便于计算出$a_i = g^{x_i}$; (2) 从$a_i$中计算$x_i$需要求解离散对数, 
+因此定义域$X$设定为$\mathbb{Z}_2^n$, 其中$2$可以进一步放宽至$\kappa^{O(1)}$(关于$\kappa$的多项式规模), 
+以保证可以在多项式时间完成离散对数求解. 
+\end{remark}
+
+\subsubsection*{扩展与深化}
+注意到在公钥加密的选择密文安全定义中敌手对解密谕言机的访问权限是全除一的, 
+由此可以看出全除一有损陷门函数的应用局限于``全除一''类安全的密码方案设计.  
+Hofheinz~\cite{Hofheinz-EUROCRYPT-2012}引入了全除多有损陷门函数, 
+将有损分支的数量从1扩展到$\mathsf{poly}(\kappa)$, 并展示了其在选择打开选择密文安全(selective opening chosen-ciphertext security)中的应用.
+在有损陷门函数的应用中, 我们通常期望有损模式下函数丢失的信息尽可能的多, 即像集尽可能的小. 这是因为单射和有损模式的反差越大, 所蕴含的结果越强, 
+如更高的泄漏容忍能力、更紧的安全归约等. 但凡事有度, 物极必反, 在常规的一致归约(universal reduction)模型下, 
+有损模式的像集尺寸$2^\tau$不能过小, 至少是关于计算安全参数$\kappa$的超多项式规模, 否则PPT的敌手可以通过生日攻击有效的区分单射和有损模式. 
+Zhandry~\cite{Zhandry-CRYPTO-2016}创造性的提出了极度有损函数(ELF, extremely lossy functions). 
+在ELF中, 有损模式下函数的像集可以缩小至关于计算安全参数$\kappa$的多项式规模, 只要在指定PPT敌手的生日攻击能力之外即可. 
+ELF的有损模式之所以能够打破像集多项式界的关键在更为精细的个体归约(individual reduction)模型~\cite{Deng-EUROCRYPT-2017}下进行安全性证明.  
+Zhandry基于不可区分程序混淆给出了ELF的构造, 并展示了其强大的应用.   
+在无须求逆的应用场景中, 不仅不需要陷门, 甚至是单射的性质也可以弱化. 
+陈等~{Chen-CT-RSA-2018}根据这一观察, 提出了规则有损函数(RLF, regular lossy functions). 
+相比标准的LTDF, RLF将单射可逆模式放宽至规则有损, 即每个像的原像集合大小相同. 
+正是这一弱化, 使得RLF不仅有更加高效的具体构造, 也可由哈希证明系统通用构造得出, 并在抗泄漏密码学领域有着重要的应用.     
+
+\subsection{相关积单向陷门函数}
+\begin{center}
+    山重水复疑无路, 柳暗花明又一村. \\
+                \hfill --- 宋 $\cdot$ 陆游《过山西村》
+\end{center}
+
+
+令$\mathcal{F} = \{f_{ek}: X \rightarrow Y\}$是一族单向陷门函数, 
+可以自然对$\mathcal{F}$进行$t$重延拓, 得到$\mathcal{F}^t = \{g_{ek_1, \dots, ek_t}: X^t \rightarrow Y^t\}$, 
+其中$f^t_{ek_1, \dots, ek_t}(x_1, \dots, x_t):= (f_{ek_1}(x_1), \dots, f_{ek_t}(x_t))$. 
+我们称$\mathcal{F}^t$为$\mathcal{F}$的$t$重积($t$-wise product). 
+
+\begin{center}
+\begin{tikzpicture}
+\node [textnode, name=OWF] {$\mathcal{F} = \{f_{ek}: X \rightarrow Y\}$}; 
+\node [circlenode, minimum size=4em, name=domain0, below of=OWF, xshift=-8em, yshift=-3em, fill=gray!50] {$X$}; 
+\node [circlenode, minimum size=4em, name=range0, below of=OWF, xshift=8em, yshift=-3em, fill=blue!20] {$Y$};
+\node [dotnode, minimum size=0.1em, name=x0, right of=domain0, xshift=1em] {}; 
+\node [dotnode, minimum size=0.1em, name=y0, left of=range0, xshift=-1em] {};
+\draw (x0) edge[->] node[above]{$f_{ek}$} (y0);  
+
+\node [textnode, name=product, below of=OWF, yshift=-8em] {$t$-wise product\\$\mathcal{F}^t = \{f^t_{ek_1, \dots, ek_t}: X^t \rightarrow Y^t\}$}; 
+
+\node [circlenode, minimum size=4em, name=domain, fill=gray!50, below of = domain0, yshift=-12em] {$X$}; 
+\node [circlenode, minimum size=4em, name=range, fill=blue!20, below of = range0, yshift=-12em] {$Y$};
+
+\node [dotnode, minimum size=0.1em, name=x, right of=domain, xshift=1em] {}; 
+\node [dotnode, minimum size=0.1em, name=y, left of=range, xshift=-1em] {};
+\draw (x) edge[->] node[above]{$f_{ek_i}$} (y);   
+
+\node [dotnode, minimum size=0.1em, name=x1, right of=domain, xshift=1.25em, yshift=1em] {}; 
+\node [dotnode, minimum size=0.1em, name=y1, left of=range, xshift=-1.25em, yshift=1em] {};
+\draw (x1) edge[->, bend left=36] node[above]{$f_{ek_1}$} (y1);   
+
+\node [dotnode, minimum size=0.1em, name=x2, right of=domain, xshift=1.125em, yshift=0.5em] {}; 
+\node [dotnode, minimum size=0.1em, name=y2, left of=range, xshift=-1.125em, yshift=0.5em] {};
+\draw (x2) edge[->, bend left=18] node[above]{$f_{ek_2}$} (y2); 
+
+\node [dotnode, minimum size=0.1em, name=x3, right of=domain, xshift=1.125em, yshift=-0.5em] {}; 
+\node [dotnode, minimum size=0.1em, name=y3, left of=range, xshift=-1.125em, yshift=-0.5em] {};
+\draw (x3) edge[->, bend right=18] node[above]{$\cdots$} (y3); 
+
+\node [dotnode, minimum size=0.1em, name=x4, right of=domain, xshift=1.25em, yshift=-1em] {}; 
+\node [dotnode, minimum size=0.1em, name=y4, left of=range, xshift=-1.25em, yshift=-1em] {};
+\draw (x4) edge[->, bend right=36] node[above]{$f_{ek_t}$} (y4);    
+\end{tikzpicture}
+\end{center}
+
+\begin{theorem}
+如果$\mathcal{F} = \{f_{ek}\}$是一族单向函数, 那么它的$t$重积$\mathcal{F}^t = \{f^t_{ek_1, \dots, ek_t}\}$也是一族单向函数. 
+\end{theorem}
+
+\begin{proof}
+证明的思路简述如下: 如果存在PPT的敌手$\mathcal{A}$打破$\mathcal{F}^t$的单向性, 
+那么其必然以不可忽略的优势对$t$个单向函数的实例$f_{ek_i}(\cdot)$求逆, 这显然与$\mathcal{F}$的单向性冲突, 因此得证. 
+\end{proof}
+
+\begin{remark}
+上述定理在$ek_1 = \cdots = ek_t$(即所有$f_{ek_i}$相同)时仍然成立, 该情形恰好对应单向函数的单向性放大(one-wayness amplification).  
+\end{remark}
+
+需要注意的是, $f^t_{ek_1, \dots, ek_t}$单向性成立的前提是各分量输入$x_i$独立随机采样, 
+而当各分量输入相关时, 单向性则未必成立, 这是因为多个像的分量交叉组合可能会泄漏原像的信息. 
+
+\begin{construction}[反例构造]\label{counterexample:CPTDF}
+令$\hat{f}_{ek}: X = \{0,1\}^n \rightarrow Y$是一个单向函数, 
+构造一个新的函数$f_{ek}: \{0,1\}^{2n} \rightarrow Y||\{0,1\}^n$如下: 
+\begin{equation*}
+    f_{ek}(x_l||x_r): = \hat{f}_{ek}(x_l)||x_r
+\end{equation*}
+\end{construction}
+在上述构造中, $f_{ek}$以$\hat{f}_{ek}$为核, 因此如果$\hat{f}_{ek}$是单向的, 那么$f_{ek}$也是单向的. 
+考察2重积$f^2_{ek_1, ek_2}$在相关输入$(x_1 = x_l||x_r, x_2 =  x_r||x_l)$下的行为: 
+\begin{equation*}
+    f^2_{ek_1, ek_2}(x_1, x_2) := (f_{ek_1}(x_1), f_{ek_2}(x_2)) 
+        = \hat{f}_{ek_1}(x_l)||x_r||\hat{f}_{ek_2}(x_r)||x_l 
+\end{equation*}
+根据$f_{ek}$的设计, $f^2_{ek_1, ek_2}$的原像信息$(x_1, x_2)$可以从像中的$(x_r, x_l)$完全恢复出来, 
+因此在输入呈如上相关时并不满足单向性. 上述反例构造的精髓是设计具有特殊结构的单向函数. 
+
+反例~\ref{counterexample:CPTDF}说明单向函数的$t$重积在输入相关时并不一定仍然单向. 
+Alon和Rosen~\cite{RS-TCC-2009}引入了相关积(correlated products)单向陷门函数, 定义如下: 要求函数的$t$重积在输入分量相关时仍然保持单向性
+
+\begin{definition}[相关积单向性]
+令$\mathcal{F}: X \rightarrow Y$是一族单向函数, $\mathcal{C}_t$是定义在$X^t$上的分布(分量相关). 
+如果$\mathcal{F}$的$t$重积$\mathcal{F}^t: X^t \rightarrow Y^t$在$\mathcal{C}_t$相关积下仍然是单向的, 
+(即对于任意PPT敌手$\mathcal{A}$, 其在如下的安全实验中优势是可忽略的) 
+\begin{displaymath}
+\Pr \left[
+f^t_{ek_1, \dots, ek_t}(x') = y^*: 
+\begin{array}{l}
+    ek_i \leftarrow \mathsf{Gen}(\kappa);\\
+    (x_1^*, \dots, x_t^*) \sample \mathcal{C}_t; \\
+    y^* \leftarrow (f_{ek_1}(x_1^*), \dots, f_{ek_t}(x_t^*));\\
+    x' \leftarrow \mathcal{A}(ek_1, \dots, ek_t, y^*);\\
+\end{array} 
+\right]
+\end{displaymath}
+则称$\mathcal{F}$是$\mathcal{C}_t$相关积安全的(correlated-product secure). 该定义可以自然延拓到陷门函数场景.   
+\end{definition}
+
+在给出CP-TDF的定义后, 接下来需要研究的问题是分析什么样的$\mathcal{F}$在何种相关积下仍然单向. 
+本书中聚焦最为典型的一种$\mathcal{C}_t$相关积——均匀重复相关积$\mathcal{U}_t$, 即$x_1 \sample X$且$x_1 =  \dots = x_t$. 
+Rosen和Segev~\cite{RS-TCC-2009}基于LTDF给出了CP-TDF的一个通用构造, 揭示了两者之间的联系. 
+
+\begin{theorem}
+令$\mathcal{F}$是一族$(n, \tau)$-LTDF, 那么$\mathcal{F}$在相关积$\mathcal{U}_t$下仍然单向, 
+其中$t \leq (n-\omega(\log \kappa))/\tau$.  
+\end{theorem}
+
+\begin{proof}
+证明通过以下的游戏序列完成, 敌手在$\text{Game}_i$中成功的事件为$S_i$.  
+\begin{trivlist}
+\item $\text{Game}_0$: 对应真实的相关积单向性实验, 函数以单射模式运作 
+\begin{itemize}
+    \item $\mathcal{CH}$独立运行$\mathcal{F}.\mathsf{GenInjective}(\kappa)$算法$t$次, 
+    	生成$ek = (ek_1, \dots, ek_t)$并将其发送给$\mathcal{A}$. 
+    \item $\mathcal{CH}$随机采样$x^* \sample X$, 计算$y^* \leftarrow (f_{ek_1}(x^*), \dots, f_{ek_t}(x^*))$
+    	并将$y^*$发送给$\mathcal{A}$. 
+    \item $\mathcal{A}$输出$x'$, 当且仅当$x' =  x^*$时成功. 
+\end{itemize}
+根据定义, 我们有:
+\begin{equation*}
+\AdvA^{\text{Game}_0}(\kappa) = \Pr[S_0]
+\end{equation*}
+
+\item $\text{Game}_1$: 与上一游戏相同, 区别在于函数切换到有损模式运作 
+\begin{itemize}
+    \item $\mathcal{CH}$独立运行\redul{$\mathcal{F}.\mathsf{GenLossy}(\kappa)$}算法$t$次, 
+    	生成$ek = (ek_1, \dots, ek_t)$并将其发送给$\mathcal{A}$. 
+\end{itemize}
+\begin{equation*}
+\AdvA^{\text{Game}_1}(\kappa) = \Pr[S_1]
+\end{equation*}
+\end{trivlist}
+
+\begin{claim}
+基于LTDF的单射/有损模式不可区分性, 任意PPT敌手$\mathcal{A}$在$\text{Game}_0$和$\text{Game}_1$中的成功概率差可忽略. 
+\end{claim}
+
+\begin{proof}
+$\text{Game}_0$和$\text{Game}_1$的差别在于$(ek_1, \dots, ek_t)$的生成模式. 
+基于LTDF的单射/有损模式不可区分性和hybrid argument, 可以推出$\text{Game}_0 \approx_c \text{Game}_1$, 
+进而保证$|\Pr[S_0] - \Pr[S_1]| \leq \mathsf{negl}(\kappa)$.  
+\end{proof}
+
+\begin{claim}
+对于任意敌手$\mathcal{A}$(即使拥有无穷计算能力), $\Pr[S_1] = \mathsf{negl}(\lambda)$. 
+\end{claim}
+
+\begin{proof}
+在$\text{Game}_1$中, 函数工作在有损模式, 因此像集的大小至多为$2^{t \cdot \tau}$, 
+由chainning lemma~\ref{lemma:chainning-lemma}可知$x^*$的平均最小熵$\avminentropy(x^*|y^*) \geq n - t \tau$. 
+根据定理前提条件中的参数选取, 有$\avminentropy(x^*|y^*) \geq \omega(\log \kappa)$, 因此断言得证. \qed
+\end{proof}
+
+综上, 我们有$\Pr[S_0] \leq \mathsf{negl}(\kappa)$. 定理得证! \qed
+\end{proof}
+
+\begin{note}
+追求简洁、消除冗余在科学和文学领域似乎都是真理. 
+然而, 正如知乎上一篇文章~\cite{zhihu-essay}所说:``尽管我们偏爱简洁, 但冗余让一切皆有可能''. 相关积单向函数的定义和构造就充分诠释了冗余的力量.
+\end{note}
+
+\subsection{自适应单向陷门函数}
+\begin{center}
+    他强由他强, 清风拂山冈; 他横由他横, 明月照大江; 他自狠来他自恶, 我自一口真气足. \\
+                \hfill --- 达摩《九阳真经》
+\end{center}
+
+
+
+构造~\ref{construction:TDF-based-KEM}仅具备IND-CPA安全性, 并不一定能够满足IND-CCA安全性. 
+这是因为底层的TDF可能具备诸如同态等优良的代数性质, 使得上层PKE/KEM方案具有可延展性. 
+从安全归约的角度分析, 归约算法无法对解密/解封装询问做出正确的应答. 
+基于以上分析, 一个自然的问题是: TDF满足何种增强的性质才能够使得构造~\ref{construction:TDF-based-KEM}满足IND-CCA安全性. 
+
+Kiltz, Mohassel和O'Neill~\cite{KMO-EUROCRYPT-2010}提出了自适应单向性(adaptive one-wayness), 
+该性质要求TDF的单向性在敌手能够访问求逆谕言机的情况下仍然成立. 
+% \begin{frame}{Adaptive One-wayness/Pseudorandomness}
+% A family of TDF is adaptive one-way/pseudorandom if for all PPT $\mathcal{A}$ 
+% the following advantage function is $\mathsf{negl}(\lambda)$
+\begin{definition}[自适应单向性]
+令$\mathcal{F}$是一族陷门函数, 定义敌手$\mathcal{A}$的优势如下:  
+\begin{displaymath} 
+\Pr \left[
+x' \in f_{ek}^{-1}(y^*): 
+\begin{array}{l}
+    pp \leftarrow \mathsf{Setup}(\kappa);\\
+    (ek, td) \leftarrow \mathsf{KeyGen}(pp);\\
+    x^* \sample X, y^* \leftarrow f_{ek}(x^*);\\
+    x' \leftarrow \mathcal{A}^{\mathcal{O}_\mathsf{inv}}(ek, y^*);
+\end{array} 
+\right]
+\end{displaymath}
+其中$\mathcal{O}_\mathsf{inv}$是求逆谕言机, $\forall x \neq x^*$, $\mathcal{O}_\mathsf{inv}(y) = \mathsf{TdInv}(td, y)$. 
+如果任意PPT敌手$\mathcal{A}$在上述安全试验中的优势均为$\mathsf{negl}(\kappa)$, 
+那么则称$\mathcal{F}$是自适应单向的.  
+\end{definition}
+
+为了方便在公钥加密场景中的应用, 引入自适应伪随机性如下.  
+\begin{definition}[自适应伪随机性]
+令$\mathcal{F}$是一族单向函数, $\mathsf{hc}$是其hardcore function. 定义敌手$\mathcal{A}$的优势如下:  
+\begin{displaymath} 
+\Pr \left[
+\beta' = \beta: 
+\begin{array}{l}
+    (ek, td) \leftarrow \mathcal{F}.\mathsf{Gen}(\lambda);\\
+    x^* \sample X, y^* \leftarrow f_{ek}(x^*);\\
+    k_0^* \leftarrow \mathsf{hc}(x^*), k_1^* \sample K, \beta \sample \{0,1\};\\
+    \beta' \leftarrow \mathcal{A}^{\mathcal{O}_\mathsf{inv}}(ek, y^*, k_\beta^*);
+\end{array} 
+\right] - \frac{1}{2}
+\end{displaymath}
+其中$\mathcal{O}_\mathsf{inv}$是求逆谕言机, $\mathsf{hc}$是$\mathcal{F}$的hardcore function. 
+如果任意PPT敌手$\mathcal{A}$在上述安全试验中的成功概率均为$\mathsf{negl}(\kappa)$, 
+那么则称$\mathsf{hc}$的是自适应伪随机的.  
+\end{definition}
+
+\begin{corollary}
+$\mathcal{F}$的自适应单向性蕴含hardcore function的自适应伪随机性.
+\end{corollary}
+\begin{proof}
+Goldreich-Levin定理的证明可以平行推广到求逆谕言机$\mathcal{O}_\mathsf{inv}$存在的情形下, 
+$\mathsf{hc}(x^*)$自适应伪随机性由$x^*$的自适应单向性保证. \qed
+\end{proof}
+
+自适应单向陷门函数(ATDF, adaptive TDF)定义简洁, 威力强大, 将ATDF代入构造~\ref{construction:TDF-based-KEM}中, 
+得到的KEM满足IND-CCA安全. 从安全归约的角度观察, ATDF的自适应单向性是为KEM的CCA安全性量身定制的, 都是``全除一''类型的安全定义. 
+那么, 如何构造ATDF呢? 文献~\cite{KMO-EUROCRYPT-2010}一方面基于实例独立(instance-independent)假设给出ATDF的具体构造, 
+一方面分别基于LTDF和CP-TDF给出了ATDF的两个通用构造. 
+
+以下我们聚焦ATDF的通用构造, 首先展示如何基于LTDF构造ATDF. 
+构造的技术困难点在于ATDF的安全试验中挑战者$\mathcal{CH}$向敌手$\mathcal{A}$提供了``全除一''式解密谕言机$\mathcal{O}_\mathsf{inv}$, 
+而LTDF的安全试验中并没有提供类似的谕言机访问接口. 
+因此, 构造的思路是通过引入精巧的结构完成解密谕言机$\mathcal{O}_\mathsf{inv}$的模拟. 
+总体的思路如下: 
+\begin{itemize} 
+\item 令ATDF的像$y$形如$(y_0, y_1)$, 确保$y_1$由$y_0$惟一确定, 可行的设计是计算原像$x$的LTDF值作为$y_0$, 
+	再以$y_0$为分支编号计算$x$的ABO-TDF值作为$y_1$. 
+\begin{equation*}
+    y_0 \leftarrow f(ek_\text{ltdf}, x), y_1 \leftarrow g(ek_\text{abo}, y_0, x) 
+\end{equation*}
+
+\item 上述设计利用ABO-TDF的相对分支标签的``全除一''求逆陷门嵌入了相对于像的``全除一''可逆结构. 
+\end{itemize}
+
+\begin{construction}[基于LTDF和ABO-TDF的ATDF构造]
+\begin{trivlist}
+\item 构造所需的组件是:
+\begin{itemize}
+    \item $(n, \tau_1)$-LTDF -- $\mathcal{F}: X \rightarrow Y_1$; 
+    \item $(n, \tau_2)$-ABO-TDF -- $\mathcal{G}: X \rightarrow Y_2$ w.r.t. $Y_1$作为分支集合; 
+\end{itemize}
+其中$\log_2 |X| = n$, $\log_2 |Y_1| = m_1$, $\log_2 |Y_2| = m_2$. 
+
+\item 构造$\text{ATDF}: X \rightarrow Y_1 \times Y_2$如下: 
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 以安全参数$\kappa$为输入, 
+	计算$pp_\text{ltdf} \leftarrow \mathcal{F}.\mathsf{Setup}(1^\kappa)$, 
+	$pp_\text{abo} \leftarrow \mathcal{G}.\mathsf{Setup}(1^\kappa)$, 
+	输出$pp = (pp_\text{ltdf}, pp_\text{abo})$.  
+
+\item $\mathsf{Gen}(pp)$: 以公开参数$pp = (pp_\text{ltdf}, pp_\text{abo})$为输入, 
+	计算$(ek_\text{ltdf}, td_\text{ltdf}) \leftarrow \mathcal{F}.\mathsf{GenInjective}(pp_\text{ltdf})$, 
+	$(ek_\text{abo}, td_\text{abo}) \leftarrow \mathcal{G}.\mathsf{Gen}(pp_\text{abo}, 0^{m_1})$, 
+	输出求值公钥$ek = (ek_\text{ltdf}, ek_\text{abo})$和陷门$td = (td_\text{ltdf}, td_\text{abo})$.  
+
+\item $\mathsf{Eval}(ek, x)$: 以求值公钥$ek = (ek_\text{ltdf}, ek_\text{abo})$和$x \in \{0,1\}^n$为输入, 
+	计算$y_1 \leftarrow f_{ek_\text{ltdf}}(x)$, $y_2 \leftarrow g_{ek_\text{abo}}(y_1, x)$, 输出$y = (y_1, y_2)$. 
+
+\item $\mathsf{TdInv}(td, y)$: 以陷门$td = (td_\text{ltdf}, td_\text{abo})$和$y = (y_1, y_2)$为输入, 
+	计算$x \leftarrow \mathcal{F}.\mathsf{TdInv}(td_\text{ltdf}, y_1)$, 
+	验证$y_2 \stackrel{?}{=} g_{ek_\text{abo}}(y_1, x)$: 如果是输出$x$, 否则输出$\bot$. 
+\end{itemize}
+\end{trivlist}
+\end{construction}
+
+上述构造的正确性显然成立. 安全性由如下定理保证: 
+\begin{theorem}
+基于LTDF和ABO-TDF的安全性, 上述构造在$n - \tau_1 - \tau_2 \geq \omega(\log \kappa)$构成一族ATDF.
+\end{theorem}
+
+\begin{proof}
+令$(x^*, y^* = (y_1^*, y_2^*))$为单向挑战实例, 其中$x^*$是原像, $y^*$是像. 
+证明的思路将像$y^* = (y_1^*, y_2^*)$的计算方式从单射无损模式逐步切换到有损模式, 最终在信息论意义下论证单向性.  
+\begin{trivlist}
+\item $\text{Game}_0$: 真实的ATDF单向性试验. $\mathcal{CH}$与$\mathcal{A}$交互如下:
+\begin{itemize}
+	\item 初始化: $\mathcal{CH}$进行如下操作
+    	\begin{enumerate}
+    		\item 运行$pp_\text{ltdf} \leftarrow \mathcal{F}.\mathsf{Setup}(1^\kappa)$, 
+				$pp_\text{abo} \leftarrow \mathcal{G}.\mathsf{Setup}(1^\kappa)$; 
+			\item 计算$(ek_\text{ltdf}, td_\text{ltdf}) \leftarrow \mathcal{F}.\mathsf{GenInjective}(pp_\text{ltdf})$, 
+        		$(ek_\text{abo}, td_\text{abo}) \leftarrow \mathcal{G}.\mathsf{Gen}(pp_\text{abo}, 0^{m_1})$;
+    		\item 发送$pp = (pp_\text{ltdf}, pp_\text{abo})$和$ek = (ek_\text{ltdf}, ek_\text{abo})$给$\mathcal{A}$. 
+    	\end{enumerate}
+
+	\item 挑战: $\mathcal{CH}$随机选取$x^* \sample X$, 
+		计算$y_1^* \leftarrow f_{ek_\text{ltdf}}(x^*)$, $y_2^* \leftarrow g_{ek_\text{abo}}(y_1^*, x^*)$, 
+		发送$y^* = (y_1^*, y_2^*)$给$\mathcal{A}$. 
+
+	\item 求逆询问: 当$\mathcal{A}$向$\mathcal{O}_\text{inv}$询问$y = (y_1, y_2)$的原像时, $\mathcal{CH}$分情况应答如下:  
+	\begin{itemize}
+    	\item $y_1 = y_1^*$: 直接返回$\bot$.  
+    	\item $y_1 \neq y_1^*$: 首先计算$x \leftarrow \mathcal{F}.\mathsf{TdInv}(td_\text{ltdf}, y_1)$, 
+        	如果$y_2 =  g_{ek_\text{abo}}(y_1, x)$则返回$x$, 否则返回$\bot$. 
+	\end{itemize}
+	根据ATDF像的生成方式可知, 第一部分完全确定了第二部分, 当$y_1 = y_1^*$时, 
+	如$y_2 = y_2^*$则$\mathcal{A}$的询问为禁讯点, 如$y_2 \neq y_2^*$则像的格式不正确. 
+	基于以上分析, $\mathcal{CH}$在应答形如$(y_1^*, y_2)$的求逆询问时, 无须进一步检查第二部分$y_2$, 直接返回$\bot$即可保证应答的正确性. 
+\end{itemize}
+
+\item $\text{Game}_1$: 在$\text{Game}_0$中$\mathcal{CH}$使用$\mathcal{F}$的陷门进行求逆, 
+	因此$\mathcal{F}$必须工作在单射可逆模式. 为了将$y_1^*$的计算模式切换到有损模式, 
+	需要利用$\mathcal{G}$的陷门进行求逆. 注意到在$\text{Game}_0$中$\mathcal{G}$的``全除一''陷门根据预先设定的有损分支$0^{m_1}$生成, 
+	因此必须先激活再使用, 因此$\text{Game}_1$的设计目的是为激活做准备:  
+\begin{itemize}
+    \item $\mathcal{CH}$在初始化阶段即\redul{随机采样$x^* \sample X$, 并计算$y_1^* \leftarrow f_{ek_\text{ltdf}}(x^*)$}.
+\end{itemize}
+与$\text{Game}_0$相比, $\text{Game}_1$仅将上述操作从挑战阶段提前至初始化阶段, 敌手的视图没有发生任何变化, 因此有: 
+\begin{equation*} 
+    \text{Game}_0 \equiv \text{Game}_1
+\end{equation*}
+
+\item $\text{Game}_2$: 上一游戏已经做好激活$\mathcal{G}$陷门的准备, 
+	因此在$\text{Game}_2$中将预设的有损分支值由$0^{m_1}$替换为$y_1^*$完成激活:
+\begin{itemize} 
+    \item $(ek_\text{abo}, td_\text{abo}) \leftarrow G.\mathsf{Gen}(pp_\text{abo}, \red{y_1^*})$
+\end{itemize}
+由ABO-TDF的有损分支隐藏性质, 可以得到:
+\begin{equation*}
+   	\text{Game}_1 \approx_c \text{Game}_2
+\end{equation*}
+
+\item $\text{Game}_3$: 使用$\mathcal{G}$的陷门$td_\text{abo}$应答求逆询问, 
+	当$\mathcal{A}$发起询问$y = (y_1, y_2)$时, $\mathcal{CH}$分情形应答如下:  
+\begin{itemize}
+    \item $y_1 = y_1^*$: 直接返回$\bot$. 
+    \item $y_1 \neq y_1^*$: 计算$x \leftarrow \mathcal{G}.\mathsf{TdInv}(td_\text{abo}, y_1, y_2)$, 
+        如果$y_1 = f_{ek_\text{ltdf}}(x)$则返回$x$, 否则返回$\bot$.
+\end{itemize} 
+像的生成方式和$\mathcal{G}$求逆算法的正确性和保证了$\mathcal{O}_\mathsf{inv}$应答的正确性, 因此有: 
+\begin{equation*}
+    \text{Game}_2 \equiv \text{Game}_3 
+\end{equation*}
+
+\item $\text{Game}_4$: 将$y_1^*$的生成方式切换到有损模式
+\begin{itemize}
+	\item $\mathcal{CH}$在初始化阶段计算\redul{$(ek_\text{ltdf}, \bot) \leftarrow \mathcal{F}.\mathsf{GenLossy}(pp_\text{ltdf})$}
+\end{itemize}
+LTDF的单射/有损模式的计算不可区分性保证了
+\begin{equation*}  
+    \text{Game}_3 \approx_c \text{Game}_4
+\end{equation*}
+\end{trivlist}
+
+\begin{claim}
+    对任意的敌手$\mathcal{A}$(即使拥有无穷的计算能力)均有$\AdvA(\text{Game}_4) = \mathsf{negl}(\kappa)$. 
+\end{claim}
+
+\begin{proof}
+在$\text{Game}_4$中, 函数$f_{ek_\text{ltdf}}(\cdot)$有损且像集大小至多为$2^{\tau_1}$, 
+函数$g_{ek_\text{abo}}(y_1^*, \cdot)$有损且像集大小至多为$2^{\tau_2}$. 
+因此$y_1^*$和$y_2^*$均在信息论意义下损失了原像$x^*$的信息, 
+在敌手$\mathcal{A}$的视图中, $x^*$的平均最小熵为
+$\avminentropy(x^*|(y_1^*, y_2^*)) \geq \minentropy(x^*) - \tau_1 - \tau_2 = n - \tau_1 - \tau_2 \geq \omega(\log \kappa)$. 
+从而对于任意敌手$\mathcal{A}$均有: 
+\begin{equation*}
+    \AdvA(\text{Game}_4) = \mathsf{negl}(\kappa)
+\end{equation*}
+断言得证! \qed
+\end{proof}
+综上, 定理得证! \qed
+\end{proof}
+
+\begin{remark}
+上述构造的设计思想值得读者反复拆解, 体会其精妙之处. 
+上述ATDF构造在形式上与Naor-Yung的双钥加密有异曲同工之处: 
+分别使用$f_{ek_\text{ltdf}}(\cdot)$和$g_{ek_\text{abo}}(\cdot, \cdot)$两个函数计算原像的函数值作为像.  
+一个自然的想法是上述构造显得冗余, 是否仅用ABO-TDF即可呢? 答案是否定的, 如果仅依赖ABO-TDF构造ATDF, 需要满足以下四点: 
+\begin{itemize} 
+	\item 求值分支可由输入公开确定计算得出, 以确保ATDF是公开可计算函数.
+	\item 像所对应的求值分支可由像中计算得出, 以确保ATDF的求逆算法可以基于ABO-TDF的求逆算法设计. 
+	\item 在安全归约中势必需要将ATDF的单向性建立在ABO-TDF的信息有损性上, 也即$y^*$是$x^*$在有损分支的求值.
+\end{itemize}
+上述三点潜在要求ATDF的像包含两个部分, 一部分是原像对应的分支值, 一部分是ABO-TDF在该分支值下的像, 这使得在安全证明时存在如下两个障碍:
+\begin{enumerate}
+	\item 分支值泄漏原像的多少信息难以确定 
+	\item 敌手可以从挑战的像中计算出有损分支值, 从而可以发起关于有损分支的求逆询问, 而归约算法无法应答
+\end{enumerate} 
+
+通过上述的拆解分析, 便可看出ATDF设计的必然性. 引入LTDF并将分支值设定为原像的LTDF值有三重作用:
+\begin{itemize} 
+	\item LTDF的陷门确保了ATDF构造存在功能完备的陷门.
+	\item 可将分支值泄漏的关于原像信息量控制在指定范围.  
+	\item 分支值完全确定了像, 从而使得ABO-TDF的陷门在归约证明中可用于模拟求逆谕言机$\mathcal{O}_\mathsf{inv}$.  
+\end{itemize} 
+LTDF+ABO-TDF $\Rightarrow$ ATDF的设计思路有如二级运载火箭, 第一级运载火箭(LTDF)在完成推动后从单射切换到有损模式, 
+同时激活第二级运载火箭(ABO-TDF).  
+\end{remark}
+
+我们再展示如何基于CP-TDF构造ATDF. 构造的难点是在归约证明中归约算法如何在不掌握全部CP-TDF实例陷门的情况下正确模拟$\mathcal{O}_\mathsf{inv}$. 
+大体的设计思路和以上基于有损陷门函数构造LTDF相似, 通过多重求值引入冗余结构, 从而使得归约算法在掌握部分CP-TDF实例陷门时能够正确应答求逆询问. 
+\begin{itemize} 
+    \item 设计像$y$形如$(y_0, y_1, \dots, y_n)$, 确保$y_0$能够惟一确定$(y_1, \dots, y_n)$
+    \begin{itemize}
+    	\item 令$y_0$是原像的CP-TDF函数值, 目的是确保$y_0$不会破坏最终ATDF函数的单向性
+    	\item 令$(y_1, \dots, y_n)$是关于原像$x$的$|y_0| = n$重冗余函数求值 
+    \end{itemize}
+    \item 嵌入``全除一''求逆结构
+    \begin{itemize}
+        \item 对$y_0^*$进行比特分解: 归约算法使用Dolev-Dwork-Naor(DDN)类技术逐比特嵌入对应的陷门, 
+        	使得对于点$y = (y_0, y_1, \dots, y_n)$处的求逆询问: 
+        \begin{enumerate}
+		    \item $y_0 = y_0^*$: 归约算法可根据$\mathcal{O}_\mathsf{inv}$的定义直接拒绝, 返回$\bot$ 
+    		\item $y_0 \neq y_0^*$: $\mathcal{R}$可至少寻找到一个可用陷门用于应答$\mathcal{O}_\mathsf{inv}$. 
+		\end{enumerate} 
+    \end{itemize}
+\end{itemize} 
+
+\begin{construction}{基于CP-TDF的ATDF}
+\begin{trivlist}
+\item 构造所需组件: 单射CP-TDF $\mathcal{F}: X \rightarrow \{0,1\}^n$
+
+\item 构造ATDF: $X \rightarrow \{0,1\}^{n(n+1)}$如下: 
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$pp \leftarrow \mathcal{F}.\mathsf{Setup}(1^\kappa)$, 输出$pp$作为公开参数. 
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入 
+\begin{enumerate}
+	\item 计算$(\hat{ek}, \hat{td}) \leftarrow \mathcal{F}.\mathsf{KeyGen}(\lambda)$;
+
+	\item 对于$b \in \{0,1\}$和$i \in [n]$, 
+		计算$(ek_{i,b}, td_{i,b}) \leftarrow \mathcal{F}.\mathsf{KeyGen}(\lambda)$;  
+        
+	\item 输出$(\hat{ek}, (ek_{i,0}, ek_{i,1}), \dots, (ek_{n,0}, ek_{n,1}))$作为求值公钥, 
+		输出$(\hat{td}, (td_{i,0}, td_{i,1}), \dots, (td_{n,0}, td_{n,1}))$作为求逆陷门.
+\end{enumerate}
+
+\item $\mathsf{Eval}(ek, x)$: 以求值公钥$ek = \hat{ek}||(ek_{1,0}, ek_{1,1}) \dots (ek_{n,0}, ek_{n,1})$和原像$x$为输入, 计算
+    \begin{enumerate}
+    	\item 计算$y_0 \leftarrow f_{\hat{ek}}(x)$; 
+    	\item 令$b_i \leftarrow y_0[i]$, 对$i \in [n]$计算$y_i \leftarrow f_{ek_{i,b_i}}(x)$; 
+    	\item 输出$y = y_0||y_1||\dots||y_n$. 
+	\end{enumerate}
+
+\item $\mathsf{TdInv}(td, y)$: 以陷门$td = (\hat{td}, \{(td_{i,0}, td_{i,1})\}_{i \in [n]})$和像$y = y_0||y_1||\dots||y_n$为输入: 
+	\begin{enumerate}
+		\item 计算$x_0 \leftarrow \mathcal{F}.\mathsf{TdInv}(\hat{td}, y_0)$; 
+		\item 令$b_i \leftarrow y_0[i]$, 
+			对所有$i \in [n]$计算$x_i \leftarrow \mathcal{F}.\mathsf{TdInv}(td_{i,b_i}, y_i)$; 
+        \item 检查$x_i = x_0$是否对于$i \in [n]$均成立, 若是则输出$x_0$, 否则输出$\bot$.
+	\end{enumerate}
+\end{itemize}
+\end{trivlist}
+\end{construction}
+
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}
+    \node [name=ekhat, textnode] {$\hat{ek}$\\$\hat{td}$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=5em, yshift=1.2em] {$ek_{1,0}$\\$td_{1,0}$}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=5em, yshift=-1.2em] {$ek_{1,1}$\\$td_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=10em, yshift=1.2em] {$ek_{2,0}$\\$td_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=10em, yshift=-1.2em] {$ek_{2,1}$\\$td_{2,1}$}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=15em, yshift=1.2em] {$ek_{3,0}$\\$td_{3,0}$}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=15em, yshift=-1.2em] {$ek_{3,1}$\\$td_{3,1}$}; 
+\end{tikzpicture}
+\caption{$n = 3$时的求值公钥和求逆陷门图示}
+\end{figure}
+
+\begin{figure}[!htbp]
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=ekhat, textnode] {$\hat{ek}$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = ekhat, xshift=5em, yshift=0.8em] {\blue{$ek_{1,0}$}}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = ekhat, xshift=5em, yshift=-0.8em] {$ek_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = ekhat, xshift=10em, yshift=0.8em] {$ek_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = ekhat, xshift=10em, yshift=-0.8em] {\blue{$ek_{2,1}$}}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = ekhat, xshift=15em, yshift=0.8em] {\blue{$ek_{3,0}$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = ekhat, xshift=15em, yshift=-0.8em] {$ek_{3,1}$}; 
+
+    \node [textnode, name=xhat, above of = ekhat, yshift=3em] {$x$};
+    \node [textnode, name=yhat, below of = ekhat, yshift=-4em] {$f_{\hat{ek}}(x)$\\$y_0 = \blue{010}$}; 
+    \draw (xhat) edge[->] (ekhat); 
+    \draw (ekhat) edge[->] (yhat); 
+
+    \node [textnode, name=x1, above of = ek10, yshift=2.2em] {$x$};
+    \node [textnode, name=y1, below of = ek11, yshift=-3.2em] {$f_{ek_{1,0}}(x)$\\$y_1$}; 
+    \draw (x1) edge[->] (ek10); 
+    \draw (ek11) edge[->] (y1); 
+
+
+    \node [textnode, name=x2, above of = ek20, yshift=2.2em] {$x$};
+    \node [textnode, name=y2, below of = ek21, yshift=-3.2em] {$f_{ek_{2,1}}(x)$\\$y_2$}; 
+    \draw (x2) edge[->] (ek20); 
+    \draw (ek21) edge[->] (y2); 
+
+    \node [textnode, name=x3, above of = ek30, yshift=2.2em] {$x$};
+    \node [textnode, name=y3, below of = ek31, yshift=-3.2em] {$f_{ek_{3,0}}(x)$\\$y_3$}; 
+    \draw (x3) edge[->] (ek30); 
+    \draw (ek31) edge[->] (y3);    
+\end{tikzpicture}
+\caption{$n=3$, $y=010$时的求值图示}
+\end{minipage}
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=tdhat, textnode] {$\hat{td}$}; 
+
+    \node [name=td10, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = tdhat, xshift=5em, yshift=0.8em] {\blue{$td_{1,0}$}}; 
+    \node [name=td11, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = tdhat, xshift=5em, yshift=-0.8em] {$td_{1,1}$}; 
+
+    \node [name=td20, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = tdhat, xshift=10em, yshift=0.8em] {$td_{2,0}$}; 
+    \node [name=td21, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = tdhat, xshift=10em, yshift=-0.8em] {\blue{$td_{2,1}$}}; 
+
+    \node [name=td30, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = tdhat, xshift=15em, yshift=0.8em] {\blue{$td_{3,0}$}}; 
+    \node [name=td31, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = tdhat, xshift=15em, yshift=-0.8em] {$td_{3,1}$}; 
+
+    \node [textnode, name=y0, above of = tdhat, yshift=3em] {$y_0 = \blue{010}$};
+    \node [textnode, name=y1, above of = td10, yshift=2.2em] {$y_1$};
+    \node [textnode, name=y2, above of = td20, yshift=2.2em] {$y_2$};
+    \node [textnode, name=y3, above of = td30, yshift=2.2em] {$y_3$};
+
+    \node [textnode, name=x0, below of = tdhat, yshift=-5em] {$x_0$}; 
+    \draw (y0) edge[->] (tdhat); 
+    \draw (tdhat) edge[->] node[left]{$f_{\hat{ek}}^{-1}$} (x0); 
+
+    \node [textnode, name=x1, below of = td11, yshift=-4.2em] {$x_1$}; 
+    \draw (y1) edge[->] (td10); 
+    \draw (td11) edge[->] node[left]{$f_{ek_{1,0}}^{-1}$} (x1); 
+    \node [textnode, left of = x1, xshift=-2.5em, yshift=0.5em] {$\stackrel{?}{=}$}; 
+
+    \node [textnode, name=x2, below of = td21, yshift=-4.2em] {$x_2$}; 
+    \draw (y2) edge[->] (td20); 
+    \draw (td21) edge[->] node[left]{$f_{ek_{2,1}}^{-1}$} (x2); 
+    \node [textnode, left of = x2, xshift=-2.5em, yshift=0.5em] {$\stackrel{?}{=}$}; 
+
+    \node [textnode, name=x3, below of = td31, yshift=-4.2em] {$x_3$}; 
+    \draw (y3) edge[->] (td30); 
+    \draw (td31) edge[->] node[left]{$f_{ek_{3,0}}^{-1}$} (x3); 
+    \node [textnode, left of = x3, xshift=-2.5em, yshift=0.5em] {$\stackrel{?}{=}$};    
+\end{tikzpicture}
+\caption{$n=3$, $y = 010$时的求逆图示}
+\end{minipage}
+\end{figure}
+
+上述ATDF构造的正确性显然. 构造中, 函数的像$y = y_0||y_1||\dots||y_n$是对原像的$n+1$重求值, 
+其中$y_0$确定了使用哪些求值公钥$ek_{i,b}$计算$y_i$, 因此当底层的CP-TDF是单射函数时, $y_0$可惟一确定$y_1, \dots, y_n$.  
+下面的定理就是利用上述结构特性模拟求逆谕言机$\mathcal{O}_\mathsf{inv}$.
+
+\begin{theorem}
+如果$\mathcal{F}$是一族相对于$\mathcal{U}_t$安全的CP-TDF, 那么上述构造一族A自适应单向陷门函数. 
+\end{theorem}
+\begin{proof}
+使用反证法通过单一游戏完成归约证明. 
+假设存在PPT的敌手$\mathcal{A}$能以不可忽略的优势打破ATDF的自适应单向性, 
+那么可以黑盒调用$\mathcal{A}$的能力构造PPT的$\mathcal{B}$打破CP-TDF相对于$\mathcal{U}_{n+1}$的单向性. 
+$\mathcal{B}$的CP-TDF挑战是公开参数$pp$、求值公钥$(ek_0, ek_1, \dots, ek_n)$和像$y^* = (y_0^*, y_1^*, \dots, y_n^*)$, 
+其中$y_i^* \leftarrow f_{ek_i}(x^*)$, $x^* \sample X$. 
+$\mathcal{B}$并不知晓$x^*$, 其攻击目标是求解$x^*$. 
+
+\begin{figure}[!hbtp]
+\centering
+\begin{tikzpicture}
+\node [textnode, name=ek0] {$ek_0$}; 
+\node [textnode, name=x0, above of = ek0, yshift=2em, color=gray] {$x^*$}; 
+\node [textnode, name=y0, below of = ek0, yshift=-2em] {$y_0^*$};
+\draw (x0) edge[->] (ek0); 
+\draw (ek0) edge[->] (y0); 
+
+\node [textnode, name=ek1, right of = ek0, xshift=5em] {$ek_1$}; 
+\node [textnode, name=x1, above of = ek1, yshift=2em, color=gray] {$x^*$}; 
+\node [textnode, name=y1, below of = ek1, yshift=-2em] {$y_1^*$};
+\draw (x1) edge[->] (ek1); 
+\draw (ek1) edge[->] (y1); 
+
+\node [textnode, name=ek2, right of = ek1, xshift=5em] {$ek_2$}; 
+\node [textnode, name=x2, above of = ek2, yshift=2em, color=gray] {$x^*$}; 
+\node [textnode, name=y2, below of = ek2, yshift=-2em] {$y_2^*$};
+\draw (x2) edge[->] (ek2); 
+\draw (ek2) edge[->] (y2); 
+
+\node [textnode, name=ek3, right of = ek2, xshift=5em] {$ek_3$}; 
+\node [textnode, name=x3, above of = ek3, yshift=2em, color=gray] {$x^*$}; 
+\node [textnode, name=y3, below of = ek3, yshift=-2em] {$y_3^*$};
+\draw (x3) edge[->] (ek3); 
+\draw (ek3) edge[->] (y3); 
+
+% \node [textnode, left of = y0, xshift=-2em, color=red] {$010$}; 
+\end{tikzpicture}
+\caption{$n=3$时$\mathcal{B}$的CP-TDF挑战实例}
+\end{figure}
+
+令$b_i^*$是$y_0^*$的第$i$比特, $\mathcal{B}$(扮演挑战者)与$\mathcal{A}$在ATDF的自适应单向性游戏中交互如下: 
+\begin{itemize}
+\item 初始化: $\mathcal{B}$将CP-TDF的$pp$设为ATDF的公开参数, 
+	设定$\red{\hat{ek}} := ek_0$, 
+	对$i \in [n]$设定$\red{ek_{i,b_i^*}} := ek_i$, 
+	计算$\blue{(ek_{i, 1-b_i^*}, td_{i,1-b_i^*})} \leftarrow \mathcal{F}.\mathsf{KeyGen}(\kappa)$.
+
+\item 挑战阶段: $\mathcal{B}$发送$(y_0^*, y_1^*, \dots, y_n^*)$给$\mathcal{A}$作为挑战. 
+
+\item 求逆询问: $\mathcal{A}$向$\mathcal{B}$发起求逆询问$y = (y_0, y_1, \dots, y_n)$, 
+	$\mathcal{B}$分情况应答如下:  
+
+\begin{enumerate}
+    \item $y_0 = y_0^*$: 直接返回$\bot$, 应答的正确性由以下两种细分情况保证: 
+	\begin{itemize}
+    	\item 对于所有的$i \in [n]$均有$y_i = y_i^*$: 询问为禁询点, 因此根据$\mathcal{O}_\mathsf{inv}$的定义需返回$\bot$.
+		\item 对于某个$i \in [n]$使得$y_i \neq y_i^*$: $\mathcal{F}$的单射性质和像的生成方式保证了
+			像的首项$y_0$确定了其余$n$项$y_1, \dots, y_n$.  
+	\end{itemize}
+
+    \item $y_0 \neq y_0^*$: 必然存在$\exists j \in [n]$ s.t. $b_j \neq b_j^*$且$y_j = f_{{ek_j, b_j}}(x)$, 
+    	其中$x$是未知原像. 此时, $\mathcal{B}$拥有关于$ek_{j,b_j}$的求逆陷门$td_{j,b_j}$, 
+    	$\mathcal{B}$可计算$x \leftarrow f_{ek_j, b_j}^{-1}(y_j)$
+	\begin{itemize}
+    	\item 如果$y_0 = f_{ek_0}$且$y_i = f_{ek_{i,b_i}}(x)$对其余所有$i \neq j$也均成立, 
+    		那么返回$x$, 否则返回$\bot$. 
+	\end{itemize}
+\end{enumerate}
+\item 求解: $\mathcal{A}$输出$x$作为ATDF的挑战应答, $\mathcal{B}$将$x$转发给CP-TDF的挑战者. 
+\end{itemize}
+容易验证, $\mathcal{B}$的优势与$\mathcal{A}$的优势相同. 定理得证! \qed
+\end{proof}
+
+\begin{figure}
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=ekhat, textnode] {\red{$\hat{ek}$}\\\red{$\bot$}}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=5em, yshift=1.2em] {\red{$ek_{1,0}$}\\\red{$\bot$}}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=10em, yshift=-1.2em] {\red{$ek_{2,1}$}\\\red{$\bot$}}; 
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=15em, yshift=1.2em] {\red{$ek_{3,0}$}\\\red{$\bot$}}; 
+
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=5em, yshift=-1.2em] {\blue{$ek_{1,1}$}\\\blue{$td_{1,1}$}}; 
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=10em, yshift=1.2em] {\blue{$ek_{2,0}$}\\\blue{$td_{2,0}$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=15em, yshift=-1.2em] {\blue{$ek_{3,1}$}\\\blue{$td_{3,1}$}}; 
+\end{tikzpicture}
+\caption{$y_0^* = 010$时生成求值公钥和求逆陷门的过程图示}
+\end{minipage}
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=ekhat, textnode] {\red{$\hat{ek}$}\\\red{$\bot$}}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=5em, yshift=1.2em] {\red{$ek_{1,0}$}\\\red{$\bot$}};
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=5em, yshift=-1.2em] {\blue{$ek_{1,1}$}\\\blue{$td_{1,1}$}}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=10em, yshift=1.2em] {\blue{$ek_{2,0}$}\\\blue{$td_{2,0}$}};  
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=10em, yshift=-1.2em] {\red{$ek_{2,1}$}\\\red{$\bot$}}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=15em, yshift=1.2em] {\red{$ek_{3,0}$}\\\red{$\bot$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=15em, yshift=-1.2em] {\blue{$ek_{3,1}$}\\\blue{$td_{3,1}$}}; 
+
+    \node [name=x0, above of = ekhat, yshift=2em] {\gray{$x$}};
+    \node [name=y0, below of = ekhat, yshift=-2em] {$y_0 = 000$};
+    \draw (x0) edge[->] (ekhat);
+    \draw (ekhat) edge[->] (y0); 
+
+    \node [name=x1, above of = ek10, yshift=0.8em] {\gray{$x$}};
+    \node [name=y1, below of = ek11, yshift=-0.8em] {\gray{$y_1$}};
+    \draw (x1) edge[->] (ek10);
+    \draw (ek11) edge[->] (y1); 
+
+    \node [name=x2, above of = ek20, yshift=0.8em] {\gray{$x$}};
+    \node [name=y2, below of = ek21, yshift=-0.8em] {\gray{$y_2$}};
+    \draw (x2) edge[->] (ek20);
+    \draw (ek21) edge[->] (y2); 
+
+    \node [name=x3, above of = ek30, yshift=0.8em] {\gray{$x$}};
+    \node [name=y3, below of = ek31, yshift=-0.8em] {\gray{$y_3$}};
+    \draw (x3) edge[->] (ek30);
+    \draw (ek31) edge[->] (y3); 
+
+    \node [rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=10em, yshift=1.2em, color=blue, thick] {}; 
+    \draw (y2) edge[->, thick, color=blue] (ek21);
+    \draw (ek20) edge[->, thick, color=blue] (x2); 
+
+    \node [textnode, left of = y0, xshift=-1em, yshift=1.3em] {$\stackrel{?}{=}$}; 
+    \node [textnode, left of = y1, xshift=-1em, yshift=1.3em] {$\stackrel{?}{=}$}; 
+    \node [textnode, left of = y3, xshift=-1em, yshift=1.3em] {$\stackrel{?}{=}$}; 
+\end{tikzpicture}
+\caption{$y_0 = 000$时的求逆过程图示}
+\end{minipage}
+\end{figure}
+
+\begin{remark}{优化}
+以上ATDF构造的像$(y_0, y_1, \dots, y_n)$包含了对原像的$(n+1)$重CP-TDF求值:  
+\begin{itemize}
+    \item $y_0$构造中起到的作用求值的公钥选择向量, 在归约证明中起到的作用是``全除一''求逆陷门的激活扳机(trigger), 当$y_0 \neq y_0^*$时即可激活求逆陷门. 
+\end{itemize}
+
+$y_0$的编码长度决定了像的冗余重数. 能否缩减$|y_0|$以提高效率呢? 
+答案是肯定的, 可以使用密码组件进行值域扩张(domain extension)的通用技术, 使用$y_0$的抗碰撞哈希值代替$y_0$. 
+在上述构造中, 我们贴合ATDF的安全定义进行更为精细的处理, 使用TCRHF(target collision resistant hash function)代替CRHF. 
+具体的, 令$\mathsf{TCR}: \{0,1\}^n \rightarrow \{0,1\}^m$, 
+使用$\mathsf{TCR}(y_0)$代替$y_0$作为作为公钥选择向量和陷门激活扳机. 
+从而利用$\mathsf{TCR}$压缩的性质将像的重数从$1+n$缩减到$1+m$.
+安全论证仍然成立, 这是因为$\mathsf{TCR}$的抗碰撞性质保证了在计算意义下: 
+\begin{equation*}
+    y_0 \neq y_0^* \Longleftrightarrow \mathsf{TCR}(y_0) \neq \mathsf{TCR}(y_0^*)  
+\end{equation*}   
+
+类似的优化技术同样可以用于LTDF+ABO-TDF $\Rightarrow$ ATDF的构造中: 可以使用$y_0$的TCR哈希值代替$y_0$作为分支值. 
+这样处理的好处是增加分支集合选择的灵活性.      
+\end{remark}
+
+\begin{note}
+LTDF+ABO-TDF $\Rightarrow$ ATDF与CP-TDF $\Rightarrow$ ATDF的构造分别与Naor-Yung范式~\cite{NY-STOC-1990}和
+Dolev-Dwork-Naor范式~\cite{DDN-STOC-1991}在思想上极为相似, 总体思路都是通过冗余的结构来保证求逆谕言机的完美模拟.  
+\end{note}
+
+
+\subsection*{自适应单向陷门关系}
+将ATDF中的确定性函数泛化为可公开高效验证的二元关系可得到自适应单向陷门关系(ATDR, adaptive trapdoor relation).  
+\begin{itemize}
+    \item 确定性函数 $\leadsto$ 概率关系
+    \item 可高效计算 $\leadsto$ 可高效采样 
+\end{itemize}
+
+
+\begin{definition}[单向陷门关系]
+一族单向陷门关系包含以下算法:  
+\begin{itemize}
+	\item $\mathsf{Setup}(\kappa)$: 以安全参数$\kappa$为输入, 输出公开参数$pp = (X, Y, EK, TD, \mathsf{R})$, 
+		其中$\mathsf{R} = \{\mathsf{R}_{ek}: X \times Y\}_{ek \in EK}$是定义在$X \times Y$上由$ek$索引的一族二元单向关系.  
+    
+    \item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 输出公钥$ek$和陷门$td$. 
+
+    \item $\mathsf{Sample}(ek)$: 输出二元关系的一个随机采样$(x, y) \sample \mathsf{R}_{ek}$. 
+
+    % \item $\mathsf{Verify}(ek, x, y)$: 以$ek$和$(x, y)$为输入, 输出``1''当且仅当$(x, y) \in \mathsf{R}_{ek}$. 
+
+    \item $\mathsf{TdInv}(td, y)$: 以$td$和$y \in Y$为输入, 输出$x \in X \cup \bot$. 
+\end{itemize}
+\end{definition}
+
+\begin{trivlist}
+\item \textbf{正确性:} $\forall (ek, td) \leftarrow \mathsf{KeyGen}(pp)$, $\forall (x, y) \leftarrow \mathsf{Sample}(ek)$, 
+	总有$(\mathsf{TdInv}(td, y), y) \in \mathsf{R}_{ek}$. 
+\end{trivlist}
+
+我们可以将函数的单射性质平行推广至二元关系的场景下: 如果$\forall (x_1, y_1), (x_2, y_2) \in \mathsf{R}_{ek}$均有
+$x_1 \neq x_2 \Rightarrow y_1 \neq y_2$, 即$y$惟一确定了$x$, 那么则称二元关系满足单射性. 
+\begin{note}
+$\mathsf{Sample}$是概率算法, 因此当$y_1 \neq y_2$时, 存在$x_1 = x_2$的可能.  
+\end{note}
+
+\begin{definition}[自适应单向性]
+令$\mathsf{R}$是一族二元关系, 定义敌手$\mathcal{A}$的优势如下: 
+\begin{displaymath}
+\Pr \left[
+(x', y^*) \in \mathsf{R}_{ek}: 
+\begin{array}{l}
+	pp \leftarrow \mathsf{Setup}(\kappa);\\ 
+    (ek, td) \leftarrow \mathsf{KeyGen}(pp);\\
+    (x^*, y^*) \leftarrow \mathsf{Sample}(ek);\\
+    x' \leftarrow \mathcal{A}^{\mathcal{O}_\mathsf{inv}}(ek, y^*);\\
+\end{array} 
+\right]
+\end{displaymath}
+其中$\mathcal{O}_\mathsf{inv}$是求逆谕言机, $\forall x \neq x^*$, $\mathcal{O}_\mathsf{inv}(y) = \mathsf{TdInv}(td, y)$. 
+如果任意PPT敌手$\mathcal{A}$在上述安全试验中的优势均为$\mathsf{negl}(\kappa)$, 
+那么则称$\mathsf{R}$是自适应单向的.  
+\end{definition}
+
+
+ATDR是ATDF的弱化, 弱化允许我们可以给出更加高效灵活的设计, 同时不严重降低可用性. 
+在给出ATDR的构造之前, 我们首先回顾基于CP-TDF的ATDF构造. 
+构造的关键之处是将像$y$设计为$y_0$和$(y_1, \dots, y_n)$两部分, 其中$y_0$设定为$f_{\hat{ek}}(x)$, 
+通过单射性完美绑定了$(y_1, \dots, y_n)$, 同时在归约证明中起到了``全除一''陷门触发器的作用: 
+当目标不再是构造确定性单向函数而是概率二元关系时, 我们有着更加灵活的选择: 
+使用一次性签名(OTS, one-time signature)的验证公钥作为$(y_1, \dots, y_n)$的求值选择器和求逆陷门触发器. 
+
+
+\begin{construction}[基于CP-TDF和OTS的ATDR构造]
+\begin{trivlist}
+\item 构造组件: 单射CP-TDF $\mathcal{F}: X \rightarrow Y$和strong OTS (令$|vk| = \{0,1\}^n$, 签名空间为$\Sigma$);
+
+\item 构造目标: ATDR $X \rightarrow VK \times Y^n \times \Sigma$
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$pp_\text{cptdf} \leftarrow \mathcal{F}.\mathsf{Setup}(1^\kappa)$, 
+	$pp_\text{ots} \leftarrow \text{OTS}.\mathsf{Setup}(1^\kappa)$, 输出$pp = (pp_\text{cptdf}, pp_\text{ots})$. 
+
+\item $\mathsf{KeyGen}(pp)$: 以$pp = (pp_\text{cptdf}, pp_\text{ots})$为输入, 
+	对$b \in \{0,1\}$和$i \in [n]$运行$(ek_{i,b}, td_{i,b}) \leftarrow \mathcal{F}.\mathsf{KeyGen}(pp_\text{cptdf})$ 
+	输出$ek = ((ek_{i,0}, ek_{i,1}), \dots, (ek_{n,0}, ek_{n,1}))$, 
+	$td = ((td_{i,0}, td_{i,1}), \dots, (td_{n,0}, td_{n,1}))$.
+
+\item $\mathsf{Sample}(ek)$: 以$ek = (ek_{1,0}, ek_{1,1}) \dots (ek_{n,0}, ek_{n,1})$为输入, 采样如下:
+	\begin{enumerate}  
+		\item 生成$(vk, sk) \leftarrow \text{OTS}.\mathsf{KeyGen}(pp_\text{ots})$; 
+		\item 随机选择$x \in X$, 对$i \in [n]$计算$y_i \leftarrow f_{ek_{i,b_i}}(x)$, 其中$b_i \leftarrow vk[i]$; 
+		\item 计算$\sigma \leftarrow \text{OTS}.\mathsf{Sign}(sk, y_1||\dots||y_n)$;
+	\end{enumerate}
+输出$y = (vk, y_1||\dots||y_n, \sigma)$.
+
+\item $\mathsf{TdInv}(td, y)$: 以$td = (\{(td_{i,0}, td_{i,1})\}_{i \in [n]})$和$y = (vk, y_1||\dots||y_n, \sigma)$为输入, 求逆如下: 
+\begin{enumerate}
+    \item 检查$\text{OTS}.\mathsf{Verify}(vk, y_1||\dots||y_n, \sigma) \stackrel{?}{=}1$, 
+    	如果签名无效则返回$\bot$; 
+
+    \item 对所有$i \in [n]$计算$x_i \leftarrow \mathcal{F}.\mathsf{TdInv}(td_{i,b_i}, y_i)$, 其中$b_i = vk[i]$. 
+    
+    \item 如果对所有$i \in [n]$均有$x_i=x_1$则返回$x_1$, 否则返回$\bot$.
+\end{enumerate}
+\end{itemize}
+\end{trivlist}
+\end{construction}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+    \node [name=vk, textnode] {$|vk| = 3$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=5em, yshift=1.2em] {$ek_{1,0}$\\$td_{1,0}$}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=5em, yshift=-1.2em] {$ek_{1,1}$\\$td_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=10em, yshift=1.2em] {$ek_{2,0}$\\$td_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=10em, yshift=-1.2em] {$ek_{2,1}$\\$td_{2,1}$}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=15em, yshift=1.2em] {$ek_{3,0}$\\$td_{3,0}$}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=15em, yshift=-1.2em] {$ek_{3,1}$\\$td_{3,1}$}; 
+\end{tikzpicture}
+\end{center}
+\caption{$|vk|=3$时的求值公钥和求逆陷门生成图示}
+\end{figure}
+
+
+\begin{figure}[!hbtp]
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=vk, textnode] {$vk$\\$sk$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=5em, yshift=0.8em] {\blue{$ek_{1,0}$}}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=5em, yshift=-0.8em] {$ek_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=10em, yshift=0.8em] {$ek_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=10em, yshift=-0.8em] {\blue{$ek_{2,1}$}}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=15em, yshift=0.8em] {\blue{$ek_{3,0}$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=15em, yshift=-0.8em] {$ek_{3,1}$}; 
+
+    \node [textnode, above of = vk, yshift=2em] {\blue{$010$}};   
+
+    \node [textnode, name=x1, above of = ek10, yshift=2.2em] {$x$};
+    \node [textnode, name=y1, below of = ek11, yshift=-3.2em] {$f_{ek_{1,0}}(x)$\\$y_1$}; 
+    \draw (x1) edge[->] (ek10); 
+    \draw (ek11) edge[->] (y1); 
+
+
+    \node [textnode, name=x2, above of = ek20, yshift=2.2em] {$x$};
+    \node [textnode, name=y2, below of = ek21, yshift=-3.2em] {$f_{ek_{2,1}}(x)$\\$y_2$}; 
+    \draw (x2) edge[->] (ek20); 
+    \draw (ek21) edge[->] (y2); 
+
+    \node [textnode, name=x3, above of = ek30, yshift=2.2em] {$x$};
+    \node [textnode, name=y3, below of = ek31, yshift=-3.2em] {$f_{ek_{3,0}}(x)$\\$y_3$}; 
+    \draw (x3) edge[->] (ek30); 
+    \draw (ek31) edge[->] (y3);    
+
+    \node [textnode, name=signature, below of = vk, yshift=-3em] {$\sigma$}; 
+    \draw (vk) edge[->] (signature);  
+\end{tikzpicture}
+\caption{$vk = 010$时的采样过程}
+\end{minipage}
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=vk, textnode] {$vk$}; 
+
+    \node [name=td10, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=5em, yshift=0.8em] {\blue{$td_{1,0}$}}; 
+    \node [name=td11, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=5em, yshift=-0.8em] {$td_{1,1}$}; 
+
+    \node [name=td20, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=10em, yshift=0.8em] {$td_{2,0}$}; 
+    \node [name=td21, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=10em, yshift=-0.8em] {\blue{$td_{2,1}$}}; 
+
+    \node [name=td30, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=15em, yshift=0.8em] {\blue{$td_{3,0}$}}; 
+    \node [name=td31, rectanglenode, minimum width=5em, minimum height=1.6em, draw, 
+        right of = vk, xshift=15em, yshift=-0.8em] {$td_{3,1}$}; 
+
+    \node [textnode, name=signature, below of = vk, yshift=-3em] {$\sigma$};
+    \node [textnode, name=y1, above of = td10, yshift=2.2em] {$y_1$};
+    \node [textnode, name=y2, above of = td20, yshift=2.2em] {$y_2$};
+    \node [textnode, name=y3, above of = td30, yshift=2.2em] {$y_3$};
+
+    \draw (vk) edge[->] node[left]{$\mathsf{Verify}$} (signature); 
+
+    \node [textnode, above of = vk, yshift=1.5em] {\blue{$010$}};   
+
+    \node [textnode, name=x1, below of = td11, yshift=-4.2em] {$x_1$}; 
+    \draw (y1) edge[->] (td10); 
+    \draw (td11) edge[->] node[left]{$f_{ek_{1,0}}^{-1}$} (x1); 
+    \node [textnode, left of = x1, xshift=-2.5em, yshift=0.5em] {$\stackrel{?}{=}$}; 
+
+    \node [textnode, name=x2, below of = td21, yshift=-4.2em] {$x_2$}; 
+    \draw (y2) edge[->] (td20); 
+    \draw (td21) edge[->] node[left]{$f_{ek_{2,1}}^{-1}$} (x2); 
+    \node [textnode, left of = x2, xshift=-2.5em, yshift=0.5em] {$\stackrel{?}{=}$}; 
+
+    \node [textnode, name=x3, below of = td31, yshift=-4.2em] {$x_3$}; 
+    \draw (y3) edge[->] (td30); 
+    \draw (td31) edge[->] node[left]{$f_{ek_{3,0}}^{-1}$} (x3); 
+    \node [textnode, left of = x3, xshift=-2.5em, yshift=0.5em] {$\stackrel{?}{=}$};    
+\end{tikzpicture}
+\caption{$vk = 010$时的求逆过程}
+\end{minipage}
+\end{figure}
+
+
+构造的正确性显然, 构造的以下三个特性使得归约算法能够成功模拟$\mathcal{O}_\mathsf{inv}$.
+\begin{itemize}
+    \item $\mathsf{R}_{ek}$是单射的并且$y_1||\dots||y_n$是对原像$x$的$n$重冗余求值. 
+    \item $vk$是求值公钥的选择比特向量. 
+    \item 利用OTS的sEUF-CMA安全性, $vk$在计算意义下绑定了$(y_1, \dots, y_n)$.  
+\end{itemize} 
+
+\begin{theorem}
+    如果OTS是sEUF-CMA安全的, 并且$\mathcal{F}$是$\mathcal{U}_n$相关积单向的, 那么上述二元关系的构造满足自适应单向性.
+\end{theorem}
+
+\begin{proof}
+证明通过以下游戏序列完成. 
+\begin{trivlist}
+\item $\text{Game}_0$: 对应真实的ATDR自适应单向性安全试验. 令$y^* = (vk^*, y_1^*||\dots||y_n^*, \sigma^*)$是挑战的像. 
+
+\item $\text{Game}_1$: 与$\text{Game}_0$相同, 唯一的区别是挑战者对于求逆询问$y = (vk^*, y_1||\dots||y_n, \sigma)$直接返回$\bot$. 
+应答的合理性分情况解释如下:
+\begin{enumerate}
+    \item $(y_1||\dots||y_v, \sigma) = (y_1^*||\dots||y_v^*, \sigma^*)$: 禁询点
+    \item $(y_1||\dots||y_v, \sigma) \neq (y_1^*||\dots||y_v^*, \sigma^*)$: 构成OTS的存在性伪造
+\end{enumerate} 
+记敌手发起第二种类型求逆询问的事件为$F$, 那么利用Difference Lemma可以证明$|\Pr[S_1] - \Pr[S_0]| \leq \Pr[F]$, 
+而基于OTS的sEUF-CMA安全性, 可以推出$\Pr[F] \leq \mathsf{negl}(\kappa)$, 从而$|\Pr[S_1] - \Pr[S_0]| \leq \mathsf{negl}(\kappa)$. 
+\end{trivlist}
+
+\begin{claim}
+如果$\mathcal{F}$是$\mathcal{U}_t$相关积安全的, 那么对于任意的PPT敌手均有$\Pr[S_1] = \mathsf{negl}(\kappa)$. 
+\end{claim}
+
+\begin{proof}
+论证通过单一归约完成. 假设存在PPT的敌手$\mathcal{A}$在$\text{Game}_1$中的优势不可忽略, 
+那么尝试构造PPT算法$\mathcal{B}$, 通过黑盒调用$\mathcal{A}$的能力打破CP-TDF相对$\mathcal{U}_n$的相关积单向性. 
+$\mathcal{B}$的CP-TDF挑战是公开参数$pp_\text{cptdf}$, 
+求值公钥$(ek_1, \dots, ek_n)$和像$(y_1^*, \dots, y_n^*)$, 
+其中$y_i^* \leftarrow f_{ek_i}(x^*)$, $x^* \sample X$. 
+$\mathcal{B}$并不知晓$x^*$, 其攻击目标是求解$x^*$. 
+
+\begin{figure}[!htbp]
+\begin{center}
+\begin{tikzpicture}
+\node [textnode, name=vk, color=red] {$010$}; 
+
+\node [textnode, name=ek1, right of = ek0, xshift=5em] {$ek_1$}; 
+\node [textnode, name=x1, above of = ek1, yshift=2em, color=gray] {$x^*$}; 
+\node [textnode, name=y1, below of = ek1, yshift=-2em] {$y_1^*$};
+\draw (x1) edge[->] (ek1); 
+\draw (ek1) edge[->] (y1); 
+
+\node [textnode, name=ek2, right of = ek1, xshift=5em] {$ek_2$}; 
+\node [textnode, name=x2, above of = ek2, yshift=2em, color=gray] {$x^*$}; 
+\node [textnode, name=y2, below of = ek2, yshift=-2em] {$y_2^*$};
+\draw (x2) edge[->] (ek2); 
+\draw (ek2) edge[->] (y2); 
+
+\node [textnode, name=ek3, right of = ek2, xshift=5em] {$ek_3$}; 
+\node [textnode, name=x3, above of = ek3, yshift=2em, color=gray] {$x^*$}; 
+\node [textnode, name=y3, below of = ek3, yshift=-2em] {$y_3^*$};
+\draw (x3) edge[->] (ek3); 
+\draw (ek3) edge[->] (y3); 
+\end{tikzpicture}
+\end{center}
+\caption{$n=3$时$\mathcal{B}$的CP-TDF挑战实例}
+\end{figure}
+ 
+$\mathcal{B}$(扮演挑战者)与$\mathcal{A}$在$\text{Game}_1$中交互如下: 
+\begin{itemize}
+\item 初始化: $\mathcal{B}$运行$pp_\text{ots} \leftarrow \text{OTS}.\mathsf{Setup}(1^\kappa)$, 
+	生成$(vk^*, sk^*) \leftarrow \text{OTS}.\mathsf{KeyGen}(pp_\text{ots})$. 
+   	令$b_i^*$是$vk^*$的第$i$比特, $\mathcal{B}$进行如下操作: 
+	\begin{enumerate}
+    	\item 对$i \in [n]$设定$\red{ek_{i,b_i^*}} := ek_i$.
+    	\item 对$i \in [v]$计算$(\blue{ek_{i, 1-b_i^*}, td_{i,1-b_i^*}}) \leftarrow \mathcal{F}.\mathsf{KeyGen}(pp_\text{cptdf})$.
+	\end{enumerate}
+	$\mathcal{B}$发送$pp = (pp_\text{cptdf}, pp_\text{ots})$和$ek = (ek_{1,0}, ek_{1,1}, \dots, ek_{n,0}, ek_{n,1})$给$\mathcal{A}$. 
+
+\begin{figure}[!htbp]
+\begin{center}
+\begin{tikzpicture}
+    \node [name=vk, textnode] {\red{$vk^*$}\\\red{$sk^*$}}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=5em, yshift=1.2em] {\red{$ek_{1,0}$}\\\red{$\bot$}}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=10em, yshift=-1.2em] {\red{$ek_{2,1}$}\\\red{$\bot$}}; 
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=15em, yshift=1.2em] {\red{$ek_{3,0}$}\\\red{$\bot$}}; 
+
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=5em, yshift=-1.2em] {\blue{$ek_{1,1}$}\\\blue{$td_{1,1}$}}; 
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=10em, yshift=1.2em] {\blue{$ek_{2,0}$}\\\blue{$td_{2,0}$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=15em, yshift=-1.2em] {\blue{$ek_{3,1}$}\\\blue{$td_{3,1}$}}; 
+\end{tikzpicture}
+\end{center}
+\caption{$|vk|=010$时归约算法设定求值公钥和求逆陷门的过程图示}
+\end{figure}
+
+\item 挑战: $\mathcal{B}$计算$\sigma^* \leftarrow \text{OTS}.\mathsf{Sign}(sk^*, (y_1^*, \cdots, y_n^*))$, 
+	发送$(vk^*, y_1^*, \cdots, y_n^*, \sigma^*)$给$\mathcal{A}$作为挑战. 
+
+\item 求逆询问: 对于求逆询问$y = (vk, y_1||\dots||y_v, \sigma)$, $\mathcal{B}$应答如下:   
+\begin{enumerate}
+    \item $vk = vk^*$: 直接返回$\bot$. 
+
+    \item $vk \neq vk^*$: 必然存在$\exists j \in [n]$ s.t. $b_j \neq b_j^*$且$y_j = f_{{ek_j, b_j}}(x)$, 其中$x$是未知原像. 
+    此时, $\mathcal{B}$拥有关于$ek_{j,b_j}$的求逆陷门$td_{j,b_j}$, $\mathcal{B}$可计算$x \leftarrow f_{ek_j, b_j}^{-1}(y_j)$
+	\begin{itemize}
+    	\item 如果$y_i = f_{ek_{i,b_i}}(x)$对所有的$i \neq j$也均成立, 那么返回$x$, 否则返回$\bot$. 
+	\end{itemize}
+\end{enumerate} 
+由$\mathcal{F}$的单射性可知, $\mathcal{B}$完美的模拟了$\text{Game}_1$中的$\mathcal{O}_\mathsf{inv}$应答. 
+
+\begin{figure}[!htbp]
+\begin{center}
+\begin{tikzpicture}
+    \node [name=vk, textnode] {\red{$vk$}}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=5em, yshift=1.2em] {\red{$ek_{1,0}$}\\\red{$\bot$}};
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=5em, yshift=-1.2em] {\blue{$ek_{1,1}$}\\\blue{$td_{1,1}$}}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=10em, yshift=1.2em] {\blue{$ek_{2,0}$}\\\blue{$td_{2,0}$}};  
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=10em, yshift=-1.2em] {\red{$ek_{2,1}$}\\\red{$\bot$}}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=15em, yshift=1.2em] {\red{$ek_{3,0}$}\\\red{$\bot$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = vk, xshift=15em, yshift=-1.2em] {\blue{$ek_{3,1}$}\\\blue{$td_{3,1}$}}; 
+
+    \node [name=x1, above of = ek10, yshift=1.3em] {\gray{$x$}};
+    \node [name=y1, below of = ek11, yshift=-1.3em] {\gray{$y_1$}};
+    \draw (x1) edge[->] (ek10);
+    \draw (ek11) edge[->] (y1); 
+
+    \node [name=x2, above of = ek20, yshift=1.3em] {\gray{$x$}};
+    \node [name=y2, below of = ek21, yshift=-1.3em] {\gray{$y_2$}};
+
+    \node [name=x3, above of = ek30, yshift=1.3em] {\gray{$x$}};
+    \node [name=y3, below of = ek31, yshift=-1.3em] {\gray{$y_3$}};
+    \draw (x3) edge[->] (ek30);
+    \draw (ek31) edge[->] (y3); 
+
+    \draw (x2) edge[->] (ek20);
+    \draw (ek21) edge[->] (y2); 
+
+    \node [name=signature, below of = vk, yshift=-2.5em] {$\sigma$};
+    \draw (vk) edge[->] node[left, yshift=1em] {$\mathsf{Verify}$} (signature); 
+
+    \node [rectanglenode, minimum width=5em, minimum height=2.4em, draw, 
+        right of = ekhat, xshift=10em, yshift=1.2em, color=blue, thick] {}; 
+    \draw (y2) edge[->, thick, color=blue] (ek21);
+    \draw (ek20) edge[->, thick, color=blue] (x2); 
+
+    \node [textnode, left of = y0, xshift=-1em, yshift=1.5em] {$\stackrel{?}{=}$}; 
+    \node [textnode, left of = y1, xshift=-1em, yshift=1.5em] {$\stackrel{?}{=}$}; 
+    \node [textnode, left of = y3, xshift=-1em, yshift=1.5em] {$\stackrel{?}{=}$}; 
+\end{tikzpicture}
+\end{center}
+\caption{$vk=010$时归约算法求逆过程图示}
+\end{figure}
+
+\item 求解: $\mathcal{A}$输出$x$作为$\text{Game}_1$中ATDF的挑战应答, $\mathcal{B}$将$x$转发给CP-TDF的挑战者. 
+\end{itemize}
+容易验证, $\mathcal{B}$的优势与$\mathcal{A}$的优势相同. 断言得证. \qed
+\end{proof}
+综上, 定理得证! \qed
+\end{proof}
+
+\section*{小结}
+Rosen和Regev~\cite{RS-TCC-2009}证明了CP-TDF与LTDF之间存在黑盒分离, Kiltz、Mohassel和O'Neill~\cite{KMO-EUROCRYPT-2010}证明了ATDF与CP-TDF之间也存在黑盒分离. 
+因此, 在黑盒的意义下, ATDF和ATDR是目前单向函数类中构造CCA-KEM所需的最弱组件. 
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}
+    \node [name=TDF, roundnode, draw=none, fill=blue!20, minimum width=4em] {TDF};
+    \node [name=CPAKEM, textnode, below of = TDF, yshift=-3em] {CPA-KEM}; 
+    \draw (TDF) edge[->] (CPAKEM);
+
+    \node [name=ATDF, roundnode, right of = TDF, xshift=8em, draw=none, fill=blue!40, minimum width=4em] {ATDF};
+    \node [name=CCAKEM, textnode, below of = ATDF, yshift=-3em] {CCA-KEM}; 
+    \draw (ATDF) edge[->] (CCAKEM);
+    \draw (ATDF) edge[->] (TDF);
+
+    \node [name=CPTDF, roundnode, above of = ATDF, yshift=4em, draw=none, fill=green!20] {CP-TDF};
+    \node [name=LTDF, roundnode, above of = CPTDF, yshift=4em, draw=none, fill=orange!20, minimum width=4em] {LTDF};
+    \draw (LTDF) edge[->, bend left=90] (CCAKEM);
+    \draw (CPTDF) edge[->, bend left=90] (CCAKEM);
+    \draw (ATDF) edge[color=red, ->, bend right=-30] node {$\times$} (CPTDF);
+    \draw (CPTDF) edge[color=red, ->, bend right=-30] node {$\times$} (LTDF);
+    \draw (LTDF) edge[->, thin] (CPTDF);
+    \draw (CPTDF) edge[->, thin] (ATDF);
+
+    \node [name=LWE, above of = LTDF, xshift=-6em, yshift=3em, textnode, color=blue] {LWE};
+    \node [name=DDH, above of = LTDF, xshift=-2em, yshift=3em, textnode, color=blue] {DDH};
+    \node [name=QR, above of = LTDF, xshift=2em, yshift=3em, textnode, color=blue] {QR};
+    \node [name=DCR, above of = LTDF, xshift=6em, yshift=3em, textnode, color=blue] {DCR};
+
+    \draw (LWE) edge[->] (LTDF);
+    \draw (DDH) edge[->] (LTDF);
+    \draw (QR) edge[->] (LTDF);
+    \draw (DCR) edge[->] (LTDF);
+\end{tikzpicture}
+\end{center}
+\caption{各类单向函数之间的蕴含关系}
+\end{figure}
+
+% \begin{frame}{How to expand the DEM key?}
+% \uncover<1->{
+% \begin{trivlist}
+%     \item $K = \text{Img}(\mathsf{hc})$. $\mathsf{GL}: X \rightarrow \{0,1\}$ is generic but yields 1-bit key. 
+% \end{trivlist}
+
+% \begin{center}
+%     \emph{How to expand?}
+% \end{center}
+% }
+% \vspace{-1em}
+
+% \begin{itemize}
+% \uncover<2->{
+% \item multiple sampling
+%     \begin{center}
+%         $x_i \sample X$, $c_i \leftarrow f(x_i)$, $k_i \leftarrow \mathsf{hc}(x_i)$
+%     \end{center}
+%     \begin{remarkblock}
+%     \begin{center}
+%         linear expansion of ciphertext and easily malleable $\leadsto$ vulnerable to CCA attack
+%     \end{center}
+%     \end{remarkblock}
+% }
+
+% \uncover<3->{
+% \item $\mathsf{hc}(\cdot)$ with multi-bits outputs
+%     \begin{itemize}
+%         \item rely on decisional assumptions
+%         \item iterating $f$ when $f$ is permutation
+%         \item differing-input indistinguishability obfuscation
+%     \end{itemize}
+%     \begin{center}
+%         \red{rely on stronger assumption}
+%     \end{center}
+% }
+% \end{itemize}
+% \end{frame}
+
+
+
+
+
+
+
