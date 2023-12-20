@@ -11,8 +11,8 @@
 \begin{figure}[!hbtp]
 \begin{center}
 \begin{tikzpicture}
-    \node [name=C, textnode] {\includegraphics[width=1.2in]{插图/code.png}};
-    \node [name=OC, textnode, right of=C, xshift=16em] {\includegraphics[width=1.2in]{插图/obf.png}};
+    \node [name=C, textnode] {\includegraphics[width=1.2in]{figure/code.png}};
+    \node [name=OC, textnode, right of=C, xshift=16em] {\includegraphics[width=1.2in]{figure/obf.png}};
     \draw (C) edge[->] node[above] {$\mathcal{O}$} (OC);
 \end{tikzpicture}
 \end{center}
@@ -289,9 +289,9 @@ Sahai和Waters~\cite{SW-STOC-2014}引入了受限伪随机函数的特例——�
 \begin{figure}[!hbtp]
 \begin{center}
 \begin{tikzpicture}
-    \node [name=adv, textnode] {\includegraphics[width=0.5in]{插图/adversary.png}};
+    \node [name=adv, textnode] {\includegraphics[width=0.5in]{figure/adversary.png}};
     \node [name=challenger, textnode, right of = adv, xshift=18em] 
-        {\includegraphics[width=0.5in]{插图/challenger.png}}; 
+        {\includegraphics[width=0.5in]{figure/challenger.png}}; 
 
     \draw ($(adv.east)+(0em, 0.5em)$) edge[->] node[above] {$x^*$} ($(challenger.west)+(0em, 0.5em)$);
 
@@ -326,9 +326,9 @@ Sahai和Waters~\cite{SW-STOC-2014}引入了受限伪随机函数的特例——�
 \begin{figure}[!hbtp]
 \begin{center}
 \begin{tikzpicture}
-    \node [name=adv, textnode] {\includegraphics[width=0.5in]{插图/adversary.png}};
+    \node [name=adv, textnode] {\includegraphics[width=0.5in]{figure/adversary.png}};
     \node [name=challenger, textnode, right of = adv, xshift=18em] 
-        {\includegraphics[width=0.5in]{插图/challenger.png}}; 
+        {\includegraphics[width=0.5in]{figure/challenger.png}}; 
 
     \draw ($(adv.east)+(0em, 0.5em)$) edge[<-] node[above] {$pp, x^*, k_{x^*}, y_\beta$} ($(challenger.west)+(0em, 0.5em)$);
 

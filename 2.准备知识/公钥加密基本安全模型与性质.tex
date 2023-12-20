@@ -39,12 +39,12 @@ $\mathsf{KeyGen}(pp) \rightarrow (pk, sk)$和$\mathsf{Encrypt}(pk, m) \rightarro
 	\node [name=Setup, textnode] {$\mathsf{Setup}(1^\kappa) \rightarrow pp$}; 
 
     \node [name=Alice, textnode, below of = Setup, xshift=-8em, yshift=-6em] 
-    	{\includegraphics[width=0.5in]{插图/alice.png}}; 
+    	{\includegraphics[width=0.5in]{figure/alice.png}}; 
     \node [textnode, above of=Alice, yshift=3em] {Alice};
     \node [textnode, name=kA, below of=Alice, yshift=-3em] {$\mathsf{KeyGen}(pp) \rightarrow (pk_a, sk_a)$};
 
     \node [name=Bob, textnode, below of = Setup, xshift=8em, yshift=-6em] 
-    	{\includegraphics[width=0.5in]{插图/bob.png}}; 
+    	{\includegraphics[width=0.5in]{figure/bob.png}}; 
     \node [textnode, above of=Bob, yshift=3em] {Bob};
     \node [textnode, name=kB, below of=Bob, yshift=-3em] {$\mathsf{KeyGen}(pp) \rightarrow (pk_b, sk_b)$};
 
