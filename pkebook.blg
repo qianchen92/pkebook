@@ -1,0 +1,155 @@
+This is BibTeX, Version 0.99d (TeX Live 2022)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: pkebook.aux
+The style file: biblatex.bst
+A level-1 auxiliary file: 前言.aux
+A level-1 auxiliary file: 1.概述/背景与起源.aux
+A level-1 auxiliary file: 1.概述/发展历程简介.aux
+A level-1 auxiliary file: 2.准备知识/符号与记号.aux
+A level-1 auxiliary file: 2.准备知识/可证明安全方法.aux
+A level-1 auxiliary file: 2.准备知识/困难问题.aux
+A level-1 auxiliary file: 2.准备知识/复杂性理论.aux
+A level-1 auxiliary file: 2.准备知识/信息论工具.aux
+A level-1 auxiliary file: 2.准备知识/公钥加密基本安全模型与性质.aux
+A level-1 auxiliary file: 3.经典方案/基于整数分解类问题的经典方案.aux
+A level-1 auxiliary file: 3.经典方案/基于离散对数类问题的经典方案.aux
+A level-1 auxiliary file: 3.经典方案/基于格问题的经典方案.aux
+A level-1 auxiliary file: 4.通用构造方法/单向陷门函数类.aux
+A level-1 auxiliary file: 4.通用构造方法/哈希证明系统类.aux
+A level-1 auxiliary file: 4.通用构造方法/可提取哈希证明系统类.aux
+A level-1 auxiliary file: 4.通用构造方法/程序混淆类.aux
+A level-1 auxiliary file: 4.通用构造方法/可公开求值伪随机函数.aux
+A level-1 auxiliary file: 5.安全性增强/抗泄漏安全.aux
+A level-1 auxiliary file: 5.安全性增强/抗篡改安全.aux
+A level-1 auxiliary file: 5.安全性增强/消息依赖密钥安全.aux
+A level-1 auxiliary file: 6.功能性扩展/确定性公钥加密.aux
+A level-1 auxiliary file: 6.功能性扩展/可搜索公钥加密.aux
+A level-1 auxiliary file: 7.标准化与工程实践/标准化与工程实践.aux
+A level-1 auxiliary file: 后记.aux
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=200001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated field_info (elt_size=4) to 28240 items from 5000.
+Database file #1: pkebook-blx.bib
+Database file #2: mycrypto.bib
+Repeated entry---line 237 of file mycrypto.bib
+ : @misc{SM2
+ :          ,
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 724 of file mycrypto.bib
+ :  
+ :  author = {Victor Shoup},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Repeated entry---line 3582 of file mycrypto.bib
+ : @inproceedings{Paillier-EUROCRYPT-1999
+ :                                       ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 6646 of file mycrypto.bib
+ : @inproceedings{Hofheinz-EUROCRYPT-2013
+ :                                       ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 6844 of file mycrypto.bib
+ : @inproceedings{Hofheinz-EUROCRYPT-2012
+ :                                       ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 6962 of file mycrypto.bib
+ : @inproceedings{Qin-PKC-2015
+ :                            ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 9921 of file mycrypto.bib
+ : @incollection{Halevi-Tutorial-2017
+ :                                   ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 10188 of file mycrypto.bib
+ : @inproceedings{AC-CCS-2017
+ :                           ,
+I'm skipping whatever remains of this entry
+Warning--I didn't find a database entry for "zhihu-essay"
+Warning--I didn't find a database entry for "PW2008"
+Warning--I didn't find a database entry for "ChenQZDC22"
+Warning--I didn't find a database entry for "FaustMVW14"
+Warning--I didn't find a database entry for "BRS2002"
+Warning--I didn't find a database entry for "BHHO2008"
+Warning--I didn't find a database entry for "ACPS2009"
+Warning--I didn't find a database entry for "BG2010"
+Warning--I didn't find a database entry for "MTY2011-EUROCRYPT"
+Warning--I didn't find a database entry for "CCS2009"
+Warning--I didn't find a database entry for "Hofheinz2013-EUROCRYPT"
+Warning--I didn't find a database entry for "CGH2012"
+Warning--I didn't find a database entry for "LLJ2015"
+Warning--I didn't find a database entry for "CramerS03"
+Warning--I didn't find a database entry for "BBO2007"
+Warning--I didn't find a database entry for "BFO2008"
+Warning--I didn't find a database entry for "FOR2012"
+Warning--I didn't find a database entry for "XXZ2012"
+Warning--I didn't find a database entry for "BS2011"
+Warning--I didn't find a database entry for "BrakerskiG10"
+Warning--I didn't find a database entry for "BonehHHO08"
+Warning--I didn't find a database entry for "BDOP2004"
+Warning--I didn't find a database entry for "AbdallaBCKKLMNPS08"
+Warning--I didn't find a database entry for "Abdalla2005"
+Warning--I didn't find a database entry for "BSS2006"
+Warning--I didn't find a database entry for "ZI2007"
+Warning--I didn't find a database entry for "BSS2008"
+Warning--I didn't find a database entry for "RPSL2009"
+Warning--I didn't find a database entry for "table:ch6-PAEKS-CI"
+Warning--I didn't find a database entry for "AbdallaBR01"
+Warning--I didn't find a database entry for "QinCZZ21"
+Biblatex version: 3.17
+Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+You've used 135 entries,
+            6399 wiz_defined-function locations,
+            2202 strings with 37484 characters,
+and the built_in function-call counts, 1053334 in all, are:
+= -- 82438
+> -- 14840
+< -- 4685
++ -- 31718
+- -- 5877
+* -- 75518
+:= -- 120145
+add.period$ -- 0
+call.type$ -- 135
+change.case$ -- 2337
+chr.to.int$ -- 44
+cite$ -- 296
+duplicate$ -- 118898
+empty$ -- 91299
+format.name$ -- 9672
+if$ -- 210963
+int.to.chr$ -- 0
+int.to.str$ -- 357
+missing$ -- 0
+newline$ -- 4708
+num.names$ -- 6244
+pop$ -- 49635
+preamble$ -- 1
+purify$ -- 3085
+quote$ -- 0
+skip$ -- 24597
+stack$ -- 0
+substring$ -- 144605
+swap$ -- 21874
+text.length$ -- 4099
+text.prefix$ -- 191
+top$ -- 1
+type$ -- 4577
+warning$ -- 0
+while$ -- 15921
+width$ -- 0
+write$ -- 4574
+(There were 8 error messages)
