@@ -1,7 +1,7 @@
 # 目录架构说明
 * pkebook.tex是书的封面及目录文件, 包含指向各章节的入口
 * elegantbook.cls是本书使用的ElegantBook模板的样式文件
-* mybooksetting-cn.tex是样式文件, 包含了需要包含的头文件和一些命令的缩写, 可以根据需要编辑
+* customcommand.tex包含了需要包含的头文件和一些命令的缩写, 可以根据需要编辑
 * mycrypto.bib是参考文献文件, 在添加之前可以查查是否已有, 条目命名格式是姓氏首字母缩写+发表期刊会议+年份
 * figure: 存放所有插图的文件夹
 
