@@ -1,0 +1,274 @@
+\section{可证明安全方法}
+
+\begin{quote}
+Talk is cheap. Show me the code.\\
+\hspace*{\fill} --- Linus Torvalds 
+\end{quote}
+
+长久以来, 密码方案的安全性分析没有系统标准的方式, 传统方式由密码分析者通过尝试各类攻击来检验密码方案的安全性. 
+容易看出, 传统的分析方式存在以下局限: 
+(1) 分析结果严重依赖分析者的个人能力(如细致的观察和敏锐的直觉); (2) 分析者难以穷尽所有可能的攻击. 
+因此, 绝大多数古典密码陷入``设计—攻破—修补—攻破''的循环往复怪圈, 难以称之为真正的科学. 
+
+直到上世纪八十年代, Goldwasser和Micali~\cite{GM-STOC-1982}借鉴计算复杂性理论的归约技术, 开创了可证明安全方法. 
+从此, 密码方案的安全性分析手段由反向攻击转为正向证明, 安全性由``声称安全''变为``可证安全'', 密码学也从此由艺术蝶变为真正的科学. 
+
+简言之, 可证明安全方法的核心是以下三要素组成: 
+\begin{itemize}
+\item \textbf{精确的安全模型:} 通常由攻击者和挑战者之间的交互式游戏进行刻画, 如图~\ref{figure:security-model}所示, 包括: 
+\begin{itemize}
+	\item 敌手的计算能力: 常见的有概率多项式时间和指数时间
+	\item 敌手能够获取的信息, 包括:
+	\begin{enumerate}
+		\item 固定信息: 如方案的公开参数等公开信息
+		\item 非固定信息: 在攻击过程中获得的信息, 形式化为访问相应谕言机获得的输出
+	\end{enumerate}
+    \item 敌手的攻击效果: 以加密方案为例, 敌手恢复密钥和恢复明文是不同的攻击效果
+\end{itemize}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+\node[textnode, name=A] {敌手$\mathcal{A}$}; 
+\node[rectanglenode, name=scheme, right of = A, xshift=20em, minimum height=3em, minimum width=6em, fill=blue!30] 
+	{密码方案$\mathcal{E}$};  
+\node[textnode, name=C, right of=scheme, xshift=6em] {挑战者$\mathcal{CH}$}; 
+
+\draw ($(A.east)+(0em, 2em)$) edge[->] ($(scheme.west)+(0em, 2em)$);
+\draw ($(A.east)+(0em, 0em)$) edge[densely dashed] ($(scheme.west)+(0em, 0em)$);
+\draw ($(A.east)+(0em, -2em)$) edge[<-] ($(scheme.west)+(0em, -2em)$); 
+
+\node[textnode, name=Adv, below of = A, xshift= 10em, yshift=-6em] {$\mathsf{Adv}_\mathcal{A}(\kappa) = |\Pr[S] - \Pr[T]|$}; 
+\end{tikzpicture}
+\end{center}
+\caption{安全模型}\label{figure:security-model}
+\end{figure}
+令事件$S$表示敌手攻击成功这一事件, $t$表示某固定的基准优势(如区分类游戏定义为$1/2$, 搜索性游戏定义为$0$), 
+定义$\mathcal{A}$的优势函数为$\mathsf{Adv}_\mathcal{A}(\kappa) = |\Pr[S] - t|$, 
+其中$S$所在的概率空间由$\mathcal{A}$和$\mathcal{CH}$的随机带确定. 
+如果对于所有PPT敌手$\mathcal{A}$, $\mathsf{Adv}_\mathcal{A}(\kappa)$均是关于安全参数$\kappa$的可忽略函数, 
+则称密码方案$\mathcal{E}$在既定的安全模型下是安全的. 
+
+\item \textbf{清晰的困难性假设}
+\item \textbf{严格的归约式证明:} 通过反证式论证将方案的安全性归结到困难性假设. 
+\end{itemize}  
+
+图~\ref{figure:reduction-proof}是归约式证明的交换图表. 归约式证明的步骤如下: 
+\begin{enumerate}
+\item 假设存在PPT的敌手$\mathcal{A}$在既定安全模型下针对密码方案$\mathcal{E}$具有不可忽略的优势$\epsilon_1(\kappa)$; 
+\item 利用$\mathcal{A}$的能力, 构建PPT的算法$\mathcal{B}$以不可忽略的优势$\epsilon_2(\kappa)$打破困难问题. 
+	这里$\mathcal{R}$通常以扮演敌手$\mathcal{A}$的挑战者的方式调用$\mathcal{A}$, 因此也常称$\mathcal{R}$是模拟算法或归约算法. 
+	$\mathcal{R}$调用敌手$\mathcal{A}$的方式又可细分为两类: 
+	\begin{itemize}
+		\item 黑盒方式: $\mathcal{R}$以黑盒的方式调用$\mathcal{A}$, 从算法的角度理解就是$\mathcal{R}$以$\mathcal{A}$作为子程序调用. 
+			黑盒方式实质上证明了比所需更强的结果, 即$\exists \mathcal{R} ~ \forall \mathcal{A}$. 
+			此类证明最为常见, 被称为黑盒归约(black-box reduction)或者一致归约(universal reduction). 
+
+		\item 非黑盒方式: $\mathcal{R}$以非黑盒的方式调用$\mathcal{A}$, 充分利用了$\mathcal{A}$的个体信息, 如算法结构、运行时间等. 
+			这类证明是完全契合可证明安全思想的, 即$\forall \mathcal{A} ~ \exists \mathcal{R}$. 
+			此类证明相对少见, 被称为个体归约(individual reduction)~\cite{Deng-EUROCRYPT-2017}, 常可以突破黑盒归约下的安全性下界.  
+	\end{itemize}
+\end{enumerate}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+\node[textnode, name=A] {$\mathcal{A}(t_1, \epsilon_1)$}; 
+\node[rectanglenode, name=scheme, right of = A, xshift=20em, minimum height=3em, minimum width=6em, fill=blue!30] {密码方案};  
+\draw (A) edge[->] node[midway, fill=white] {攻破} (scheme); 
+
+\node[textnode, name=R, below of = A, yshift=-6em] {$\mathcal{R}(t_2, \epsilon_2)$};
+\node[rectanglenode, name=assumption, right of = R, xshift=20em, minimum height=3em, minimum width=6em, 
+	fill=gray!30] {困难性假设};    
+\draw (R) edge[->] node[midway, fill=white] {攻破} (assumption); 
+
+\draw (assumption) edge[->] (scheme); 
+\draw (A) edge[->] (R);
+\end{tikzpicture}
+\end{center}
+\caption{归约式证明的交换图表}\label{figure:reduction-proof}
+\end{figure}
+
+上述两步归约式论证的逻辑是: 构造出的算法$\mathcal{R}$与困难假设相矛盾, 因此不存在算法$\mathcal{R}$, 进而得出$\mathcal{A}$不存在的结论. 
+
+\begin{trivlist}
+\item \textbf{安全性强弱.} 在明确可证明安全方法后, 密码方案的强弱可以根据三要素的强弱定性分析: 
+\begin{itemize}
+	\item 安全模型的强弱: 敌手的计算能力越强大、获得的信息越多、攻击的效果越弱, 则所确定的安全模型越强, 反之越弱. 
+	\item 困难假设的强弱: 通常搜索类假设强于判定类假设, 平均情形(average-case)假设强于最坏情形(worst-case)假设. 
+	\item 归约质量的优劣: 笼统的说, $(t_2, \epsilon_2)$越接近$(t_1, \epsilon_1)$, 归约的质量越高. 
+		在归约算法的运行时间和优势函数两个指标中, 通常更关注后者. 定义归约松紧因子$r = \epsilon_2/\epsilon_1$, 
+		如果$r$是一个常数, 称归约是紧的; 如果$r$是一个可察觉的函数(noticeable function), 称归约多项式松弛的, 归约有效; 
+		如果$r$是一个可忽略函数, 称归约超多项式松弛, 归约无效.  
+\end{itemize}
+\end{trivlist}
+
+\begin{remark}
+阿基米德曾说过:``给我一个支点, 我能撬起地球!'' 可证明安全方法与这句名言有共通之处, 
+地球可以理解为待证明方案的安全性, 支点和杠杆可以理解为归约式证明方法, 而施加在杠杆上的力可以理解为困难性假设. 
+如果支点在困难性假设和方案安全性正中, 代表归约最优, 方案的安全性可以紧归约到假设困难性上; 如果力臂过短, 则代表归约松弛, 困难性假设无法有意义的保证密码方案的安全性.  
+\end{remark}
+
+\subsection{如何书写安全性证明}
+很多初学者对方案/协议的安全性有隐约的直觉, 但是很难写出严格精确的证明. 密码学中的安全性证明如同吉他中的大横按, 
+是横亘在所有初学者面前的一个障碍. 
+
+本小节将以极为精炼的方式归纳总结安全性证明的构建方式. 
+给出安全性证明大致有两种外在形式, 分别是单一归约和游戏序列.
+
+单一归约适用于密码方案/协议仅依赖单一困难问题的简单形式. 
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+    \node [textnode, name=assumption] {$\mathcal{P}$};
+    \node [textnode, name=scheme, right of = assumption, xshift=12em] {$\mathcal{E}$}; 
+    \node [textnode, name=implies, right of = assumption, xshift=6em] {$\Longrightarrow$}; 
+
+    \node [textnode, name=A, below of = scheme, yshift=-6em] {$\mathcal{A}$}; 
+    \draw (A) edge[->] (scheme); 
+
+    \node [textnode, name=B, below of = assumption, yshift=-6em] {$\mathcal{B}$}; 
+    \draw (B) edge[->] (assumption);
+    \node [textnode, below of = implies, yshift=-6em] {$\Longleftarrow$};  
+\end{tikzpicture}
+\end{center}
+\caption{单一归约}\label{figure:solo-reduction}
+\end{figure}
+拟基于惟一困难假设$\mathcal{P}$证明密码方案/协议$\mathcal{E}$的安全性时, 
+证明的方式是构建如图~\ref{figure:solo-reduction}所示的交换图表, 
+即首先假设存在PPT的敌手$\mathcal{A}$打破$\mathcal{E}$的安全性, 
+再利用$\mathcal{A}$构造算法$\mathcal{B}$打破困难假设$\mathcal{P}$. 
+构造$\mathcal{B}$的方法通常是令$\mathcal{B}$在方案$\mathcal{E}$的安全游戏中模拟挑战者的角色, 
+模拟的方式是将困难问题的实例直接嵌入到安全游戏的参数中. 
+此时, 基于$\mathcal{P}$的困难性便可得到任意PPT敌手针对$\mathcal{E}$的优势函数
+$\AdvA^\mathcal{E}(\kappa) \leq \mathsf{negl}(\kappa)$的结论.  
+
+\begin{remark}
+需要特别指出, 单一归约的适用范围有限, 仅适用于困难问题单一且能够直接嵌入安全游戏的场景, 
+这就要求安全游戏的目标和困难问题的类型必须相同, 比如同是计算性或者判定性. 
+有时, 在困难问题单一的情况下, 我们也需按照下面介绍的游戏序列方式组织证明. 如章节中的ElGamal PKE的证明. 
+\magenta{add ref here}  
+\end{remark}
+ 
+对于基于多个困难问题的密码方案/协议, 即待证明的定理形如$\mathcal{P}_1+\cdots+\mathcal{P}_n \Rightarrow \mathcal{E}$, 
+就难以使用单一归约进行证明了.  
+Shoup~\cite{Shoup-ePrint-2004}针对该情形, 系统地提出了``游戏序列''的方式组织证明. 游戏序列的证明框架如下: 
+
+\begin{enumerate}
+\item 引入一系列游戏, 记为$\text{Game}_0, \dots, \text{Game}_m$. 
+    敌手在$\text{Game}_i$中成功的事件记作$S_i$, 优势基准为$t$, 则敌手在$\text{Game}_i$的优势函数为: 
+    \begin{equation*}
+        \AdvA^{\text{Game}_i} = |\Pr[S_i] - t| 
+    \end{equation*}
+    通常情况下$\text{Game}_0$刻画原始真实的安全游戏, 
+    $\text{Game}_m$刻画最终游戏且$\AdvA^{\text{Game}_m} = |\Pr[S_m]-t| = \mathsf{negl}(\kappa)$, 
+    即敌手在$\text{Game}_m$中的优势函数是可忽略的. 
+
+\item 证明对于所有的$i \in [m]$均有$|\Pr[S_i] - \Pr[S_{i-1}]| \leq \mathsf{negl}(\kappa)$; 
+
+\item 通过混合论证(hybrid argument)得出$\AdvA^{\text{Game}_m} = |\Pr[S_0]-t| = \mathsf{negl}(\kappa)$的结论.   
+\end{enumerate}
+
+对于同一密码方案/协议, 在使用游戏序列进行证明时存在多种可能得游戏序列组织方式. 
+尽管在游戏序列的设定没有严格的规定, 但有以下两个经验准则:
+\begin{itemize}
+    \item 相邻游戏的差异需最小化, 下一个游戏与上一个游戏仅有一个差异为宜; 
+    \item 差异应易于分析. 
+\end{itemize}
+
+相邻游戏之间的差异通常有以下三种类型: 
+\begin{enumerate}
+    \item 差异源于不可区分的分布; 
+    \item 差异基于某特定事件是否发生; 
+    \item 差异仅是概念上调整, 为后续分析做铺垫. 
+\end{enumerate}
+
+\begin{trivlist}
+\item 对于第一类差异, $\text{Game}_i$和$\text{Game}_{i+1}$的变化可以归结为分布的不可区分性, 如$Z_0 \approx Z_1$, 
+    其中$Z_0$和$Z_1$是两个分布. 换言之, 存在归约算法$B$, 
+    以$Z_0$为输入时, 可以完美模拟敌手在$\text{Game}_i$中的视图; 
+    以$Z_1$为输入时, 可以完美模拟敌手在$\text{Game}_{i+1}$中的视图. 
+    我们令$\text{View}_i$表述敌手在$\text{Game}_i$中的视图. 
+    在上下文清晰没有歧义时, 也常用$\text{Game}_i$直接代指敌手的视图.   
+\begin{itemize}
+    \item 当$Z_0 \approx_s Z_1$时, 利用复合引理(composition lemma)可以立刻得出任意敌手在两个游戏中的输出统计不可区分, 
+        进而得出$\Pr[S_0] - \Pr[S_1] \leq \mathsf{negl}(\kappa)$
+    \item 当$Z_0 \approx_c Z_1$时, \underline{如果敌手成功这一事件$\mathcal{B}$可准确判定}, 
+        则同样可以得出$\Pr[S_0] - \Pr[S_1] \leq \mathsf{negl}(\kappa)$, 论证过程如下图~\ref{figure:IND-change}所示, 
+        $\mathcal{B}$在事件$S$发生时输出``1'', 否则输出``0''. 
+        根据游戏定义, 有$\Pr[\mathcal{B}(Z_0)] = \Pr[S_i]$, $\Pr[\mathcal{B}(Z_1)] = \Pr[S_{i+1}]$, 因此有: 
+        \begin{equation*}
+            |\Pr[S_i] - \Pr[S_{i+1}]| = |\Pr[\mathcal{B}(Z_0) = 1] - \Pr[\mathcal{B}(Z_1) = 1]| \leq \mathsf{negl}(\kappa)
+        \end{equation*}
+\end{itemize}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+    \node[textnode, name=D] {$\mathcal{B}$}; 
+    \node[textnode, right of = D, xshift=6em] {$\approx$}; 
+    \node[textnode, name=Z1, right of = D, xshift=6em, yshift=3em] {$Z_0$}; 
+    \node[textnode, right of = Z1, xshift=2em] {$\rightarrow 1$}; 
+    \node[textnode, name=Z2, right of = D, xshift=6em, yshift=-3em] {$Z_1$};
+    \node[textnode, right of = Z2, xshift=2em] {$\rightarrow 1$}; 
+    \node[textnode, name=G1, left of = D, xshift=-6em, yshift=3em] {~$\text{Game}_i$~}; 
+    \node[textnode, name=G2, left of = D, xshift=-6em, yshift=-3em] {$\text{Game}_{i+1}$};
+    \node[textnode, name=A, right of = D, xshift=-12em] {$\mathcal{A}$}; 
+    \draw (D) edge[-] (Z1); 
+    \draw (D) edge[-] (Z2); 
+    \draw (D) edge[-] (G1); 
+    \draw (D) edge[-] (G2); 
+    \draw (A) edge[-] (G1); 
+    \draw (A) edge[-] (G2); 
+    \draw (G1) edge[-, dashed] node[midway, fill=white]{$S_i$} (Z1);
+    \draw (G2) edge[-, dashed] node[midway, fill=white]{$S_{i+1}$} (Z2); 
+\end{tikzpicture}
+\end{center}
+\caption{基于分布不可区分的游戏演变}\label{figure:IND-change}
+\end{figure}
+\end{trivlist}
+
+\begin{remark}
+许多学术论文在证明的过程中为了简便往往先证明敌手在两个相邻游戏中的视图不可区分, 
+再据此得出敌手优势函数的差是可忽略这一结论. 
+在多数情形, 这种论证并无问题, 但需要特别小心的是在视图计算不可区分时, 必须同时确保归约算法能够准确判定敌手成功事件才能够确保证明严谨. 
+在有些特殊情形, 归约算法无法有效判定敌手是否在游戏中成功, 此时归约算法无法利用敌手成功概率差异打破底层区分性假设, 从而导致归约失效. 
+请读者参考文献~\cite{HLL-ASIACRYPT-2016}加深对该证明技术细节的理解和掌握. 
+\end{remark}
+
+
+第二类差异取决于某个特定事件是否发生, 即定义在同一概率空间的两个相邻游戏$\text{Game}_i$和$\text{Game}_{i+1}$仅在某特定事件$F$发生时存在差异, 
+在$F$不发生时完全一致, 概率描述如下:  
+\begin{equation*}
+    S_i \wedge \neg F = S_{i+1} \wedge \neg F
+\end{equation*}
+
+为了分析敌手在相邻游戏$\text{Game}_i$和$\text{Game}_{i+1}$中的优势函数差, 需要以下的``差异引理''(difference lemma): 
+\begin{lemma}[Difference Lemma]
+令$A$, $B$, $F$是定义在同一概率空间中的事件, 
+如果$A \wedge \neg F = B \wedge \neg F$, 那么则有$|\Pr[A] - \Pr[B]| \leq \Pr[F]$. 
+\end{lemma}
+\begin{proof}
+差异引理的证明如下, 仅需使用古典概率中简单的缩放技巧: 
+\begin{align*}
+|\Pr[A] - \Pr[B]| &= |\Pr[A \wedge F]+\Pr[A \wedge \neg F] - \Pr[B \wedge F] - \Pr[B \wedge \neg F]| \blue{//\text{全概率展开}}\\ 
+                  &= |\Pr[A \wedge F] - \Pr[B \wedge F]| \blue{//\text{化简}}\\
+                  &\leq \max\{\Pr[A \wedge F], \Pr[B \wedge F]\} \leq \Pr[F] \blue{//\text{缩放}}
+\end{align*}
+证毕! \qed
+\end{proof}
+
+根据差异引理, 若需证明$|\Pr[S_i] - \Pr[S_{i+1}]| \leq \mathsf{negl}(\kappa)$, 仅需证明$\Pr[F] \leq \mathsf{negl}(\kappa)$, 
+证明细分为以下两种情形:
+\begin{itemize}
+    \item $F$发生的概率取决于敌手的计算能力, 如敌手找到哈希函数的碰撞或者成功伪造消息认证码. 
+        该情形需要建立安全归约, 即若$F$发生, 则存在敌手打破困难问题$X_i$. 
+    \item $F$发生的概率与敌手的计算能力无关. 该情形仅需纯粹的信息论论证(information-theoretic argument).
+\end{itemize}
+
+
+第三类差异称为桥接差异. 在分析游戏序列之间的差异时, 有时需要引入桥接步骤对某个变量的生成方式以等价的方式重新定义, 以确保差异分析的良定义.  
+桥接步骤引入的差异仅是挑战者侧的概念性变化, 敌手侧的视图完全相同, 因此$\Pr[S_i] = \Pr[S_{i+1}]$. 
+桥接步骤看似可有可无, 实则必要, 若不引入必要的桥接步骤, 则会使得证明跳跃难以理解、游戏序列间的差异无法精确分析. 
+
+

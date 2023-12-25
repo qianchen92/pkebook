@@ -1,0 +1,184 @@
+\section{确定性公钥加密}
+%可以介绍Wee的~\cite{Wee-EUROCRYPT-2012}. 
+
+确定性公钥加密由Bellare, Boldyreva和O'Neill~\cite{BBO2007}于2007年提出, 是一种加密算法确定, 每个明文对应一个密文的公钥加密方案. 经典的(教科书式)RSA加密方案就是一种确定性公钥加密方案. 确定性加密方案无法实现标准的语义安全性, 但是在加密数据检索等方面具有广泛的应用. 正因如此, 确定性加密得到了广泛而深入的研究, 包括确定性加密的安全模型~\cite{BFO2008,BS-JOC-2014}, 确定性加密的方案构造~\cite{Wee-EUROCRYPT-2012,FOR2012,FOR-JOC-2015}, 确定性加密的功能推广~\cite{XXZ2012,ZFLW-IWSEC-2017}等.
+
+\subsection{安全模型}
+同传统的公钥加密方案, 一个确定性公钥加密方案$\text{DPKE}$包含参数生成算法$\mathsf{Setup}$, 密钥生成算法$\mathsf{KeyGen}$, 加密算法$\mathsf{Encrypt}$和解密算法$\mathsf{Decrypt}$四个算法. 明文空间一般要求具有较高的最小熵, 否则敌手可以根据明文分布推出密文所对应的明文. 2011年, Brakerski和Segev~\cite{BS2011}提出确定性公钥加密的辅助输入安全模型. 在该模型中, 除了明文分布信息外, 敌手还拥有被加密明文的额外信息, 但是从该额外信息恢复明文是困难的. 为了刻画敌手的这一攻击能力, 我们定义消息空间$\mathcal{M}$上的一组难于求逆辅助输入(Hard-to Invert Auxiliary Inputs)函数: $\mathcal{F}=\{f_{\kappa}\}$. 对于任意PPT敌手$\mathcal{A}$, 如果下面的不等式成立, 其中$x \sample \mathcal{M}$, 
+\[
+\text{Pr}\left[\mathcal{A}(1^\kappa, f_\kappa(x)) = x)\right] \leq \delta
+\]
+则称一个可有效计算的函数族$\mathcal{F}=\{f_{\kappa}\}$关于可有效采样(消息)分布$\mathcal{M}$是$\delta$-难于求逆的.
+
+\begin{definition} [辅助输入安全性]
+令$\mathcal{F} = \{f: \mathcal{M} \rightarrow \{0, 1\}^*\}$是一个从消息空间到任意长度空间的难于求逆辅助输入函数族. 定义确定性公钥加密方案$\text{DPKE}$的辅助输入敌手$\mathcal{A}$的优势函数如下: 
+\begin{displaymath}
+	\mathsf{Adv}_{\mathcal{A}, \mathcal{F}, \text{DPKE}}^{\text{PrivInd}}(\kappa) = \left| \Pr \left[ \beta' = \beta:~
+	\begin{array}{ll}
+		& pp \leftarrow \mathsf{Setup}(1^\kappa); \\		
+		& (pk, sk) \leftarrow \mathsf{KeyGen}(pp);\\
+		& (M_0, M_1) \sample \mathcal{M}; \\
+		& \beta \sample \{0,1\};\\ 
+		& C \leftarrow \mathsf{Encrypt}(pk, M_\beta); \\
+		& \beta' \leftarrow \mathcal{A}(pk, C, f(M_0), f(M_1)) 
+	\end{array} 
+\right] - \frac{1}{2} \right|.
+\end{displaymath}
+如果对于任意的PPT敌手$\mathcal{A}$, 优势函数$\mathsf{Adv}_{\mathcal{A}, \mathcal{F}, \text{DPKE}}^{\text{PrivInd}}(\kappa)$关于安全参数$\kappa$是可忽略的, 则称确定性公钥加密方案$\text{DPKE}$是$(\mathcal{F}, \mathcal{M})$-PrivInd安全的.
+\end{definition}
+
+\subsection{基于对偶仿射哈希的DPKE方案}
+\subsubsection{对偶仿射哈希}
+对偶仿射哈希(Dual Projective Hashing)是2012年Wee~\cite{Wee-EUROCRYPT-2012}提出的一种新型密码学原语. 它类似于Cramer和Shoup提出的仿射哈希, 不同之处是对于非法元素, 仿射哈希的输出结果是随机的(平滑性), 而对偶仿射哈希要求输出结果能够唯一确定哈希密钥, 且存在一个陷门有效恢复哈希密钥. 下面给出对偶仿射哈希的定义, 其中部分符号无特殊说明外, 与第四章哈希证明系统定义中的符号含义一致. 
+\begin{definition}[对偶仿射哈希]\label{definition:DualHPS}
+一个对偶仿射哈希$\text{DPH}$包含以下五个算法:
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 以安全参数$\kappa$为输入, 输出公开参数$pp = (\mathsf{H}, SK, PK, X, L, W, \Pi, \alpha)$, 其中$\mathsf{H}: X \times SK \rightarrow \Pi$是一个由集合元素$u \in X$索引的一族带密钥哈希函数, 记作$\mathsf{H}_u(sk)$~\footnote{不同于哈希证明系统, 这里用集合$X$中的元素作为哈希函数的索引, 而将私钥空间中的元素作为哈希函数的输入.}, $L$是定义在$X$上的$\mathcal{NP}$语言, $W$是对应的证据集合, $\alpha(\cdot)$是从私钥集合$SK$到公钥集合$PK$的投射函数. 我们将$L$称之为Yes实例, $X \setminus L$称之为No实例. 特别地, 存在两个抽样算法: $\mathsf{SampleYes}(pp)$输出一对随机Yes实例$(u, w)$, 其中$u$在$L$上均匀分布, $w$是相应的证据; $\mathsf{SampleNo}(pp)$输出一对随机No实例$(u, td)$, 其中$u$在$X \setminus L$上均匀分布, $td$是相应的(求逆)陷门. 此外, 对偶仿射哈希要求Type~2类型的子集成员判定问题是困难的.
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 随机采样$sk \sample SK$, 计算$pk \leftarrow \alpha(sk)$, 输出$(pk, sk)$.
+
+\item $\mathsf{PrivEval}(sk, u)$: 以私钥$sk$和$u \in X$为输入, 输出$\pi = \mathsf{H}_u(sk)$.
+
+\item $\mathsf{PubEval}(pk, u, w)$: 以公钥$pk$, $u \in L$及相应的$w$为输入, 输出$\pi = \mathsf{H}_u(sk)$, 其中$pk = \alpha(sk)$.
+
+\item $\mathsf{TdInv}(td, pk, \pi)$: 对于任意$(u, td) \leftarrow \mathsf{SampleNo}(pp)$和任意$sk \in SK$, 若$pk = \alpha(sk)$, $\pi = \mathsf{H}_u(sk)$, 该算法输出$sk \in SK$, 使得$\alpha(sk) = pk$, $\mathsf{H}_u(sk) = \pi$.
+\end{itemize}
+\end{definition} 
+
+\subsubsection{DPKE方案的构造}
+\begin{construction}[基于对偶仿射哈希的DPKE方案]\label{construction:ch6-DPKE}
+基于一个对偶仿射哈希$\text{DPH} = (\mathsf{Setup}, \mathsf{KeyGen}, \mathsf{PrivEval}, \mathsf{PubEval}, \mathsf{TdInv})$, 构造的确定性公钥加密方案如下:
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$pp \leftarrow \text{DPH}.\mathsf{Setup}(1^\kappa)$, 输出系统参数$pp = (\mathsf{H}, SK, PK, X, L, W, \Pi, \alpha)$.
+
+\item $\mathsf{KeyGen}(pp)$: 运行$(u, td) \leftarrow \text{DPH}.\mathsf{SampleNo}(pp)$, 输出公钥$pk = u$和私钥$sk = td$. 
+  
+\item $\mathsf{Encrypt}(pk, M)$: 以公钥$pk = u$和明文$M \in SK$为输入, 输出密文$C = \alpha(M)||\mathsf{H}_u(M)$.
+
+\item $\mathsf{Decrypt}(sk, C)$: 以私钥$sk = td$和密文$C = y_0||y_1$为输入, 输出明文$M' = \mathsf{TdInv}(td, y_0, y_1)$. 
+\end{itemize}
+\end{construction}
+
+\begin{note}
+在第4.4.3节中, 利用仿射哈希证明系统构造公钥加密或密钥封装方案时, 仿射哈希的公钥和私钥分别作为加密或密钥封装方案的公钥和私钥, 而随机抽样元素则作为密文的一部分. 在构造确定性加密方案时, 仿射哈希的公钥作为密文, 而随机抽样的元素则作为公钥, 用法刚好相反, 这也许作者将其称为对偶仿射哈希的原因.
+\end{note}
+
+在分析方案~\ref{construction:ch6-DPKE}的安全性之前, 先回顾一下可重构提取器(Reconstructive Extractor)的概念~\cite{Trevisan-ACM-2001}.
+\begin{definition}[可重构提取器]
+一个可重构提取器$(\epsilon, \delta)$-可重构提取器包含如下两个函数$(\mathsf{Ext}, \mathsf{Rec})$:
+\begin{itemize}
+\item $\mathsf{Ext}: \{0, 1\}^n \times \{0, 1\}^d \rightarrow \Sigma$是一个提取算法. 
+
+\item $\mathsf{Rec}(1^n, 1/\epsilon)$: 对于任意$x \in \{0, 1\}^n$和任意函数$D$满足
+\[
+\left|\text{Pr}[\mathcal{D}(r, \mathsf{Ext}(x, r)) = 1] - \text{Pr}[\mathcal{D}(r, \mathsf{Ext}(x, \sigma)) = 1]\right| \geq \epsilon
+\]
+其中$r \sample \{0, 1\}^d$, $\sigma \sample \Sigma$, 则以$(1^n, 1/\epsilon)$为输入, 在运行时间$\mathsf{poly}(n, 1/\epsilon, \log |\Sigma|)$内, $\mathsf{Rec}$输出$x \in \{0, 1\}^n$的概率至少为$\delta$, i.e.,
+\[
+\text{Pr}[\mathsf{Rec}^{\mathcal{D}}(1^n, 1/\epsilon) = x] \geq \delta.
+\]
+\end{itemize}
+\end{definition} 
+
+根据文献~\cite{Trevisan-ACM-2001}, 任意$(\epsilon, \delta)$-可重构提取器也是一个极小熵为$1/\delta$的强提取器. 类似地, 对于$\delta \cdot \mathsf{negl}(\cdot)$-难于求逆辅助输入, 任意$(\epsilon, \delta)$-可重构提取器的输出结果是伪随机的.
+
+\begin{trivlist}
+\item \textbf{可重构提取器的构造.} 事实证明, 随机线性函数不仅是一个好的随机数提取器, 也是一个好的可重构提取器.
+\end{trivlist}
+\begin{lemma}[\cite{BrakerskiG10}]\label{lemma:ch6-LHL}
+令$q$是一个素数.则函数$\mathsf{Ext}: \{0, 1\}^n \times \mathbb{Z}_q^n \rightarrow \mathbb{Z}_q$, 定义为$(\mathbf{x}, \mathbf{a}) \mapsto \mathbf{x}^{\top}\vec{a}$, 是一个$(\epsilon, \frac{\epsilon^3}{512 \cdot n \cdot q^2})$-可重构提取器.
+\end{lemma}
+
+根据引理~\ref{lemma:ch6-LHL}, $\mathsf{Ext}$将$(x_1, \ldots, x_n)$和$(a_1, \ldots, a_n)$映射为$a_1x_1 + \cdots + a_nx_n \pmod q$. 此外, 该引理可以推广到以下情况:
+\begin{itemize}
+\item $\mathbb{G}$是一个阶为素数$q$的循环群, $g$是生成元, $\mathsf{Ext}: \{0, 1\}^n \times \mathbb{G}^n \rightarrow \mathbb{G}$定义为$(\mathbf{x}, g^{\mathbf{a}})  \mapsto g^{\mathbf{x}^{\top}\mathbf{a}}$.
+\end{itemize}
+
+方案~\ref{construction:ch6-DPKE}的安全性由下面的定理保证.
+\begin{theorem}
+如果$(x, pp) \mapsto \alpha(pp, x)$是一个$(\epsilon, \delta)$-可重构提取器, 子集成员判定问题是困难的, 则构造方案~\ref{construction:ch6-DPKE}是$(\mathcal{F}, \mathcal{M})$-PrivSind安全的.
+\end{theorem}
+
+\begin{proof}
+令$S_i$表示敌手在$\text{Game}_i$中的成功事件. 以游戏序列的方式组织证明如下: 
+\begin{trivlist}
+\item $\text{Game}_0$: 该游戏是标准的PrivInd游戏, 挑战者$\mathcal{CH}$和敌手$\mathcal{A}$交互如下: 
+\begin{itemize}
+\item 初始化: $\mathcal{CH}$运行$\mathsf{Setup}(1^\kappa)$生成公开参数$pp$, 
+		同时运行$\mathsf{KeyGen}(pp)$生成公私钥对$(pk, sk) = (u, td)$. $\mathcal{CH}$将$(pp, u)$发送给$\mathcal{A}$. 
+
+\item 挑战: $\mathcal{CH}$选择两个随机消息$(M_0, M_1) \sample \mathcal{M}$和随机比特$\beta \in \{0,1\}$, 将$C = \alpha(M_\beta)||\mathsf{H}_u(M_\beta) \leftarrow \mathsf{Encrypt}(pk, M_\beta)$, $f(M_0)$和$f(M_1)$发送给$\mathcal{A}$.
+
+\item 猜测: $\mathcal{A}$输出对$\beta$的猜测$\beta'$. $\mathcal{A}$成功当且仅当$\beta' = \beta$. 
+\end{itemize} 
+根据定义, 我们有: 
+\[
+	\mathsf{Adv}_{\mathcal{A}, \mathcal{F}, \text{DPKE}}^{\text{PrivInd}}(\kappa) = |\Pr[S_0] - 1/2|
+\]
+
+\item $\text{Game}_1$: 该游戏与$\text{Game}_0$的唯一不同在于公钥$pk$的选择方式. 将$(u, td) \leftarrow \mathsf{SamplNo}(pp)$替换为$(u, w) \leftarrow \mathsf{SamplYes}(pp)$, i.e., 公钥$u$从Yes实例集合中选择. 根据子集成员判定问题困难性, 我们有
+\[
+|\Pr[S_0] - \Pr[S_1]| \leq \mathsf{Adv}_{\text{SMP}}(\kappa)
+\]
+
+\item $\text{Game}_2$: 该游戏与$\text{Game}_1$的唯一不同在于密文$\mathsf{H}_u(M_\beta)$的计算方式变为$\mathsf{PubEval}(\alpha(pp, M_\beta), u, w)$. 根据仿射哈希的性质, $\text{Game}_1$和$\text{Game}_2$的分布是完全一样的. 因此, 我们有
+\[
+\Pr[S_1] = \Pr[S_2]
+\]
+
+\item $\text{Game}_3$: 该游戏与$\text{Game}_2$的唯一不同在于密文$\alpha(pp, M_\beta)$的计算方式变为随机选择$\sigma \sample \Sigma$. 具体地, 密文从$\alpha(pp, M_\beta)||\mathsf{PubEval}(\alpha(pp, M_\beta), u, w)$变为$\sigma||\mathsf{PubEval}(\sigma, u, w)$. 可以证明, 如果敌手$\mathcal{A}$在$\text{Game}_2$和$\text{Game}_3$中的优势相差至多$2\epsilon$. 否则, 我们可以利用$\mathcal{A}$构造一个区分器$\mathcal{D}$, 使得
+\[
+\left|\text{Pr}[\mathcal{D}(pp, \alpha(pp, M), f(M)) = 1] - \mathcal{D}(pp, \sigma, f(M)) = 1]\right| \geq \epsilon
+\]
+其中$pp \leftarrow \text{DPH}.\mathsf{Setup}$, $M \sample \mathcal{M}$, $\sigma \sample \Sigma$. 区分器$\mathcal{D}$模拟$\mathcal{A}$的视图方式如下: 首先, $\mathcal{D}$随机选择$(u, w) \leftarrow \mathsf{SampleYes}(pp)$, 将$u$作为公钥发送给$\mathcal{A}$.其次, $\mathcal{D}$随机选择$\beta \sample \{0, 1\}$, 将自己的挑战信息$M$作为$M_\beta$, 并从空间$\mathcal{M}$中随机选择一个消息作为$M_{1 - \beta}$. 接下来, $\mathcal{D}$利用公钥$u$及其证据$w$计算$y_1 = \mathsf{PubEval}(y_0, u, w)$并将密文$y_0||y_1$发送给$\mathcal{A}$. 最后, 根据敌手$\mathcal{A}$的输出结果$\beta'$, 如果$\beta = \beta'$，$\mathcal{D}$输出1, 否则输出0. 显然, 若$y_0 = \alpha(pp, M)$, 则$\mathcal{D}$完美地模拟了$\mathcal{A}$在$\text{Game}_2$中的视图; 若$y_0 = \sigma$, 则$\mathcal{D}$完美地模拟了$\mathcal{A}$在$\text{Game}_3$中的视图. 由于这两种情况的概率各为$1/2$, 所以$\mathcal{D}$的区分概率至少为$\epsilon$. 由此, 我们可以利用$\mathsf{Rec}^{\mathcal{D}}$以概率$\delta$从$f(M)$中恢复$M$. 也就是说, 我们能够以至少$\epsilon \cdot \delta$的概率在分布$\mathcal{M}$上求函数$f$的逆. 这与假设相矛盾. 由此可得
+\[
+|\Pr[S_2] - \Pr[S_3]| \leq 2\epsilon
+\]
+在$\text{Game}_3$中, 由于$\mathcal{A}$的视图与挑战比特$\beta$完全独立不相关, 所以$\Pr[S_3] = \frac{1}{2}$.
+\end{trivlist}
+
+综上, 定理得证! \qed
+\end{proof}
+
+\subsection{基于DLIN的实例化方案}
+下面介绍一种基于DLIN问题的对偶仿射哈希的具体实现, 结合通用构造方案~\ref{construction:ch6-DPKE}, 可以得到一个基于DLIN假设的确定性公钥加密方案~\cite{BS2011}.
+
+令$\mathbb{G}$是一个阶为素数$q$的循环群, $g$是它的一个生成元. $d$-DLIN假设描述如下: 给定$g_1, \ldots, g_{d+1}$, $g_1^{r_1}, \ldots, g_d^{r_d}$, 其中$g_1, \ldots, g_{d+1} \sample \mathbb{G}$, $r_1, \ldots, r_d \sample \mathbb{Z}_q$, 则$g_{d+1}^{r_1 + \cdots + r_d}$依然是伪随机的, 与$\mathbb{G}$中的随机元素在计算上不可区分. 显然, 经典的DDH假设可以看作是$d = 1$的DLIN假设.
+
+\begin{construction}[对偶仿射哈希]
+一个对偶仿射哈希$\text{DPH}$包含以下五个算法:
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 公开参数定义为$pp = (\mathbb{G}, g^{\mathbf{P}})$, 其中$\mathbf{P} \sample \mathbb{Z}_q^{d \times m}$. 除此之外, 公开参数还定义了私钥空间$SK = \{0, 1\}^m$, 公钥空间$PK = \mathbb{G}^m$, Yes实例集合$L = \{g^{\mathbf{W}\mathbf{P}} : \mathbf{W} \in \mathbb{Z}_q^{m \times d}\}$和No实例集合$X \setminus L = \{g^{\mathbb{A}} : \mathbb{A} \in \mathbb{Z}_q^{m \times m} \text{ 满秩}\}$~\footnote{根据~\cite{BonehHHO08}, 在DLIN假设下集合$L$与$X \setminus L$中的元素是不可区分的.}, 证据空间$W = \mathbb{Z}_q^{m \times d}$, 哈希值空间$\Pi = \mathbb{G}^m$. 对于任意$\mathbf{x} \in SK$和任意$\mathbf{U} \in X$, 哈希函数$\mathsf{H}$和仿射映射$\alpha(pp, \cdot)$的定义分别如下: 
+\[
+\mathsf{H}_{\mathbf{U}}(\mathbf{x}) = \mathbf{U}^{\mathbf{x}} \in \mathbb{G}^m \text{ and }\alpha(pp, \mathbf{x}) = g^{\mathbf{P}\mathbf{x}}
+\]
+采样算法$\mathsf{SampleYes}$和$\mathsf{SampleNo}$分别定义如下:
+\[
+(u = g^{\mathbf{W}\mathbf{P}}, w = \mathbf{W}) \leftarrow \mathsf{SampleYes}(pp) \text{ and } (u = g^{\mathbf{A}}, td = \mathbf{W}^{-1}) \leftarrow \mathsf{SampleNo}(pp)
+\]
+其中$\mathbf{W} \sample \mathbb{Z}_q^{m \times d}$, $\mathbf{A} \sample \mathbb{Z}_q^{m \times m}$~\footnote{从集合$\mathbb{Z}_q^{m \times m}$中随机选择一个矩阵$\mathbf{A}$, 以压倒性地概率$\mathbf{A}$是满秩的.}.
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 随机选择$sk = \mathbf{x} \sample SK$, 计算$pk \leftarrow \alpha(pp, sk) = g^{\mathbf{P}\mathbf{x}}$.
+
+\item $\mathsf{PrivEval}(sk, u)$: 以私钥$sk = \mathbf{x} \in \{0, 1\}^m$和$u = \mathbf{U} \in \mathbb{G}^{m \times m}$为输入, 输出$\pi = \mathsf{H}_u(sk) = \mathbf{U}^{\mathbf{x}}$.
+
+\item $\mathsf{PubEval}(pk, u, w)$: 以公钥$pk = g^{\mathbf{P}\mathbf{x}}$, $u = g^{\mathbb{W}\mathbb{P}} \in L$及相应的$w = \mathbf{W}$为输入, 输出$\pi = \mathsf{H}_u(sk) = g^{\mathbf{W} \cdot \mathbf{P}\mathbf{x}}$.
+
+\item $\mathsf{TdInv}(td, pk, \pi)$: 对于任意$(u = g^{\mathbf{A}}, td = \mathbf{A}^{-1}) \leftarrow \mathsf{SampleNo}(pp)$和任意$sk = \mathbf{x} \in SK$, 由于
+\[
+\pi = \mathsf{H}_u(sk) = g^{\mathbf{A}\mathbf{x}}
+\] 
+且$\mathbf{x} \in \{0, 1\}^m$, 所以, 已知$\mathbf{A}^{-1}$和$\pi$, 可以计算出$g^{\mathbf{x}}$, 从而得到$\mathbf{x}$. 
+\end{itemize}
+\end{construction} 
+
+
+
+
+
+
+
+
+
+
+

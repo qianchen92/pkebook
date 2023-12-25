@@ -1,0 +1,1130 @@
+\section{哈希证明系统类}
+\begin{center}
+	一阴一阳之谓道, 继之者善也, 成之者性也.\\
+                \hfill --- 《易经 · 系辞上》
+\end{center}
+
+1998年, Cramer和Shoup~\cite{CS-CRYPTO-1998}基于判定性Diffie-Hellman问题构造出首个标准模型下高效的公钥加密方案, 成为CS98-PKE. 
+2002年, Cramer和Shoup~\cite{CS-EUROCRYPT-2002}再度合作, 提出了哈希证明系统(HPS, hash proof system)的概念, 
+给出了标准模型下构造CCA-secure PKE的全新范式, 完美的阐释了CS98-PKE的设计原理. 
+在同一篇论文中, 作者还正式提出了KEM+DEM的公钥加密工作模式, 相比朴素混合加密更加现代、模块化. 
+以下首先介绍HPS的定义和相关性质. 
+
+
+\begin{definition}[哈希证明系统]
+HPS包含以下多项式时间算法: 
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 以安全参数$\kappa$为输入, 输出公开参数$pp = (\mathsf{H}, SK, PK, X, L, W, \Pi, \alpha)$, 
+    其中$\mathsf{H}: SK \times X \rightarrow \Pi$是由私钥集合$SK$索引的一族带密钥哈希函数(keyed hash function), 
+    $L$是定义在$X$上的$\mathcal{NP}$语言, $W$是对应的证据集合, $\alpha$是从私钥集合$SK$到公钥集合$PK$的投射函数. 
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 随机采样$sk \sample SK$, 计算$pk \leftarrow \alpha(sk)$, 输出$(pk, sk)$. 
+
+\item $\mathsf{PrivEval}(sk, x)$: 以私钥$sk$和$x \in X$为输入, 输出$\pi = \mathsf{H}_{sk}(x)$. 
+
+\item $\mathsf{PubEval}(pk, x, w)$: 以公钥$pk$、$x \in L$以及相应的$w$为输入, 输出$\pi = \mathsf{H}_{sk}(x)$, 其中$\alpha(sk) = pk$. 
+\end{itemize}
+\end{definition}
+
+\begin{figure}[!htbp]
+\begin{center}
+\begin{tikzpicture}
+    \node[textnode, name=Setup] {$pp \leftarrow \mathsf{Setup}(1^\kappa)$}; 
+    \node[textnode, name=KeyGen, below of=Setup, xshift=-6em, yshift=-4em] {$\mathsf{KeyGen}(pp) \rightarrow (pk, sk)$ \\s.t. $\alpha(sk) = pk$}; 
+    \node[circlenode, name=SK, right of = KeyGen, xshift=12em, minimum size=5em] {$SK$};
+    \node[circlenode, name=PK, right of = SK, xshift=10em, minimum size=3em] {$PK$};
+    \draw (SK) edge[->] node[above] {$\alpha$} node[below] {projection} (PK);
+
+
+    \node[circlenode, name = X, below of = Setup, xshift=-6em, yshift=-15em, draw=none, fill=gray!50, minimum size=6em] {};
+    \node[textnode, above of = X, xshift=-1em, yshift=1.5em] {$X$}; 
+    \node[circlenode, name = L, below of = X, xshift=1em, yshift=-1em, draw = none, fill=violet!70, minimum size=2.5em] {$L$};
+    \node[circlenode, name = W, below of = L, yshift=-6em, draw=none, fill=cyan, minimum size=2.5em] {$W$};
+    \node[textnode, name = SampR, below of = L, xshift=-3em, yshift=-3em] {$\mathsf{SampR}(pp)$};
+    \draw (SampR) edge[->] (L);
+    \draw (SampR) edge[->] (W); 
+    \draw (L) edge[<->] (W); 
+
+    \node[circlenode, name = Pi, right of = X, xshift=16em, draw=none, fill=blue!20, minimum size=3.5em] {$\Pi$};
+
+    \draw (X) edge[->] node[above] {$\mathsf{H}_{sk}(x)$} (Pi); 
+
+    \node[dotnode, name = x1, above of = X, xshift=1.5em, yshift=1em] {}; 
+    \node[dotnode, name = y1, above of = Pi, xshift=-0.6em, yshift=1em] {}; 
+    \draw (x1) edge[color=red, ->, bend left=40] node[above] {$\mathsf{PrivEval}(sk, x)$} (y1);
+
+    \node[dotnode, name = x2, below of = X, xshift=1.5em, yshift=-1.5em] {}; 
+    \node[dotnode, name = y2, above of = Pi, xshift=-0.6em, yshift=-1em] {}; 
+    \draw (x2) edge[color=blue, ->, bend left=-40] node[below] {$\mathsf{PubEval}(pk, x, w)$} (y2);
+\end{tikzpicture}
+\end{center}
+\caption{HPS示意图}
+\end{figure}
+
+HPS的定义围绕$L \subset X$展开, 引入了$\mathsf{KeyGen}$, $\mathsf{PrivEval}$和$\mathsf{PubEval}$这三个核心算法. 
+以下性质刻画了哈希函数在输入$x \in L$上的行为, 用于保证上层密码方案的功能性.  
+\begin{trivlist}
+\item \textbf{投射性(Projectivity):} $\forall x \in L$, 函数值$\mathsf{H}_{sk}(x)$由$x$和私钥的投射$pk \leftarrow \alpha(sk)$完全确定.
+\end{trivlist}
+
+以下性质由弱到强刻画了哈希函数在输入$x \in X \backslash L$上的行为, 用于保证上层密码方案的安全性.  
+% \begin{block}{Smooth: for $x^* \sample X \backslash L$}
+
+\begin{trivlist}
+\item \textbf{平滑性(Smooth):} $\mathsf{H}_{sk}(\cdot)$在输入$x \sample X \backslash L$时的输出与$\Pi$上的均匀分布统计接近, 即: 
+\begin{equation*}
+    (pk, \mathsf{H}_{sk}(x)) \approx_s (pk, \pi)
+\end{equation*}
+其中$(pk, sk) \leftarrow \mathsf{KeyGen}(pp)$, $\pi \sample \Pi$.   
+
+
+\item \textbf{1-一致性(1-Universal):} $\mathsf{H}_{sk}(\cdot)$在任意输入的输出与$\Pi$上的均匀分布统计接近, 
+    即$\forall x \in X \backslash L$, 有:
+\begin{equation*}
+    (pk, \mathsf{H}_{sk}(x)) \approx_s (pk, \pi)
+\end{equation*}
+其中$(pk, sk) \leftarrow \mathsf{KeyGen}(pp)$, $\pi \sample \Pi$. 
+
+\item \textbf{2-一致性(2-Universal):} 在给定某点$x^* \in X \backslash L$哈希函数值的情形下, 
+    $\mathsf{H}_{sk}(\cdot)$在任意输入的输出仍与$\Pi$上的均匀分布统计接近, 
+    即$\forall x, x^* \in X \backslash L$且$x \neq x^*$, 有:
+\begin{equation*}
+    (pk, \mathsf{H}_{sk}(x^*), \mathsf{H}_{sk}(x)) \approx_s (pk, \mathsf{H}_{sk}(x^*), \pi)
+\end{equation*}
+其中$(pk, sk) \leftarrow \mathsf{KeyGen}(pp)$, $\pi \sample \Pi$. 
+\end{trivlist}
+
+\begin{note}
+以上三条性质由弱到强. 
+smooth性质同时建立在$sk \sample SK$和$x \sample X \backslash L$两根随机带上, 
+1-universal性质仅建立在$sk \sample SK$一根随机带上, 
+而2-universal性质则可解读为要求1-universal性质在随机带$sk \sample SK$有偏时(将$\mathsf{H}_{sk}(x^*)$理解为关于$sk$的泄漏)仍然成立. 
+特别注意, 三条性质均刻画的是输入在语言外时哈希函数的行为.
+\end{note}
+
+\subsection{起源释疑}
+相信很多读者在阅读HPS早期的文献时, 都会对这个范式的命名和引入动机感到疑惑. 
+事实上, HPS是一类指定验证者的非交互式零知识证明系统(designated verifier NIZK), 
+引入的动机来自以下的思考: Naor-Yung双重加密范式使用标准的NIZK来证明密文的合法性(well-formedness), 
+然而密文的合法性并非一定是可公开验证的(public verifiable), 解密私钥$sk$的持有者可验证即可. 
+指定可验证弱于公开可验证, 因此DV-NIZK的效率通常高于NIZK. 
+想必Cramer和Shoup正是基于以上的思考, 引入了HPS, 目的是在标准模型下构造高效的CCA-secure PKE. 
+
+\begin{figure}[!htbp]
+\begin{center}
+\begin{tikzpicture}
+\node [textnode, name=Setup] {$\mathsf{Setup}(1^\kappa) \rightarrow pp$}; 
+\node [textnode, name=HGen, below of = Setup, yshift=-3em] {$\mathsf{KeyGen}(pp) \rightarrow (\red{pk}, \blue{sk})$};
+\node [roundnode, name=Gen, below of = HGen, fill=blue!10, yshift=-3em, minimum width=10em, minimum height=2em] 
+{$\mathsf{Gen}(pp) \rightarrow (\red{crs}, \blue{td})$};
+\draw (HGen) edge[->] (Gen);
+
+\node [name=Prover, textnode, below of=Gen, xshift=-10em, yshift=-3em] {$P(x, w)$};
+\node [name=Verifier, textnode, below of=Gen, xshift=10em, yshift=-3em] {$V(sk)$};  
+\node [name=Check, textnode, below of=Verifier, yshift=-2em] 
+{$\pi \stackrel{?}{=} \mathsf{H}_{sk}(x)$ via \red{$\mathsf{PrivEval}(sk, x)$}};   
+\draw (Prover) edge[->] node[above] {$x$, $\pi \leftarrow \mathsf{H}_{sk}(x) = 
+    \blue{\mathsf{PubEval}(pk, x, w)}$} (Verifier);
+\end{tikzpicture}
+\end{center}
+\caption{从DV-NIZK的视角解析HPS}
+\end{figure}
+
+\begin{note}
+上图解释了HPS的命名渊源, 其本质上是指定验证者零知识证明, 证明的形式是实例的哈希值, 故名\emph{哈希证明系统}. 
+\end{note}
+
+\begin{itemize}
+\item DV-NIZK的完备性由$\mathsf{H}_{sk}(\cdot)$的投射性保证:
+\begin{equation*}
+    \forall x \in L, \mathsf{H}_{sk}(x) = \mathsf{PubEval}(pk, x, w)
+\end{equation*}
+
+\item DV-NIZK的合理性由1-universal性质保证$\forall x \notin L$, $\mathsf{H}_{sk}(x)$随机分布, 
+    即使拥有无限计算能力的证明者$P^*$也无法预测, 因此通过验证的概率可忽略. 
+    2-universal性质则保证了更强的合理性, 即敌手在看到一个No实例的有效证明后, 也无法为一个新的No实例生成有效证明.    
+
+\item DV-NIZK的零知识性是显然且平凡的: 指定验证者拥有私钥, 
+    因此可以对任意的$x \in L$(甚至是$x \in X$)生成正确的证明 
+\end{itemize}
+此外, 证明系统是有效的, 即证明者在拥有证据时可以高效计算出实例的证明, 这对于基于HPS密码方案的功能性至关重要. 
+
+
+\subsection{HPS的构造}
+我们首先以针对$L_\text{DDH}$语言的HPS构造为例, 获得对HPS设计方式的直观认识. 
+令$(\mathbb{G}, p, g)$是算法$\mathsf{GroupGen}(1^\kappa)$的输出, 
+其中$\mathbb{G}$是阶为素数$p$的群, $g$是生成元. 随机选取$\mathbb{G}$中的两个生成元$g_1, g_2$. 
+令$pp = (\mathbb{G}, p, g_1, g_2)$是公开参数, 定义由$pp$索引的$\mathcal{NP}$语言如下:  
+\begin{equation*}
+    L_\text{DDH} = \{(x_1, x_2) \in X: \exists w \in W \text{~s.t.~} x_1 = g_1^w, x_2 = g_2^w\}
+\end{equation*}
+其中$X = \mathbb{G} \times \mathbb{G}$, $W = \mathbb{Z}_p$. 
+
+容易验证, 语言中的元素是DH对, 语言外的元素是非DH对, $(x_1, x_2) \sample L_\text{DDH}$.  
+DDH假设蕴含$L \subset X$上的SMP困难问题成立, 即: 
+\begin{itemize}
+    \item $U_L \approx_c U_X$: 随机DH对与$X$中的随机二元组计算不可区分
+
+    \item 由于$|L|/|X| = 1/p = \mathsf{negl}(\kappa)$, $L$在$X$中稀疏, 
+        所以可以进一步得到$U_L \approx_c U_{X \backslash L}$: 随机DH对与随机非DH对计算不可区分
+\end{itemize}
+
+\begin{construction}[$L_\text{DDH}$语言的HPS构造]\label{construction:HPS-for-DDH}
+$L_\text{DDH}$的HPS构造如下, 如图~\ref{figure:HPS-DH}所示:
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 以安全参数$\kappa$为输入, 输出公开参数$pp = (\mathbb{G}, p, g_1, g_2)$. 
+    $pp$还包括了对$SK = \mathbb{Z}_p \times \mathbb{Z}_p$, $PK = \mathbb{G}$, $L_\text{DDH}$, 
+    $X = \mathbb{G} \times \mathbb{G}$和$W = \mathbb{Z}_p$的描述.   
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 随机采样$sk \sample \mathbb{Z}_p^2$, 
+    计算$pk \leftarrow \alpha(sk) = g_1^{sk_1} g_2^{sk_2}$, 输出$(pk, sk)$. 
+
+\item $\mathsf{PrivEval}(sk, x)$: 以私钥$sk$和$x \in X$为输入, 输出$\pi = \mathsf{H}_{sk}(x) = x_1^{sk_1} x_2^{sk_2}$. 
+
+\item $\mathsf{PubEval}(pk, x, w)$: 以公钥$pk$、$x \in L_\text{DDH}$以及相应的$w$为输入, 输出$\pi = pk^w$, 其中$\alpha(sk) = pk$. 
+    以下等式说明了公开求值算法的正确性:
+    \begin{equation*}
+        pk^w = (g_1^{sk_1} g_2^{sk_2})^w = x_1^{sk_1} x_2^{sk_2} = \mathsf{H}_{sk}(x)
+    \end{equation*}
+\end{itemize}
+\end{construction}
+
+\begin{figure}[!htbp]
+\begin{center}
+\begin{tikzpicture}
+    \node[textnode, name=Setup] {$pp = (\mathbb{G}, p, g_1, g_2) \leftarrow \mathsf{Setup}(1^\kappa)$}; 
+    \node[textnode, name=KeyGen, below of=Setup, xshift=-6em, yshift=-6em] {$\mathsf{KeyGen}(pp) \rightarrow (pk, sk)$ \\s.t. $\alpha(sk) = pk$}; 
+    \node[circlenode, name=SK, right of = KeyGen, xshift=12em, minimum size=5em] {$SK$};
+    \node[textnode, above of = SK, yshift=3em] {$\mathbb{Z}_p \times \mathbb{Z}_p$}; 
+    \node[circlenode, name=PK, right of = SK, xshift=12em, minimum size=3em] {$PK$};
+    \node[textnode, above of = PK, yshift=2.5em] {$\mathbb{G}$}; 
+    \draw (SK) edge[->] node[above] {$sk \sample \mathbb{Z}_p^2$} node[below] {$\alpha(sk) = g_1^{sk_1} g_2^{sk_2}$} (PK);
+
+
+    \node[circlenode, name = X, below of = Setup, xshift=-6em, yshift=-15em, draw=none, fill=gray!50, minimum size=6em] {};
+    \node[textnode, above of = X, xshift=0em, yshift=1.5em] {$X$}; 
+
+    \node[textnode, name=random-tuple, left of = X, xshift=-6em, yshift=3em] {$(g_1^{w_1}, g_2^{w_2})$}; 
+    \draw (random-tuple) edge[->] ($(X.north)+(-1em, -1.5em)$); 
+
+    \node[circlenode, name = L, below of = X, xshift=1em, yshift=-1em, draw = none, fill=violet!70, minimum size=2.5em] {$L$};
+    \node[textnode, name=DH-tuple, left of = L, xshift=-9em, yshift=-1em] {$(g_1^w, g_2^w)$}; 
+    \draw (DH-tuple) edge[->] ($(L.north)+(-0.8em, -1em)$); 
+
+    \node[circlenode, name = W, below of = L, yshift=-6em, draw=none, fill=cyan, minimum size=2.5em] {$W$};
+    \node[textnode, below of = W, yshift=-2em] {$\mathbb{Z}_p$}; 
+    \node[textnode, name = SampR, below of = L, xshift=-3em, yshift=-3em] {$\mathsf{SampR}(pp)$};
+    \draw (SampR) edge[->] (L);
+    \draw (SampR) edge[->] (W); 
+    \draw (L) edge[<->] (W); 
+
+    \node[circlenode, name = Pi, right of = X, xshift=16em, draw=none, fill=blue!20, minimum size=3.5em] {$\Pi$};
+
+    \draw (X) edge[->] node[above] {$\mathsf{H}_{sk}(x) = x_1^{sk_1} x_2^{sk_2}$} (Pi); 
+
+    \node[dotnode, name = x1, above of = X, xshift=1.5em, yshift=1em] {}; 
+    \node[dotnode, name = y1, above of = Pi, xshift=-0.6em, yshift=1em] {}; 
+    \draw (x1) edge[color=red, ->, bend left=40] node[above] {$\mathsf{PrivEval}(sk, x) = x_1^{sk_1} x_2^{sk_2}$} (y1);
+
+    \node[dotnode, name = x2, below of = X, xshift=1.5em, yshift=-1.5em] {}; 
+    \node[dotnode, name = y2, above of = Pi, xshift=-0.6em, yshift=-1em] {}; 
+    \draw (x2) edge[color=blue, ->, bend left=-40] node[below] {$\mathsf{PubEval}(pk, x, w) = pk^w$} (y2);
+\end{tikzpicture}
+\end{center}
+\caption{$L_\text{DDH}$的HPS}\label{figure:HPS-DH}
+\end{figure}
+
+\begin{lemma}
+以上关于$L_\text{DDH}$的HPS满足1-universal性质. 
+\end{lemma}
+
+\begin{proof}
+证明的目标是
+\begin{equation*}
+    \forall x \in X \backslash L, (pk, \mathsf{H}_{sk}(x)) \approx_s (pk, \pi)
+\end{equation*}
+其中$(pk, sk) \leftarrow \mathsf{KeyGen}(pp)$, $\pi \sample \Pi$. 
+
+
+首先固定$x = (x_1 = g_1^{w_1}, x_2 = g_2^{w_2}) \in X \backslash L$, 其中$w_1 \neq w_2$. 
+将左式表示为关于$sk$函数的形式:
+\begin{equation*}
+    (pk, \mathsf{H}_{sk}(x)) = f_{g_1, g_2, x_1, x_2}(sk_1,sk_2) := (g_1^{sk_1}g_2^{sk_2}, x_1^{sk_1}x_2^{sk_2})
+\end{equation*}
+用矩阵的形式描述函数作用过程:
+\begin{displaymath}
+\left(\begin{array}{cc}
+g_1 & g_2\\
+g_1^{w_1} & g_2^{w_2}
+\end{array} \right)
+\left(\begin{array}{c}
+sk_1\\
+sk_2
+\end{array} \right) 
+= 
+\left(\begin{array}{c}
+pk\\
+\mathsf{H}_{sk}(x)
+\end{array} \right)
+\end{displaymath} 
+令$g_2 = g_1^\beta$, 其中$\beta \in \mathbb{Z}_p$, 将最左边矩阵进行等价变形: 
+\begin{displaymath}
+\left(\begin{array}{cc}
+g_1 & g_2\\
+g_1^{w_1} & g_2^{w_2}
+\end{array} \right) = 
+\left(\begin{array}{cc}
+g_1 & g_1^{\beta}\\
+g_1^{w_1} & g_1^{w_2\beta}
+\end{array} \right) = 
+g_1
+\underbrace{
+\left(\begin{array}{cc}
+1 & \beta\\
+w_1 & w_2\beta
+\end{array} \right)
+}_{M} 
+\end{displaymath}
+$\textup{det}(M) = \beta(w_1-w_2)$ $\Rightarrow$ $M$满秩 $\Rightarrow$ 
+$f$单射. 又由于函数的定义域和值域大小相等, 最终得出:  
+\begin{displaymath}
+\underbrace{
+\left(\begin{array}{cc}
+g_1 & g_2\\
+g_1^{w_1} & g_2^{w_2}
+\end{array} \right)
+}_{\text{full rank~} 2 \times 2} 
+\underbrace{
+\left(\begin{array}{c}
+sk_1\\
+sk_2
+\end{array} \right) 
+}_{\text{~uniform over~} \mathbb{Z}_p^2}= 
+\underbrace{
+\left(\begin{array}{c}
+pk\\
+\mathsf{H}_{sk}(x)
+\end{array} \right)
+}_{\text{uniform over~} \mathbb{G}^2}
+\end{displaymath} 
+从而1-universal性质得证! \qed
+\end{proof}
+
+\begin{remark}
+HPS并不一定要求$L \subseteq X$之上一定存在SMP问题, 但只有当$L \subseteq X$之上存在SMP问题时, 相应的HPS有密码学意义. 
+这是因为HPS中所有关于哈希函数的性质均是针对输入在语言外时定义的, 只有当SMP问题存在时, 才可以间接刻画出哈希函数在输入在语言内时的行为. 
+\end{remark}
+
+HPS存在两个局限: 
+\begin{itemize}
+    \item 证明只支持私密验证, 不满足公开验证性
+    \item 证明的表达能力有限, 目前仅能对证明群中的子群成员归属问题, 尚未知能否延伸到任意的NP语言. 
+\end{itemize}
+在很多具体的零知识证明应用场合, 公开验证性和强大的表达能力均不是必须, 因此用标准的零知识证明系统有大材小用之嫌, 
+哈希证明系统可以做的更快更好, 其中效率的优势恰恰源自局限. 以下展示如何基于HPS设计IND-CPA和IND-CCA的KEM方案. 
+
+
+\subsection{基于HPS构造IND-CPA KEM}
+作为暖场应用, 我们首先介绍如何基于HPS构造CPA安全的KEM. 设计的思路如下: 
+\begin{itemize}
+\item 发送方扮演HPS中的证明者, 选择$L$中的随机实例$x$作为密文$c$, 利用公钥$pk$和相应的证据$w$计算其哈希证明$\pi$作为会话密钥$k$. 
+
+\item 接收方扮演HPS中的验证者, 使用私钥$sk$计算$x$的哈希证明以恢复会话密钥$k$. 
+\end{itemize}
+
+\begin{construction}[基于HPS的CPA安全KEM]\label{construction:CPA-KEM-from-HPS}
+从smooth的HPS出发, 构造CPA安全的KEM如下: 
+\begin{itemize}
+\item $\mathsf{Setup}(\kappa)$: 运行$pp \leftarrow \text{HPS}.\mathsf{Setup}(1^\kappa)$, 
+    输出$pp = (\mathsf{H}, SK, PK, X, L, W, \Pi, \alpha)$作为公开参数, 其中$X$作为密文空间, $\Pi$作为会话密钥空间. 
+
+\item $\mathsf{KeyGen}(pp)$: 运行$(pk, sk) \leftarrow \text{HPS}.\mathsf{KeyGen}(pp)$, 输出公钥$pk$和私钥$sk$. 
+
+\item $\mathsf{Encaps}(pk; r)$: 以公钥$pk$和随机数$r$为输入, 执行如下步骤: 
+\begin{enumerate}
+    \item 运行$(x, w) \leftarrow \mathsf{SampR}(r)$生成随机实例和相应的证据;
+    \item 通过$\text{HPS}.\mathsf{PubEval}(pk, x, w)$计算实例$x$的哈希证明$\pi \leftarrow \mathsf{H}_{sk}(x)$; 
+    \item 输出实例$x$作为密文$c$, 输出哈希证明$\pi$作为会话密钥$k$. 
+\end{enumerate}
+
+\item $\mathsf{Decaps}(sk, c)$: 以私钥$sk$和密文$c$为输入, 通过$\text{HPS}.\mathsf{PrivEval}(sk, c)$
+    计算$c$的哈希证明$\pi \leftarrow \mathsf{H}_{sk}(x)$以恢复会话密钥$k$. 
+\end{itemize}
+\end{construction} 
+
+KEM方案的正确性有HPS的完备性保证. 安全性由如下定理保证. 
+
+\begin{theorem}
+如果$L \subseteq X$上的SMP困难问题成立, 那么构造~\ref{construction:CPA-KEM-from-HPS}中的KEM是IND-CPA安全的. 
+\end{theorem}
+
+\begin{proof}
+我们将通过游戏序列组织证明. 游戏序列的编排次序由如下证明思路指引:  
+\begin{itemize}
+    \item 将诚实生成的密文分布$x \sample L$切换为$x \sample X \backslash L$
+    \item 论证当$x \sample X \backslash L$时, $(pk, \pi = \mathsf{H}_{sk}(x))$的分布与$(pk, \pi \sample \Pi)$统计接近. 
+\end{itemize} 
+
+\begin{trivlist}
+\item $\text{Game}_0$: 对应真实的游戏, 其中挑战密文$x^* \sample L$, 计算会话密钥的方式是对$\mathsf{H}_{sk}(x^*)$进行公开求值
+\begin{itemize}
+    \item 初始化: $\mathcal{CH}$计算$pp \leftarrow \text{HPS}.\mathsf{Setup}(1^\kappa)$, 
+        $(pk, sk) \leftarrow \text{HPS}.\mathsf{KeyGen}(pp)$, 将$pp$和$pk$发送给$\mathcal{A}$. 
+    \item 挑战: $\mathcal{CH}$按照以下步骤生成挑战 
+        \begin{enumerate}
+            \item 随机采样\redul{$(x^*, w^*) \leftarrow \mathsf{SampR}(r^*)$};  
+            \item 通过\redul{$\text{HPS}.\mathsf{PubEval}(pk, x^*, r^*)$}公开计算$\pi^* \leftarrow \mathsf{H}_{sk}(x^*)$; 
+            \item 令$c^* = x^*$, $k_0^* = \pi^*$, 随机采样$k_1^* \sample \Pi$; 
+            \item 随机选取$\beta \sample \{0,1\}$, 将$(c^*, k_\beta^*)$发送给$\mathcal{A}$作为挑战. 
+        \end{enumerate}
+        敌手$\mathcal{A}$在游戏中的视图包括$(pp, pk, x^*, k_\beta^*)$. 
+    \item 应答: $\mathcal{A}$输出对$\beta$的猜测$\beta'$, $\mathcal{A}$成功当且仅当$\beta' = \beta$.
+\end{itemize}
+为了准备将挑战密文的分布从$x^* \in L$切换到$x^* \in X \backslash L$, 我们首先需要引入以下的游戏作为过渡, 这是因为分布切换后$x^*$已经不在语言$L$内, 
+$\mathcal{CH}$无法再以公开求值的方式计算哈希证明, 所以需要提前改变$\mathcal{CH}$的求值方式. 
+
+\item $\text{Game}_1$: 与$\text{Game}_0$相比唯一的区别在于挑战阶段的步骤2, 
+    $\mathcal{CH}$通过\redul{$\text{HPS}.\mathsf{PrivEval}(sk, x^*)$}秘密计算$\pi^* \leftarrow \mathsf{H}_{sk}(x^*)$. 
+    $\mathsf{H}_{sk}(\cdot)$的投射性质保证了当$x^* \in L$时, $\mathsf{PubEval}(pk, x^*, w^*) = \mathsf{H}_{sk}(x^*) = \mathsf{PrivEval}(sk, x^*)$
+    因此在敌手的视角中, $\mathcal{CH}$所作出的改变完全不可察觉, 我们有:
+    \begin{equation*}
+        \text{Game}_0 \equiv \text{Game}_1
+    \end{equation*}
+经过$\text{Game}_1$的铺垫, 我们可以顺利过渡到以下的$\text{Game}_2$.
+\item $\text{Game}_2$: 与$\text{Game}_1$唯一的区别是调用$\mathsf{SampNo}(r^*)$采样\redul{$x^* \leftarrow X \backslash L$}. 
+    SMP问题的困难性保证了敌手在相邻游戏中的视图计算不可区分: 
+    \begin{equation*}
+        \text{Game}_1 \approx_c \text{Game}_2
+    \end{equation*} 
+
+\item $\text{Game}_3$: 与$\text{Game}_2$的惟一不同是在挑战阶段随机采样\redul{$\pi^* \sample \Pi$}替代$\pi^* \leftarrow \mathsf{H}_{sk}(x^*)$. 
+    由$\mathsf{H}_{sk}(\cdot)$的平滑性保证:
+    \begin{equation*}
+        \text{Game}_2 \approx_s \text{Game}_3
+    \end{equation*}
+在$\text{Game}_3$中, $k_0^*$和$k_1^*$均是$\Pi$上的均匀分布, 因此即使对于拥有无穷计算能力的敌手$\mathcal{A}$, 其优势也为0. 综合以上, 定理得证! \qed             
+\end{trivlist}
+\end{proof}
+
+
+\subsection{基于HPS构造IND-CCA KEM}
+我们首先以自问自答的方式分析基于HPS构造CCA-secure KEM的难点. 
+\begin{trivlist}
+\item 构造~\ref{construction:CPA-KEM-from-HPS}中的KEM方案是IND-CCA安全的么? 
+\begin{itemize}
+\item 从归约证明的角度粗略分析似乎并没有技术困难, 因为归约算法$\mathcal{R}$始终掌握私钥$sk$, 可以回答任意的解封装询问. 
+    然而细致分析后发现并非如此. 与IND-CPA安全游戏相比, 在IND-CCA安全游戏中敌手的视图中额外包括了对解封装询问的应答. 
+    当解封装询问$c = x$的密文$x \notin L$时, 应答会泄漏更多关于$sk$的信息(公钥$pk$可以看做关于$sk$的部分泄漏). 
+    因此我们无法再使用平滑性得出$\text{Game}_2 \approx_s \text{Game}_3$的结论. 
+\end{itemize}
+
+\item 接上问, 既然当$x \in X \backslash L$时的解封装询问会泄漏$sk$的信息, 那拒绝此类询问是否可以达到IND-CCA安全性呢?
+\begin{itemize} 
+\item 不可以. 这是因为SMP问题的困难性使得PPT的解密者无法判定是否$x \in L$. 
+    善于思考的读者很能发现解密者还拥有解密私钥$sk$, 然而解密者(对应诚实用户)仅拥有一个解密私钥, 依然无法判定是否$x \in L$. 
+    那是否有巧妙的方案设计使得解密者拥有多个解密私钥, 从而解密者可以通过检测多个私钥求值的一致性来判定$x \in ? L$了. 
+    答案依然是否定的, 因为SMP的困难性否定了此类方案设计算法的存在性. 
+    反过来, 如果解密者拥有了对应SMP问题公开参数对应的秘密参数, 那么确实可以设计方案使得解密者拥有多个解密私钥, 
+    比如考虑$L_\text{DDH}$语言的HPS~\ref{construction:HPS-for-DDH}, 如果解密者知晓$\alpha$使得$g_1^\alpha = g_2$, 那么任取$\Delta \in \mathbb{Z}_p$, 均有: 
+    \begin{equation*}
+        (sk_1, sk_2) \thicksim (sk_1' = sk_1+\alpha \Delta, sk_2' = sk_2-\Delta) \Leftrightarrow g_1^{sk_1} g_2^{sk_2} = g_1^{sk_1'} g_2^{sk_2'}
+    \end{equation*}
+    上述设计方案已经暗含了SMP问题的困难性对解密者不复存在, 这使得安全归约将会在$\text{Game}_1 \approx_c \text{Game}_2$的步骤失败, 
+    原因是归约算法(针对SMP问题的敌手)不掌握$\alpha$, 从而无法模拟解密者的行为.  
+\end{itemize}
+\end{trivlist}
+
+通过以上的分析, 不难得出基于HPS构造CCA-secure KEM的一种思路是杜绝``危险''的解密询问: 
+\begin{itemize}
+    \item $x \in L$属于安全的解密询问, 这是因为应答$\pi = \text{HPS}.\mathsf{PubEval}(pk, x, w)$没有额外泄漏关于$sk$的信息, 
+        因此不会破坏平滑性.        
+    
+    \item $x \notin L$属于危险的解密询问, 杜绝的思路在密文中嵌入某种\red{私密认证结构}, 使得PPT的敌手无法生成有效的(valid)危险密文, 
+        同时解密者能够判定密文是否有效. 
+        具体的设计思路是将哈希证明作为信息论意义下的一次性消息验证码(information-theoretic one-time MAC), 此处需要满足2-universal性质的HPS.
+\end{itemize}
+
+\begin{construction}[基于HPS的CCA-secure KEM]\label{construction:CCA-KEM-from-HPS}
+构造的组件是: 
+\begin{itemize}
+    \item 满足smooth性质的$\text{HPS}_1$
+    \item 满足2-universal性质的$\text{HPS}_2$
+\end{itemize}
+
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$:  
+    \begin{enumerate}
+        \item 运行$pp_1 \leftarrow \text{HPS}_1.\mathsf{Setup}(1^\kappa)$, 
+            其中$pp_1 = (\mathsf{H}_1, SK_1, PK_1, X, L, W, \Pi_1, \alpha_1)$; 
+        \item 运行$pp_2 \leftarrow \text{HPS}_2.\mathsf{Setup}(1^\kappa)$, 
+            其中$pp_2 = (\mathsf{H}_2, SK_2, PK_2, X, L, W, \Pi_2, \alpha_2)$; 
+        \item 输出公开参数$pp = (pp_1, pp_2)$. 
+            公钥空间$PK = PK_1 \times PK_2$, 
+            私钥空间$SK = SK_1 \times SK_2$, 密文空间$C = X \times \Pi_2$, 会话密钥空间$K = \Pi_1$. 
+    \end{enumerate}
+
+\item $\mathsf{KeyGen}(pp)$: 解析$pp = (pp_1, pp_2)$, 执行以下步骤:
+    \begin{enumerate}
+        \item 计算$(pk_1, sk_1) \leftarrow \text{HPS}_1.\mathsf{KeyGen}(pp_1)$;
+        \item 计算$(pk_2, sk_2) \leftarrow \text{HPS}_2.\mathsf{KeyGen}(pp_2)$;
+        \item 输出公钥$pk = (pk_1, pk_2)$和私钥$sk = (sk_1, sk_2)$. 
+    \end{enumerate}
+
+\item $\mathsf{Encaps}(pk; r)$: 以公钥$pk = (pk_1, pk_2)$和随机数$r$为输入, 执行以下步骤:
+    \begin{enumerate}
+        \item 运行$(x, w) \leftarrow \mathsf{SampR}(r)$随机采样语言$L_1$中的实例和相应证据; 
+        \item 通过$\text{HPS}_1.\mathsf{PubEval}(pk_1, x, w)$计算实例$x$在$\text{HPS}_1$中的
+            哈希证明$\pi_1 \leftarrow \mathsf{H}_1(sk_1, x)$; 
+        \item 通过$\text{HPS}_2.\mathsf{PubEval}(pk_2, x, w)$计算实例$x$在$\text{HPS}_2$中的哈希证明
+            $\pi_2 \leftarrow \mathsf{H}_2(sk_2, x)$; 
+        \item 输出实例$x$和$\pi_2$作为密文$c$, 其中$\pi_2$可以看做$x$的MAC值; 输出哈希证明$\pi_1$作为会话密钥$k$. 
+    \end{enumerate}
+
+    \item $\mathsf{Decap}(sk, c)$: 以私钥$sk = (sk_1, sk_2)$和密文$c = (x, \pi_2)$为输入, 
+        通过$\text{HPS}_2.\mathsf{PrivEval}(sk_2, x)$计算$x$的哈希证明$\pi_2' \leftarrow \mathsf{H}_2(sk_2, x)$;
+        如果$\pi_2 \neq \pi_2'$则输出$\bot$, 
+        否则通过$\text{HPS}_1.\mathsf{PrivEval}(sk_1, x)$计算$x$的哈希证明$\pi_1 \leftarrow \mathsf{H}_1(sk_1, x)$
+        以恢复会话密钥$k$. 
+\end{itemize}
+\end{construction} 
+
+构造~\ref{construction:CCA-KEM-from-HPS}的正确性由$\text{HPS}_1$和$\text{HPS}_2$的完备性保证, 安全性由以下定理保证. 
+
+\begin{theorem}
+如果$L \subseteq X$上的SMP问题成立, 那么构造~\ref{construction:CCA-KEM-from-HPS}中的KEM是IND-CCA安全的. 
+\end{theorem}
+
+\begin{proof}
+为了便于安全分析, 首先对密文$c = (x, \pi_2)$做如下的分类:
+\begin{itemize}
+    \item 良生成的(well-formed) $\iff$ $x \in L$
+    \item 有效的(valid) $\iff$ $\mathsf{H}_{sk_2}^2(x) = \pi_2$
+\end{itemize}
+根据以上定义, 良生成的密文有可能是无效的, 有效的密文也可能是非良生成的. 
+在基于HPS构造的KEM中, 非良生成的密文是\red{``危险的''}, 因为解封装询问的结果会泄漏关于私钥的信息. 
+
+以下通过游戏序列完成定理证明: 
+\begin{trivlist}
+\item $\text{Game}_0$: 对应真实的游戏
+    \begin{itemize}
+        \item 初始化: $\mathcal{CH}$生成
+            $pp_1 \leftarrow \text{HPS}_1.\mathsf{Setup}(1^\kappa)$, 
+            $pp_2 \leftarrow \text{HPS}_2.\mathsf{Setup}(1^\kappa)$, 
+            计算$(pk_1, sk_1) \leftarrow \text{HPS}_1.\mathsf{KeyGen}(pp_1)$, 
+            $(pk_2, sk_2) \leftarrow \text{HPS}_2.\mathsf{KeyGen}(pp_2)$, 
+            发送$pp = (pp_1, pp_2)$和$pk = (pk_1, pk_2)$给敌手$\mathcal{A}$. 
+
+        \item 挑战: $\mathcal{CH}$执行以下操作生成挑战 
+            \begin{enumerate}
+                \item 运行\redul{$(x^*, w^*) \leftarrow \mathsf{SampR}(r^*)$}随机采样$L$中的实例和证据;  
+                \item 通过\redul{$\text{HPS}_1.\mathsf{PubEval}(pk_1, x^*, r^*)$}计算哈希证明
+                    $\pi_1^* \leftarrow \mathsf{H}_1(sk_1, x^*)$; 
+                \item 通过\redul{$\text{HPS}_2.\mathsf{PubEval}(pk_2, x^*, w^*)$}计算哈希证明
+                    $\pi_2^* \leftarrow \mathsf{H}_2(sk_2, x^*)$; 
+                \item 令$c^* = (x^*, \pi_2^*)$, \redul{$k_0^* = \pi_1^*$}, $k_1^* \sample \Pi$; 
+                \item 选择随机比特$\beta \sample \{0,1\}$, 发送$(c^*, k_\beta^*)$给$\mathcal{A}$作为挑战. 
+            \end{enumerate}
+
+        \item 解封装询问: 当敌手发起解封装询问$c = (x, \pi_2)$时, $\mathcal{CH}$分情况应答如下
+            \begin{itemize}
+                \item $c = c^*$: 返回$\bot$; 
+                \item $c \neq c^*$: 如果\redul{$\pi_2 = \text{HPS}_2.\mathsf{PrivEval}(sk_2, x)$}  
+                    返回$\text{HPS}_1.\mathsf{PrivEval}(sk_1, x)$; 否则返回$\bot$. 
+            \end{itemize}
+    \end{itemize}
+
+\item $\text{Game}_1$: 与CPA构造情形类似, 该游戏的引入是为了将密文$c^*$由语言$L$内切换到语言外. 
+    在挑战阶段, $\mathcal{CH}$通过\redul{$\text{HPS}_1.\mathsf{PrivEval}(sk_1, x^*)$}计算$\pi_1^* \leftarrow \mathsf{H}_1(sk_1, x^*)$, 
+    通过\redul{$\text{HPS}_2.\mathsf{PrivEval}(sk_2, x^*)$}计算$\pi_2^* \leftarrow \mathsf{H}_2(sk_2, x^*)$. 
+    HPS的投射性保证了$\text{Game}_0 \equiv \text{Game}_1$. 
+
+\item $\text{Game}_2$: 将随机采样$L$中的实例和证据$(x^*, w^*) \sample \mathsf{SampR}(r^*)$切换
+    为随机采样$X \backslash L$中的实例\redul{$x^* \leftarrow \mathsf{SampNo}(r^*)$}.  
+    SMP问题的困难性保证了敌手在相邻游戏中的视图计算不可区分: 
+    \begin{equation*}
+        \text{Game}_1 \approx_c \text{Game}_2
+    \end{equation*}
+
+在游戏序列演进过程中, 仅在论证$\text{Game}_1 \approx_c \text{Game}_2$时依赖计算困难假设; 
+其余的分析均在信息论意义下(information-theoretic)完成, 从此刻起挑战者$\mathcal{CH}$拥有无穷计算能力. 
+ 
+\item $\text{Game}_3$: 微调解密规则, 将直接拒绝非良生成但有效的(ill-formed but valid)密文.  
+    对于解封装询问$c = (x, \pi_2)$, 只要$x \notin L$, 那么即使$\pi_2 = \mathsf{H}_{sk_2}^2(x)$也直接返回$\bot$表示拒绝. 
+    改变规则的目的是拒绝所有危险密文, 从而确保解封装询问的应答不泄漏关于私钥的信息. 
+
+\begin{claim}
+    $|\Pr[S_3] - \Pr[S_2]| \leq \mathsf{negl}(\kappa)$. 
+\end{claim}
+\begin{proof}
+注意到正常的解封装算法会对此类密文返回解封装结果, 并不是直接返回$\bot$拒绝. 为了分析规则改变引发的差异, 引入如下事件$E$: 
+\begin{itemize}
+    \item $\mathcal{A}$发起非良生成但有效的解封装询问, 即:$x \notin L \wedge \pi_2 = \mathsf{H}_{sk_2}^2(x)$
+\end{itemize} 
+显然如果事件$E$不发生, 那么$\text{Game}_2$与$\text{Game}_3$完全相同. 
+令$Q$表示$\mathcal{A}$发起解封装询问的最大次数, $\text{HPS}_2$的2-universal保证了(存疑): 
+\begin{equation*}
+    \Pr[E] \leq Q/|\Pi_2| = \mathsf{negl}(\kappa)
+\end{equation*}
+利用差异引理, 断言得证. \qed  
+\end{proof}
+
+\item $\text{Game}_4$: 对所有良生成的解封装询问$c = (x, \pi_2)$也即$x \in L$, 
+    $\mathcal{CH}$使用公钥$pk = (pk_1, pk_2)$和相应的证据$w$应答. 
+    注意到$\mathcal{CH}$拥有无穷计算能力, 因此能够计算出$x \in L$的证据$w$.  
+    该规则变化仅是为了说明对良生成密文的解封装不会额外泄漏关于私钥的信息, 不会引发敌手视图的任何改变, 
+    因此$\text{Game}_3 \equiv \text{Game}_4$. 
+
+\item $\text{Game}_5$: 随机采样\redul{$\pi_1^* \sample \Pi_1$}代替$\pi^* \leftarrow \mathsf{H}_1(sk_1, x^*)$. 
+\end{trivlist}
+
+\begin{claim}
+敌手$\mathcal{A}$在$\text{Game}_4$和$\text{Game}_5$中的视图统计不可区分. 
+\end{claim}
+
+\begin{proof}
+敌手$\mathcal{A}$在$\text{Game}_4$和$\text{Game}_5$中的视图均由以下部分组成: 
+\begin{itemize}
+    \item 公开参数: $pp = (pp_1, pp_2)$; 
+    \item 公钥: $pk = (pk_1, pk_2)$; 
+    \item 挑战: 密文$c^* = (x^*, \pi_2^*)$和会话密钥$k_\beta^*$; 
+    \item 解封装询问: 由公钥$pk$和敌手$\mathcal{A}$的询问确定.  
+\end{itemize}
+接下来, 我们通过递增分布项的方式证明断言:
+\begin{enumerate}
+\item 首先由$\text{HPS}_1$的平滑性可知, 当$x^* \sample X \backslash L$是有: 
+    \begin{equation*}
+        (pk_1, x^*, \boxed{\mathsf{H}_1(sk_1, x^*)}) \approx_s (pk_1, x^*, \boxed{U_{\Pi_1}})
+    \end{equation*}
+
+\item 将$\red{(pk_2, \pi_2^*)}$表示为$g_{sk_2}(x^*)$, 其中$g_{sk_2}(x) := (\alpha_2(sk_2), \mathsf{H}_2(sk_2, x))$. 
+    复合引理(composition lemma)可推出$X \approx_s Y \Rightarrow f(X) \approx_s f(Y)$, 其中$f$可以是任意(概率)函数.  
+    将上面公式左右两边的分布分别看成$X$和$Y$, 令$f(pk_2, x^*, \pi_2) = (g_{sk_2}(x^*), pk_2, x^*, \pi_2)$, 应用复合引理即可得: 
+    \begin{equation*}
+        (\red{pk_2, \pi_2^*}, \uline{pk_1, x^*, \mathsf{H}_{sk_1}^1(x^*)}) \approx_s 
+        (\red{pk_2, \pi_2^*}, \uline{pk_1, x^*, U_{\Pi_1}})
+    \end{equation*}
+    令$view' = (pk, x^*, \pi_2^*, k_\beta^*)$, 上面公式可以简写为$view_4' \approx_s view_5'$.
+
+\item 在左右两边添加解封装结果.  
+    $\mathcal{CH}$对解封装询问的应答总可以表示为$f_\mathsf{decaps}(view')$, 
+    $f_\mathsf{decaps}$编码了敌手$\mathcal{A}$选择密文$\{c_i\}$的策略和解封装算法, 易知$f_\mathsf{decaps}$是一个PPT算法. 
+    再次应用复合引理, 可以得到:
+    \begin{equation*}
+        (\red{f_\mathsf{decaps}(view_4')}, view_4') \approx_s (\red{f_\mathsf{decaps}(view_5')}, view_5')
+    \end{equation*}
+\end{enumerate}
+根据敌手视图的定义, 可以得到$\text{Game}_4 \approx_s \text{Game}_5$, 断言得证. \qed 
+\end{proof}
+
+在$\text{Game}_5$中, $k_0^*$和$k_1^*$均从$\Pi_1$中随机采样. 因此对于任意敌手均有$\Pr[S_5] = 0$. 
+综合以上, 定理得证! \qed
+\end{proof} 
+
+\subsection*{小结}
+HPS给出了基于SMP类型判定性问题构造公钥加密的范式, 在论证安全性时遵循如下的三步走(三板斧)套路: 
+\begin{center}
+\begin{tikzpicture}
+    \node [shapenode, name=real, draw=none, fill=blue!30] {Real \\ ~~~$x \in L$~~~}; 
+    
+    \node [shapenode, name=ideal, draw=none, right of = real, xshift=12em, fill=gray!50] {Ideal \\ ~~~$x \notin L$~~~}; 
+
+    \draw (real) edge [<->, thick] node [above, red] {SMP} (ideal);
+\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+    \item 真实游戏中挑战密文为语言中的随机实例$x \in L$; 
+    \item 理想游戏中挑战密文为语言外的随机实例$x \notin L$, 在信息论意义下证明敌手优势可忽略; 
+    \item 利用SMP完成语言内外的切换, 论证PPT敌手在真实游戏和理想游戏中的优势差可忽略. 
+\end{enumerate}
+论证过程与中国道家的``阴阳相生''思想暗合. 
+
+在很多情形下, 公钥加密的私钥嵌入于底层困难问题, 
+因此设计高等级安全公钥加密的一个常见难点是归约证明过程中, 归约算法$\mathcal{R}$需要在未知私钥的情形下模拟与私钥相关的谕言机. 
+一个具体的例子就是难以证明ElGamal PKE具备私钥抗泄漏安全性, 因为私钥嵌入在底层DDH困难问题中.  
+Cramer和Shoup另辟蹊径, 绕过了该难点, 关窍是在基于HPS的公钥加密设计中, 公钥加密的密文嵌入于底层困难问题, 
+归约算法$\mathcal{R}$始终掌握私钥, 从而可以完美模拟任意与私钥相关的谕言机. 
+正是该特性使得HPS的用途极为广泛, 远远超越了最初的CCA安全的公钥加密, 
+如HPS在基于口令的密钥交换(PAKE: Password authenticated key exchange)、
+不经意传输(Oblivious transfer)的构造中均有重要应用, 更是达成密钥泄漏安全、消息依赖密钥安全等高等级安全的主流技术工具. 
+
+
+% \section{More Applications}
+% \subsection{Leakage Resilient PKE}
+% \begin{frame}{Bounded Leakage Model}
+% \begin{trivlist}
+%     \item We focus on a simple yet general leakage model called Bounded Leakage Model
+% \end{trivlist}
+
+% \begin{center}
+% \begin{tikzpicture}
+%     \node [name=adv, textnode] {\includegraphics[width=0.5in]{\path/Image/cartoon/adversary.png}};
+%     \node [name=challenger, textnode, right of = adv, xshift=15em] 
+%         {\includegraphics[width=0.5in]{\path/Image/cartoon/challenger.png}}; 
+%     \node [name=Func, right of = challenger, xshift=4em, shapenode, minimum height=3em, thick] {$\mathsf{F}$~~~\red{$sk$}~~~~~}; 
+
+%     \draw ($(adv.east)+(0em, 1em)$) edge[->] node[above] {$g_i$} ($(challenger.west)+(0em, 1em)$);
+%     \draw ($(challenger.west)+(0em, -1em)$) edge[->] node[above] {$g_i(sk)$} ($(adv.east)+(0em, -1em)$);
+
+%     \node [name=restriction, below of = adv, xshift=9em, yshift=-4em] 
+%         {natural restriction\\$\sum|g_i(\red{sk})| \leq |\red{sk}|$}; 
+% \end{tikzpicture}
+% \end{center}
+% \end{frame}
+
+% \begin{frame}{Leakage-Resilient KEM}
+% \begin{definition}[$\ell$-Leakage-Resilience]
+% KEM is IND-CPA/CCA $\ell$-leakage-resilient if for any PPT $\mathcal{A}$: 
+% \begin{displaymath}
+%     \Pr \left[\beta = \beta':
+%     \begin{array}{ll}
+%         & (pk, sk) \leftarrow \mathsf{Gen}(\lambda);\\
+%         & \blue{state \leftarrow \mathcal{A}_1^{\mathcal{O}_\text{leak}(\cdot)}(pk);}\\
+%         & (c^*, k^*) \leftarrow \mathsf{Encaps}(pk); \\
+%         & k_0^* \leftarrow k^*, k_1^* \sample K;\\
+%         & \beta \sample \{0,1\}; \\
+%         & \beta' \leftarrow \mathcal{A}_2^{\red{\mathcal{O}_\text{dec}(\cdot)}}(pk, c^*, k_\beta^*);
+%     \end{array} 
+%     \right] - \frac{1}{2}
+% \end{displaymath}
+% Here $\mathcal{O}_\text{leak}(\cdot)$ on input $g_i: SK \rightarrow \{0,1\}^*$, outputs $g_i(sk)$. 
+% \end{definition}
+
+% \begin{trivlist}
+%     \item The only restriction is $\sum|g_i(sk)| \leq \ell$. 
+% \end{trivlist}
+% \end{frame}
+
+% \begin{frame}{How to achieve provably secure leakage-resilience?}
+
+% \begin{center}
+% \begin{tikzpicture}
+% \uncover<1->{
+%     \node [name=adv, textnode] {\includegraphics[width=0.5in]{\path/Image/cartoon/adversary.png}};
+%     \node [name=LRFunc, shapenode, right of = adv, xshift=8em, minimum height=3em, 
+%         thick, label={[xshift=0cm, yshift=1em]$\mathcal{R}$}] {$\mathsf{F}$~~\red{$sk$}~~~~};
+%     \node [name=assumptions, shapenode, draw=none, rounded corners=1em, minimum height=3em, fill=blue!30, 
+%         right of = LRFunc, xshift=8em] {Assumptions}; 
+% }
+
+% \uncover<2->{
+%     \draw ($(adv.north)+(2em, -0.5em)$) edge[->, thick, bend left] ($(LRFunc.north)+(-1em, 2em)$);
+%     \draw ($(LRFunc.north)+(1em, 2em)$) edge[->, thick, bend left] ($(assumptions.west)+(0em, 1.5em)$);
+% }
+
+% \uncover<3->{
+%     \draw ($(adv.east)+(0em, 0.5em)$) edge[->] node[above] {$g$} ($(LRFunc.west)+(0em, 0.5em)$);
+%     \draw ($(LRFunc.west)+(0em, -0.5em)$) edge[->] node[below] {$g(sk)$} ($(adv.east)+(0em, -0.5em)$);
+% }
+% \uncover<4->{
+%     \draw ($(LRFunc.east)+(0em, 0em)$) edge[<->] ($(assumptions.west)+(0em, 0em)$);
+%     \draw ($(LRFunc.south)+(0em, 0.7em)$) edge[->, bend right = 60, thick, dashed, color=red] ($(assumptions.south)+(0em, 0em)$);
+% }
+% \end{tikzpicture}
+% \end{center}
+
+% \vspace{-2em}
+% \uncover<5->{
+% Technical hurdle: a paradox
+
+% \begin{itemize}
+%     \item In order to answer \emph{\red{arbitrary}} leakage queries, it seems $\mathcal{R}$ must know $sk$   
+%     \item Typically $\mathcal{R}$ does not know $sk$ since the challenge instance is embedded in it 
+% \end{itemize}
+% }
+
+% \uncover<6->{
+% \begin{remarkblock}
+%     With HPS, $\mathcal{R}$ always know $sk$ $\leadsto$ $\mathcal{R}$ can handle leakage queries
+%     \begin{itemize} 
+%         \item hard problem instance is not embedded to $sk$ in HPS
+%     \end{itemize}
+% \end{remarkblock}
+% }
+% \end{frame}
+
+% \begin{frame}{Thinking}
+% \begin{trivlist}
+% \uncover<1->{
+%     \item The above KEM based on HPS is CPA-secure, but is insecure against key-leakage attack. 
+%         \begin{itemize}
+%         \uncover<2->{
+%             \item From key leakage, $\mathcal{A}$ gets to learn partial information about $sk$, 
+%                 thus $sk$ is not \red{uniformly random} in $\mathcal{A}$'s view anymore.
+%         }
+
+%         \uncover<3->{
+%             \item Thereby, we can not apply smoothness to argue $\mathsf{H}_{sk}(x^*)$ 
+%                 is close to uniform \emph{in the presence of key leakage}. 
+%         }  
+%         \end{itemize} 
+% }
+
+% \vspace{1em}
+% \uncover<4->{
+% \begin{center}
+%     \emph{How to solve this problem?}
+% \end{center}
+% }
+% \end{trivlist}
+% \end{frame}
+
+
+% \begin{frame}{The Seminal Leakage-Resilient PKE in Bounded Leakage Model}
+% \uncover<1->{
+% \begin{noteblock}
+%     \cite{NS-CRYPTO-2009} (CRYPTO 2009): Public-Key Cryptosystems Resilient to Key Leakage
+% \end{noteblock}
+
+% \begin{figure}[!hbth]
+%     \centering
+%     \includegraphics[height=1.2in]{\path/Photo/Moni_Naor.jpeg} \qquad
+%     \includegraphics[height=1.2in]{\path/Photo/Gil_Segev.jpg}
+%     \caption{Moni Naor \& Gil Segev}
+% \end{figure}
+% }
+
+% \begin{trivlist}
+% \uncover<2->{
+%     \item \mdblue{No leakage:} smoothness $\Rightarrow \pi^* \leftarrow \mathsf{H}_{sk}(x^*) \approx_s U_\Pi$, 
+%         $sk \sample SK$.  
+% }
+
+% \uncover<3->{
+%     \item \red{Bounded leakage:} $sk$ is not uniformly random, so does $\pi^*$.  
+%         But $\pi^*$ still has sufficient min-entropy
+% }
+% \end{trivlist}
+
+% \end{frame}
+
+
+% \begin{frame}{Notions of Entropy}
+% \begin{trivlist}
+% \uncover<1->{
+% \item \mdblue{min-entropy} --- the unpredictability of a random variable $X$: 
+%     \begin{equation*}
+%         \minentropy(X) = - \log (\max_x \Pr[X = x])
+%     \end{equation*}
+%     the optimal probability of guessing $X$.  
+% }
+
+% \vspace{0.5em}
+% \uncover<2->{
+% \item \mdblue{average min-entropy} --- the remaining unpredictability of a random variable 
+%         $X$ conditioned on another random variable $Y$: 
+%     \begin{equation*}
+%         \avminentropy(X|Y) = -\log \left(\expect_{y \leftarrow Y} \left[2^{-\minentropy(X|Y = y)}\right]\right)
+%     \end{equation*}
+%     the optimal probability of guessing $X$, given knowledge of $Y$.  
+% }
+
+% \vspace{0.5em}
+% \uncover<3->{
+% \begin{noteblock}
+% \mdblue{Chain Lemma:} If $|Y| = 2^r$, then $\avminentropy(X|Y) \geq \minentropy(X) - r$. 
+% \end{noteblock}
+% }
+% \end{trivlist}
+% \end{frame}
+
+
+% \begin{frame}{Randomness Extractor}
+% \begin{definition}[Average-case strong randomness extractor]
+% $\mathsf{Ext}: \{0, 1\}^n \times \{0, 1\}^t \rightarrow \{0, 1\}^m$ is an average-case 
+% $(\kappa, m)$-strong extractor if for all pairs of random variables $(X,Y)$ such that 
+% $X \in \{0,1\}^n$ and $\avminentropy(X|Y) \geq \kappa$ it holds that:
+% \begin{equation*}
+%     (\mathsf{Ext}(X, S), S, Y) \approx_s (U_m, S, I))
+% \end{equation*} 
+% where $S$ is uniform over $\{0, 1\}^t$.
+% \end{definition} 
+
+% \vspace{1em}
+
+% \begin{remarkblock}
+%     Leftover hash lemma states that any family of universal hash functions 
+%     is an average-case strong randomness extractor. 
+% \end{remarkblock} 
+% \end{frame}
+
+% \begin{frame}{Leakage-resilient KEM from HPS}
+% \begin{trivlist}
+% \item \mdblue{Ingredients:} $(\log |\Pi| - \ell, m)$ average-case strong randomness extractor 
+% $\mathsf{Ext}$ (where $\ell$ is the leakage bound), smooth HPS 
+% \end{trivlist}
+% \begin{construction}[Leakage-resilient KEM from Smooth HPS]
+% \begin{itemize}
+%     \item $\mathsf{Gen}(\lambda)$: run $(pk, sk) \leftarrow \text{HPS}.\mathsf{Gen}(\lambda)$. 
+
+%     \item $\mathsf{Encaps}(pk;r)$: $C = X$, $K = \{0,1\}^m$ 
+%         \begin{enumerate}
+%             \item run $(x, w) \leftarrow \mathsf{SampR}(r)$;
+%             \item compute $\pi \leftarrow \mathsf{H}_{sk}(x)$ via $\text{HPS}.\mathsf{Pub}(pk, x, w)$;
+%             \item pick \redul{$s \sample \{0,1\}^t$};  
+%             \item output \redul{$c = (x, s)$}, \redul{$k \leftarrow \mathsf{Ext}(\pi, s)$}. 
+%         \end{enumerate}
+
+%     \item $\mathsf{Decaps}(sk, c)$: 
+%     \begin{enumerate}
+%         \item parse $c = (x, s)$; 
+%         \item compute $\pi \leftarrow \text{HPS}.\mathsf{Priv}(sk, x)$; 
+%         \item output $k \leftarrow \mathsf{Ext}(\pi, s)$.
+%     \end{enumerate} 
+% \end{itemize}
+% \end{construction} 
+% \end{frame}
+
+% \begin{frame}{Security Proof}
+% \uncover<1->{
+% \begin{noteblock}
+% \mdblue{Theorem:} Assuming SMP is hard, the above construction is $\ell$-LR-CPA secure.
+% \end{noteblock}
+% }
+% \uncover<2->{
+%     The proof is almost identical to that for plain CPA security. 
+% }
+% \begin{itemize}
+%     \uncover<3->{
+%         \item SMP is embedded in the ciphertext, 
+%             thus $\mathcal{R}$ always has the real $sk$ to handle all leakage queries. 
+%     }
+
+%     \uncover<4->{
+%         \item Chain lemma + Smoothness $\Rightarrow$ In the presence of bounded leakage: 
+%         \begin{eqnarray*} 
+%             \avminentropy(\pi^*|leak) & \geq & \minentropy(\pi^*) - \ell\\
+%                                       & = & \log |\Pi| - \ell
+%         \end{eqnarray*}
+%         \vspace{-1em}
+%     }
+
+%     \uncover<5->{
+%         \item Apply randomness extractor: 
+%         \begin{equation*}
+%             k^* \leftarrow \mathsf{Ext}(\pi^*, s^*) \approx_s U_m
+%         \end{equation*}
+%         \vspace{-1em}
+%     }   
+% \end{itemize}
+% \end{frame}
+
+% \subsection{Lossy Trapdoor Functions}
+% \begin{frame}{LTDF from Dual HPS}
+% \begin{noteblock}
+% \cite{Wee2012-EUROCRYPT} (EUROCRYPT 2012): Dual Projective Hashing and Its Applications
+% \end{noteblock}
+
+% \begin{trivlist}
+%     \item \mdblue{Key Observation:} $\mathsf{H}_{sk}(x)$ could also be wrote as $\mathsf{H}_x(sk)$
+%     \begin{itemize}
+%         \item projective $\leadsto$ lossy when $x \in L$
+%         \item \red{(informal)} universal $\leadsto$ invertible when $x \notin L$
+%     \end{itemize}
+% \end{trivlist}
+
+% \begin{definition}[Dual HPS]
+% Same as HPS expect universality is replaced by invertibility---
+% $\forall (x, \tau) \leftarrow \mathsf{SampNo}(\lambda)$ and $\forall sk$, 
+% one can efficiently recover $sk$ from $(\alpha(sk), \mathsf{H}_{x}(sk))$ with $\tau$: 
+% \begin{center}
+%     $\mathsf{TdInv}(\tau, \alpha(sk), \mathsf{H}_x(sk)) = sk$
+% \end{center}
+% \end{definition}
+
+% \end{frame}
+
+% \begin{frame}{Connection Between LTDF and HPS}
+% \begin{construction}[LTDF from Dual HPS]
+% \begin{itemize}
+%     \item $\mathsf{Gen}(\lambda; inj)$: run $(x, \tau) \leftarrow \mathsf{SampNo}(\lambda)$, output $x$ and $\tau$
+%     \item $\mathsf{Gen}(\lambda; lossy)$: run $(x, w) \leftarrow \mathsf{SampYes}(\lambda)$, output $x$ and $\bot$
+%     \item $\mathsf{Eval}(x, sk)$: \redul{treat $x$ as evaluation key and $sk$ as input}
+%     \begin{center}
+%         $F_x(sk): = \alpha(sk)||\mathsf{H}_x(sk)$
+%     \end{center}
+
+%     \item $\mathsf{Invert}(\tau, y_0||y_1)$: output $\mathsf{TdInv}(\tau, y_0||y_1)$
+% \end{itemize}
+% \end{construction}
+
+% \begin{noteblock}
+%     \mdblue{Theorem:} Under the SMP, the above construction yields a collection of $(n, \log|\text{Img}(\alpha)|)$-LTDF.
+% \end{noteblock}
+
+% \begin{itemize}
+%     \item Correctness for injective mode $\Leftarrow$ Invertibility
+%     \item Lossiness for lossy mode: $\text{Img}(F_x) = \text{Img}(\alpha)$ for $x \in L$ $\Leftarrow$ Projective property
+%     \item Injective $\approx_c$ Lossy $\Leftarrow$ SMP
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{More Thinking}
+% \begin{trivlist}
+% \item \red{Shortcomings} of \redul{Dual HPS $\Rightarrow$ LTDF}
+% \begin{itemize}
+%     \item require HPS satisfying invertibility $\leadsto$ reduce generality
+%     \item no efficient ABO construction is known 
+% \end{itemize}
+
+% \vspace{1em}
+% \item \mdblue{Observation:} 
+% \begin{itemize}
+%     \item invertibility or even injectivity is not necessary for some applications
+%     \item efficient ABO construction is possible by exploiting algebra structure of SMP
+% \end{itemize}
+% \end{trivlist}
+% \end{frame}
+
+% \begin{frame}{(Algebra) Subset Membership Problem}
+% \uncover<1->{
+% \begin{center}
+% \begin{tikzpicture}
+%     \draw (0, 2) node {$U_X \approx_c U_L$};
+%     \draw [color=gray!40, fill=gray!40] (0,0) circle (1cm);
+%     \draw (0,0.7) node {$X$};
+%     \draw [color=violet!70, fill=violet!70] (0,0) circle (0.4cm);
+%     \draw (0,0) node {$L$};
+%     \draw [color=cyan, fill=cyan] (4,0) circle (0.4cm);
+%     \draw (4,0) node {$W$}; 
+%     \draw [<->, thin] (0.4,0) -- (3.6,0);
+%     \draw (2,0.2) node {$\mathsf{R}_L$};
+%     \draw [color=black] (2, -1) node {$\mathsf{SampR}(\lambda)$}; 
+%     \draw [color=black] [->, thin] (1.8, -0.8) -- (0.3, -0.3);
+%     \draw [color=black] [->, thin] (2.2, -0.8) -- (3.7, -0.3);
+
+%     \draw [color=black] (-3, 1) node {$\mathsf{SampAll}(\lambda)$};
+%     \draw [color=black] (-3, 0) node {$\mathsf{SampYes}(\lambda)$};
+%     \draw [color=black] (-3, -1) node {$\mathsf{SampNo}(\lambda)$}; 
+
+%     \draw [color=black] [->, thin] (-2,1) -- (-0.72,0.65);
+%     \draw [color=black] [->, thin] (-2,0) -- (-0.4,0);
+%     \draw [color=black] [->, thin] (-2,-1) -- (-0.5,-0.5); 
+% \end{tikzpicture}
+% \end{center}
+% }
+
+% \uncover<2->{
+% Algebra SMP (mild \& natural)
+%     \begin{itemize}
+%         \item $X$ forms an Abelian group, $L$ forms a subgroup of $X$
+%         \item Quotient group $H = X/L$ is cyclic and $\#(H) = |X|/|L| = p$
+%     \end{itemize}    
+% }
+
+% \uncover<3->{
+% Algebraic properties $\leadsto$ two useful facts
+% \begin{enumerate}
+%     \item Let $\bar{a} = aL$ for some $a \in X \backslash L$ be a generator of $H$, 
+%         the co-sets $(aL, 2aL, \dots, (p-1)aL, paL = L)$ constitute a partition of $X$. 
+
+%     \item For each $x \in L$, $ia+x \notin L$ for $1 \leq i <p$
+% \end{enumerate}
+% }
+
+% \end{frame}
+
+% \begin{frame}{ABO-RLF from HPS for ASMP}
+% \uncover<1->{
+% Let $aL$ be a generator for $H = X/L$, we build ABO-RLF from HPS for ASMP as below: 
+% \begin{itemize}
+%     \item $\mathsf{Gen}(\lambda, b^*)$: $(x, w) \leftarrow \mathsf{SampYes}(\lambda)$, 
+%         output $ek = -b^*a + x$
+%     \item $f_{ek,b}(sk)$: output $\alpha(sk)||\mathsf{H}_{sk}(ek+ba)$
+% \end{itemize}
+% }
+
+% \uncover<2->{
+% \begin{noteblock}
+% \mdblue{\textbf{Lemma:}} Assume $g_x(sk):=\alpha(sk)||\mathsf{H}_{sk}(x)$ is $v$-regular for any $x \notin L$. 
+% The above construction is $(v, \log |\textup{Img} \alpha|)$-ABO-RLF under ASMP. 
+% \end{noteblock}
+% }
+
+% \uncover<3->{
+% \begin{itemize}
+%     \item $ek+ba = x + (b-b^*)a \notin L$ if $b \neq b^*$ $\Rightarrow$ $v$-regular
+%     \item $ek+ba = x + (b-b^*)a \in L$ if $b = b^*$ $\Rightarrow$ lossy by the projective property
+%     \item ASMP $\Rightarrow$ Hidden lossy branch. For any $b_0^*, b_1^* \in \mathbb{Z}_p$: 
+%     \begin{equation*}
+%         (-b_0^*a+x) \approx_c (-b_0^*a+u) \equiv (-b_1^*a+u) \approx_c (-b_1^*a+x)
+%     \end{equation*}
+%     where $u \sample X$. 
+% \end{itemize}
+% }
+
+% \end{frame}
+
+% \subsection{Lossy Encryption}
+% \begin{frame}{Lossy Encryption}
+% \begin{trivlist}
+% \item Peikert, Vaikuntanathan, Waters: Dual Mode Encryption
+% \begin{noteblock}
+% \cite{PVW2008} (CRYPTO 2008): A Framework for Efficient and Composable Oblivious Transfer
+% \end{noteblock}
+
+% \item Bellare, Hofheinz, Yilek: Lossy Encryption
+% \begin{noteblock}
+% \cite{BHY2009} (EUROCRYPT 2009): Possibility and impossibility results for encryption and commitment 
+%     secure under selective opening
+% \end{noteblock}
+
+% \begin{itemize}
+%     \item injective public keys: normal encryption
+%     \item lossy public keys: lossy encryption --- encryptions of any two plaintexts under a lossy key 
+%         yield distributions that are statistically close
+%     \item injective public keys $\approx_c$ lossy public keys
+% \end{itemize}
+
+% \end{trivlist}
+% \end{frame}
+
+% \begin{frame}{Lossy KEM}
+% \begin{trivlist}
+% \item We can define lossy KEM analogously to lossy encryption
+% \begin{itemize}
+%     \item injective public keys: normal encapsulation
+%     \item lossy public keys: lossy encapsulation --- encapsulated key is statistically close to uniform 
+%     \item injective public keys $\approx_c$ lossy public keys
+% \end{itemize}
+% \end{trivlist}
+
+% \begin{center}
+%     Lossy Encryption $\Leftrightarrow$ Lossy KEM 
+% \end{center}
+% \end{frame}
+
+% \begin{frame}{Lossy KEM from HPS}
+% \begin{trivlist}
+%     \item \mdblue{Main idea:} dual use of HPS
+% \end{trivlist}
+
+
+% \centering
+% \begin{tabular}{|c|c|c|c|c|}
+
+% \hline
+%            & $pk$       & $sk$         & $x$        & $w$\\
+% \hline
+% normal use & public key & secret key   & ciphertext & randomness\\
+% \hline
+% dual use   & ciphertext & randomness & public key & secret key\\
+% \hline
+% \end{tabular}
+
+% \begin{construction}[Lossy KEM from smooth HPS]
+% \begin{itemize}
+%     \item $\mathsf{Gen}(\lambda, inj)$: $(x, w) \leftarrow \mathsf{SampYes}(\lambda)$, 
+%         output $x$ as public key and $w$ as secret key. 
+
+%     \item $\mathsf{Gen}(\lambda, lossy)$: $x \leftarrow \mathsf{SampNo}(\lambda)$, output $x$ as public key. 
+
+%     \item $\mathsf{Encaps}(x; r)$: $(pk, sk) \leftarrow \text{HPS}.\mathsf{Gen}(\lambda; r)$, 
+%         output $pk$ as ciphertext and compute $\mathsf{H}_{sk}(x)$ via $\text{HPS}.\mathsf{Priv}(sk, x)$ 
+%         as encapsulated key. 
+
+%     \item $\mathsf{Decaps}(w, c)$: recover $\mathsf{H}_{sk}(x)$ via $\text{HPS}.\mathsf{Pub}(c, x, w)$.  
+% \end{itemize}
+% \end{construction}
+% \end{frame}
+

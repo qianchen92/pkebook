@@ -1,0 +1,231 @@
+\section{标准化与工程实践}
+\begin{center}
+	纸上得来终觉浅, 绝知此事要躬行. \\
+                \hfill --- 宋·陆游《冬夜读书示子聿》
+\end{center}
+
+
+\subsection{公钥加密的标准化}
+标准化对密码技术的实际落地应用具有重要意义, 否则, 即使是同一密码方案/协议也可能由于参数选取、接口设计缺乏统一的规范而无法互联互通. 
+以下首先简要介绍与密码领域相关较为密切的国内外标准化组织. 
+
+\subsubsection{国内外标准化组织简介}
+\begin{enumerate}
+\item 国际标准化组织与国际电工委员会\\
+    国际标准化组织(ISO)与国际电工委员会(IEC)联合成立了名为ISO/IEC JTC 1的委员会, 重点关注信息技术领域的标准化, 联合制定了一系列ISO/IEC标准, 
+    其中的ISO/IEC 18033系列标准规定了加密算法、密码协议和密钥管理技术. 
+    ISO/IEC标准通常由世界各地的成员国共同参与制定, 涉及多轮草案和投票, 标准化过程严格, 需经过彻底的审查和意见反馈与修订. 
+    正因如此, ISO/IEC标准具有广泛的国际认可度, 在实施全球化技术和安全政策方面均具有强大的影响力, 可确保来自不同供应商的产品和服务可以安全有效地协同工作. 
+    符合ISO/IEC标准的密码产品通常质量和安全方面具有较高的置信度, 这对于金融交易、医疗保健和国家安全等关键应用至关重要. 
+         
+
+\item 互联网工程任务组\\
+    互联网工程任务组(IETF)是一个开放的标准组织, 负责开发和推广互联网标准, 特别是维护TCP/IP协议族的标准. 
+    与ISO/IEC不同, 它不依赖于任何特定国家或管理机构, 没有正式的会员资格或会员资格要求. 
+    IETF将其技术文档发布为征求意见稿RFC(Requests for Comments), IETF制定的RFC全方位涵盖了计算机网络体系, 
+    在安全性与隐私方面, IETF制定的技术标准和实践文档致力于抵御已知和新出现的威胁, 为互联网的安全和隐私提供了重要的基础要素. 
+    IETF针对安全方面正在进行的一些工作包括: 最新版本的传输层安全协议TLS 1.3、自动证书管理环境协议(最近发布为RFC 8555)和消息传递分层安全协议等. 
+    IETF标准具有高度的包容性, 任何人均可参与到标准制定的过程中, 且标准制定更多的基于实施和部署规范方面的实际经验, 强调实用性和执行性. 
+    IETF标准在万物互联互通中起到了至关重要的作用, 标准化的通信协议确保不同的系统可以无缝地协同工作, SSL/TLS等就是IETF标准的典范工作. 
+
+\item 美国电气电子工程师学会\\
+    美国电气电子工程师学会(Institute of Electrical and Electronics Engineers, IEEE)的标准化组织为推出了公钥密码学标准IEEE P1363. 
+    该标准包括传统公钥密码学(IEEE Std 1363-2000 and 1363a-2004)、
+    格基公钥密码学(IEEE Std 1363.1-2008)、口令基公钥密码学(IEEE Std 1363.2-2008)、使用双线性映射的公钥密码学(IEEE Std 1363.3-2013). 
+         
+\item 中国国家标准局\\
+    中国国家标准局现称为中国国家标准化管理委员会(SAC), 是中国国务院直属的政府机构, 它负责起草和管理国家标准, 并代表中国加入ISO/IEC等国际标准组织。
+    中国国家标准局一直积极制定信息安全国家标准, 包括密码算法和协议. SAC的标准对国内行业具有重大影响，并且经常被用作中国境内法规的基础. 
+    随着中国在全球贸易中的地位不断提升, SAC标准在国际上的影响力也越来越高. 
+
+
+\item 美国国家标准局\\
+    美国国家标准与技术研究院 (National Institute of Standards, NIST)成立于1901年, 现隶属于美国商务部. 
+    NIST是美国最古老的物理科学实验室之一, 成立之初的目的是消除当时美国工业在测量基础设施方面的短板. 当前, 从智能电网和电子健康记录到原子钟、先进纳米材料和计算机芯片, 
+    无数产品和服务都在某种程度上依赖于NIST提供的技术、测量和标准. NIST致力于制定与信息技术各个方面相关的标准和指南, 
+    还专门为联邦机构和广大公众制定密码标准和指南, 包括哈希算法、随机数生成算法、加密方案、签名方案和后量子密码方案等.
+    尽管NIST是美国机构, 但具有国际影响力, 其标准和指南不仅被美国联邦机构广泛采用, 还被私营部门组织和全球其他政府广泛采用. 
+
+\item 美国国家标准学会\\
+    美国国家标准学会(American National Standards Institute, ANSI)成立于1918年, 是美国非盈利民间标准化团体.
+    作为自愿性标准体系中的协调中心, ANSI的主要职能是协调国内各机构团体的标准化活动、审核批准美国国家标准、
+    代表美国参加国际标准化活动、提供标准信息咨询服务等. 在密码学领域, 该组织制定了基于椭圆曲线的公钥密码学标准ANSI X9.63. 
+
+\item RSA公司\\
+    1990年起, RSA公司发布了一系列公钥密码技术标准PKCS(Public Key Cryptography Standards), 
+    旨在推广公司拥有专利的密码算法, 如RSA加密算法与签名、Schnorr签名等. 
+    尽管PKCS系列不是工业标准, 但其中的部分算法已经在纳入若干标准化组织(如IETF和PKIX工作组)的正式标准进程中.
+\end{enumerate}
+
+
+\subsubsection{公钥加密标准方案}
+选择密文安全常简称为CCA安全, 自上世纪90年代起即成为公钥加密的事实标准(de factal standard), 
+正因如此, 绝大多数标准化组织制定的公钥加密标准均具备选择密文安全. 以下首先介绍基于数论类假设的公钥加密标准方案. 
+
+\begin{itemize}
+\item 基于整数分解类困难问题的公钥加密方案\\
+    PKCS\#1~\cite{PKCS1}是PKCS系列标准中最早也应用最广泛的一个, 制定了RSA加密和签名标准, 最新的版本号为v2.2. 
+    PKCS\#1中定义了RSA公钥和私钥应如何表示和存储, 规定了基本的RSA操作, 包括加密和解密，签名和验证. 
+    特别的, 标准中为RSA加密方案引入填充机制OAEP(Optimal Asymmetric Encryption Padding), 得到可证明IND-CCA安全的RSA-OAEP,  
+    解决了早期版本中存在的安全问题, 如针对PKCS\#1 v1.5填充的自适应选择明文攻击和Bleichenbacher攻击. 
+
+\item 基于离散对数类困难问题的公钥加密方案\\
+    离散对数类困难问题根据代数结构的不同, 划分为数域和椭圆曲线两个子类, 在同样的安全级别下, 
+    后者的参数规模更为紧致, 因此构建于其上的密码方案相比前者具有显著的性能优势, 但是由于数学结构复杂, 工程实践的难度也更大. 
+    DHIES (Diffe-Hellman Integrated Encryption Scheme, DHIES)是DHAES~\cite{ABR-ePrint-1999}的标准化方案, 
+    采用混合加密方式, 密钥封装机制基于数域循环群上的ElGamal PKE和哈希函数构造, 数据封装机制基于消息验证码和堆成加密方案构造. 
+    DHIES整体方案在随机谕言机模型中基于CDH假设具备可证明的选择密文安全.
+    ECIES (Elliptic Curve Encryption Scheme, ECIES)是DHIES在椭圆曲线循环群上的对于版本. 
+    DHIES和ECIES被纳入IEEE 1363a、ANSI X9.63和ISO/IEC 18033-2标准. 
+    ECIES还被椭圆曲线密码标准组(Standards for Efficient Cryptography Group, SECG)纳入到椭圆曲线密码学标准SEC 1~\cite{SEC-1}中.
+    
+    NIST在联邦信息处理标准(Federal Information Processing Standards Publication)FIPS 186-5~\cite{FIPS-186-5}、
+    SECG在SEC 2~\cite{SEC-2}和ECC Brainpool在RFC 5639~\cite{RFC-5639}中分别给出了推荐的椭圆曲线参数选择. 
+    中国密码管理局为满足国内电子认证服务系统等应用需求, 于2010年12月17日发布了《SM2椭圆曲线公钥密码算法》~\cite{SM2}, 2016年成为中国国家密码标准. SM2标准中包括推荐椭圆曲线参数和包括公钥加密方案在内的各种类型公钥密码方案. 
+
+\item 基于格类困难问题的公钥加密方案\\
+    Shor算法的出现意味着在后量子时代基于数论类困难问题的密码方案将不再安全, 因此设计能够抵抗量子攻击的密码方案成为当前密码学的前沿热点, 
+    其中格基方案是抗量子安全密码学中的主流. 
+    NIST自2016年开始了后量子密码学标准方案的征集. 经过最新一轮的评审, NIST于2023年8月24号发布了3个FIPS草案拟定了抗量子密码系列方案, 
+    其中FIPS 203~\cite{FIPS-203}定义了基于LWE困难问题的公钥加密方案CRYSTALS-KYBER~\cite{Kyber-EUROSP-2018}. 
+\end{itemize}
+
+如前所述, 绝大多数标准中的公钥加密方案都满足IND-CCA安全. 然而, IND-CCA安全与同态性无法共存, 
+在分布式计算环境和大数据应用等密态数据的可操作性比机密性保护更重要的场景中, 迫切需要标准化的同态公钥加密方案. 
+
+\begin{itemize}
+\item 部分同态加密方案标准\\ 
+    ISO/IEC 18033-6~\cite{ISO/IEC-18033-6}标准中定义了Exponential ElGamal和Paillier~\cite{Paillier-EUROCRYPT-1999}两个加法同态加密方案. 
+
+\item 全同态加密方案标准\\
+    全同态加密尚处于飞速发展阶段, 然而工业界的应用需求更为迫切. 
+    2017年, 来自IBM、Microsoft、Intel和NIST和其它开放组织的研究人员共同成立了全同态标准化联盟(Homomorphic Encryption Standardization Consortium), 
+    并发布了同态加密标准文档~\cite{HE-Standard}. 该文档涵盖了适用于整数运算的Brakerski-Gentry-Vaikuntanathan (BGV)~\cite{BGV-TOCT-2014}和
+    Brakerski/Fan-Vercauteren (BFV)~\cite{Brakerski-CRYPTO-2012, FV-ePrint-2012}、
+    适用于浮点数运算的Cheon-Kim-Kim-Song (CKKS)~\cite{CKKS-ASIACRYPT-2017}
+    以及适用于Boolean电路求值的Ducas-Micciancio (FHEW)~\cite{DM-EUROCRYPT-2015}和Chillotti-Gama-Georgieva-Izabachene (TFHE)~\cite{CGGI-JoC-2020}.
+    该文档尽管不是官方标准，但基本可以看成事实上的标准.  
+\end{itemize}
+
+\subsection{公钥加密的工程实践}
+实现密码算法对程序员的素质要求较高, 既需要专业的密码知识以确保实现的忠实性和安全性, 也需要精湛的编程技术以确保实现的效率. 
+在一般情况下, 不建议非专业程序员自行从底层起构建密码算法, 如此不仅可省去重复制造轮子的无用功, 更能避免造出方形轮子的错误. 
+
+\subsubsection{重要方案的优秀开源实现}
+工程实践中经常需要使用已有的公钥加密方案, 以下推荐部分常用方案的优秀开源实现供一线程序员按图索骥. 
+\begin{trivlist}
+\item 标准公钥加密方案
+\begin{itemize}
+    \item RSA-OAEP: OpenSSL库~\cite{OpenSSL}中提供了C语言版本的实现. 
+
+    \item Paillier: mpc4j库~\cite{mpc4j}提供了Java语言的实现. 
+
+    \item ElGamal: Kunlun库~\cite{libKunlun}中给出了ElGamal PKE及其多个衍生方案的C++实现, 同时给出了配套的零知识证明实现, 可直接部署应用于密态计算场景. 
+\end{itemize}
+
+\item 属性加密
+\begin{itemize}
+    \item FAME(Fast Attribute-based Message Encryption)~\cite{AC-CCS-2017}: 
+        首个基于标准假设完全安全的密文策略和密钥策略ABE方案(对策略类型或属性没有任何限制), 构建于Type-III双线性映射上. 
+        相应的开源实现可参考: \url{https://github.com/sagrawal87/ABE} 
+\end{itemize}
+
+\item 全同态加密: Microsoft的SEAL (Simple Encrypted Arithmetic Library)库~\cite{SEAL}给出了BGV、BFV和CKKS方案的优秀实现, 
+    PALISADE的后继者OpenFHE~\cite{OpenFHE}则包含了所有主流全同态加密方案的实现. 
+\end{trivlist}
+
+\subsubsection{重要的开源密码库}
+下面的内容适用于程序员在实现自研公钥加密方案时, 为如何选择合适的密码算法库做出参考. 
+
+\begin{table}[H]
+\begin{center}
+\caption{常用开源密码算法库}
+\scalebox{0.8}{
+\begin{tabular}{|c|c|cccc|c|c|c|}
+    \hline
+    \multirow{2}*{库名}  & \multirow{2}*{\makecell[c]{编程\\语言}} & \multicolumn{4}{c|}{支持算子类型} & \multirow{2}*{易用性} & \multirow{2}*{实时性} & \multirow{2}*{国密算法支持}\\ 
+    \cline{3-6} 
+                         &                       & 对称密码 & 大整数运算 & 椭圆曲线 & 双线性映射 & & &\\
+    \hline
+    OpenSSL & C &  \cmark & \cmark & \cmark & \xmark & $\bigstar \bigstar \bigstar \bigstar \bigstar$ 
+    &  $\bigstar \bigstar \bigstar \bigstar \bigstar$  & SM2/SM3/SM4\\
+    \hline
+    tongsuo & C &  \cmark & \cmark & \cmark & \xmark & $\bigstar \bigstar \bigstar \bigstar \bigstar$ 
+    &  $\bigstar \bigstar \bigstar \bigstar \bigstar$  & SM2/SM3/SM4\\
+    \hline
+    gmSSL   & C &  \cmark & \cmark & \cmark & \xmark & $\bigstar \bigstar \bigstar$ 
+    &  $\bigstar \bigstar \bigstar$  & SM2/SM3/SM4/SM9/ZUC\\
+    \hline
+    mcl     & C/C++  & \cmark & \cmark & \cmark & \cmark & $\bigstar \bigstar \bigstar$ 
+    &  $\bigstar \bigstar \bigstar \bigstar \bigstar$  & ---\\
+    \hline
+    MIRACL  & C/C++  & \cmark & \cmark & \cmark & \cmark & $\bigstar \bigstar \bigstar \bigstar \bigstar$ 
+    &  $\bigstar \bigstar \bigstar$  & ---\\
+    \hline
+    NTL     & C++ &  \xmark & \cmark & \xmark & \xmark  & $\bigstar \bigstar \bigstar \bigstar \bigstar$ 
+    & $\bigstar \bigstar \bigstar \bigstar \bigstar$  & ---\\
+    \hline
+    Bouncy Castle & Java/C\# & \cmark & \cmark & \cmark & \cmark &  $\bigstar \bigstar \bigstar \bigstar \bigstar$ 
+    & $\bigstar \bigstar \bigstar \bigstar \bigstar$  & SM2/SM3/SM4\\
+    \hline
+    Crypto++ &  C++ &  \cmark & \cmark & \cmark & \cmark & $\bigstar$ & $\bigstar \bigstar \bigstar \bigstar$ & SM3/SM4\\
+    \hline
+    Botan    & C++ & \cmark & \cmark & \cmark & \xmark & $\bigstar \bigstar \bigstar \bigstar \bigstar$ &
+    $\bigstar \bigstar \bigstar \bigstar \bigstar$  & SM2/SM3/SM4\\
+    \hline
+    libsodium & C & \xmark & \cmark & \cmark & \xmark & $\bigstar \bigstar \bigstar$ & $\bigstar \bigstar$  & ---\\
+    \hline
+    libgcrypt & C & \xmark & \cmark & \cmark & \xmark & $\bigstar \bigstar \bigstar \bigstar$ 
+    & $\bigstar \bigstar \bigstar \bigstar$  & SM2/SM3/SM4\\
+    \hline 
+\end{tabular}\label{table:常用密码算法库}
+}
+\end{center}
+\end{table}
+
+
+\subsection{密码学的工程实践经验}
+
+\blue{请伟嘉在此处补充: 其实工程实践经验应该和密码学中的对象关联不强, 适用于公钥加密的经验应该同样适用于其他种类方案.}ß  
+% \begin{itemize}
+% \item 安全的随机数发生器\\
+%     随机数是现代密码学中不可或缺的要素. 在密码的工程实现中, 需要调用安全的随机数发生器(Random Number Generator, RNG)基于可靠的熵源生成随机数.  
+
+% \item 侧信道攻击防护
+  % 1. 掩码对策
+
+  %    掩码方案旨在屏蔽加密数据与侧信道泄漏之间的关系，是抵抗能量分析攻击、故障攻击和缓存攻击等侧信道攻击的应用最广泛的对策。在明文和密钥相同的条件下，掩码方案与密码算法输出相同的密文. 但掩码方案在与明文和密钥有关的运算中执行掩码操作，使得密码设备执行时泄露的侧信息不与密钥直接相关，从而增加了侧信道攻击的难度。
+  
+  % 2. 隐藏对策
+  
+  %    隐藏对策的目的是隐藏电路引起的侧信道泄漏，不仅要控制侧信道泄漏的幅度（垂直方向），而且要调整侧信道泄漏的位置(水平方向)。 垂直隐藏包括随机化方法以及均匀化方法. 随机化方法使泄漏模式看起来不同从而难以检测，均匀化方法使泄漏模式看起来相似从而难以分析. 水平隐藏本质上是泄漏去同步，目的在于使泄漏发生在不同的时间段。 
+  
+  % 3. 软件防御
+  
+  %    由于密码算法在执行过程中会泄漏一定的信息，设计者可以在软件或协议上做一些更改，从而降低密码算法实现过程中的信息的泄漏。
+  
+  % 4. 故障防御技术
+  
+  %    双模块冗余（Dual Modular Redundancy，DMR）是一种使用两个模块来防御故障攻击的机制，其中一个模块用于加密，另一个模块用于错误检测. 
+  %    DMR 具有可靠性、安全性的特点，提升了密码系统的鲁棒性，目前已被许多商业解决方案采用. 
+
+% \item 避免密码误用
+% \begin{itemize}
+%     \item 密钥配置策略: 
+
+%     \item nonce的使用: 
+% \end{itemize}
+% \end{trivlist}
+
+% %
+%  * 后量子密码学（Post-quantum cryptography,PQC）安全
+
+%   1. 预防横向漏洞
+
+%      横向漏洞包括与芯片处理的敏感变量有关的可观察到的时序变化，因此有关时序变化的恒定时间计算可以通过布尔逻辑或某些汇编来交换条件结构来实现，而恒定时间数据访问可以通过访问整个 LUT 来取代单个查找表（LUT），或通过拉格朗日多项式对大型 LUT 进行插值，甚至通过位片实现来实现。     
+     
+%   2. 预防纵向漏洞
+  
+%      针对纵向攻击的可证明保护依赖于对所有敏感变量 s 的随机屏蔽。一种通用方法是自下而上的方法，首先将计算分解为乘积之和，再用(安全)小工具替换和与积，或者是另外一种自上而下的方法，首先分析算法，得出适应的操作，使非线性操作的数量最小化，再创建相应的（缺失的）小工具。
+
+

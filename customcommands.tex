@@ -1,0 +1,147 @@
+\usepackage{caption}
+\usepackage{latexsym}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{soul}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{framed}
+\usepackage{boxedminipage}
+\usepackage{cancel,siunitx}
+\usepackage{amssymb}% http://ctan.org/pkg/amssymb
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\usepackage{makecell}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{threeparttable}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{url}
+\usepackage{float}
+\usepackage{mdframed}
+\usepackage[normalem]{ulem} % 批注
+\usepackage{autobreak}
+
+\usepackage{adjustbox}
+\usepackage{dashbox}
+
+
+\usepackage{tikz}     % 绘图包
+\usetikzlibrary{calc, matrix, patterns, backgrounds, arrows, shapes, snakes, circuits, circuits.logic.US, 
+chains, fit, decorations, intersections, positioning}
+
+\tikzset{
+    shapenode/.style = {draw, rectangle, fill=none, auto, node distance=0em, font=\normalsize}, 
+    roundnode/.style = {draw, rectangle, rounded corners=0.5em, inner sep = 0.2em, 
+      node distance=0em, minimum height=1.5em},
+    rectanglenode/.style = {draw, rectangle, inner sep = 0em, node distance=0em},
+    textnode/.style  = {draw=none, fill=none, rectangle, minimum size=0cm, inner sep = 0em, 
+      auto, node distance=0em, font=\normalsize},
+    smalltextnode/.style  = {draw=none, fill=none, rectangle, minimum size=0.5cm, auto, node distance=0em, font=\small},
+    circlenode/.style = {circle, draw, auto, inner sep = 0em, node distance=0em}, 
+    ellipsenode/.style = {draw, ellipse, inner sep = 0em, node distance=0em, minimum height=0em, minimum width=0em},
+    dotnode/.style = {draw, fill=black, circle, auto, minimum size=0.2em, inner sep = 0em, node distance=0em},  
+    connect/.style = {black,->},
+    implies/.style={double,double equal sign distance,-implies}, 
+    every text node part/.style={align=center}
+}
+
+% define the colors
+\definecolor{lightmidnightblue}{rgb}{0.2, 0.2, 0.7}
+\definecolor{darkgreen}{rgb}{0.0,0.5,0.0}
+
+\newcommand{\blue}[1]{{\color{blue} #1}}
+\newcommand{\cyan}[1]{{\color{cyan} #1}}
+\newcommand{\purple}[1]{{\color{purple} #1}}
+\newcommand{\yellow}[1]{{\color{yellow} #1}}
+\newcommand{\darkred}[1]{{\color{darkred} #1}}
+\newcommand{\gray}[1]{{\color{gray} #1}}
+\newcommand{\red}[1]{{\color{red} #1}}
+\newcommand{\green}[1]{{\color{green}#1}}
+\newcommand{\magenta}[1]{{\color{magenta} #1}}
+\newcommand{\black}[1]{{\color{black} #1}}
+\newcommand{\orange}[1]{{\color{orange} #1}}
+\newcommand{\mdblue}[1]{{\color{lightmidnightblue} #1}}
+
+\colorlet{lightgray}{gray!20}
+\colorlet{darkgray}{gray!100}
+
+% define notions
+\renewcommand{\P}{\mathbf{P}}
+\newcommand{\NP}{\mathbf{NP}}
+\newcommand{\coNP}{\textup{co-}\mathbf{NP}}
+
+% define shorthands
+\newcommand{\define}{\stackrel{\textup{def}}{=}}
+
+\newcommand{\iO}{i\mathcal{O}}
+\newcommand{\diO}{di\mathcal{O}}
+\newcommand{\sample}{\xleftarrow{\textup{\tiny R}}}
+\newcommand{\expect}{\mathbb{E}}
+\newcommand{\entropy}{\mathsf{H}}
+\newcommand{\minentropy}{\mathsf{H}_\infty}
+\newcommand{\avminentropy}{\tilde{\mathsf{H}}_\infty}
+\newcommand{\AdvA}{\mathsf{Adv}_\mathcal{A}}
+\newcommand{\AdvB}{\mathsf{Adv}_\mathcal{B}}
+
+\newcommand{\outV}{\text{out}_V}
+\newcommand{\viewV}{\text{view}_V}
+\newcommand{\viewVstar}{\text{view}_{V^*}}
+
+\newcommand{\Oderive}{\mathcal{O}_\mathsf{derive}^\Phi}
+\newcommand{\Oinv}{\mathcal{O}_\mathsf{inv}}
+\newcommand{\Oleak}{\mathcal{O}_\mathsf{leak}(\cdot)}
+\newcommand{\Ovefy}{\mathcal{O}_\mathsf{vefy}(\cdot,\cdot)}
+\newcommand{\Otag}{\mathcal{O}_\mathsf{tag}(\cdot)}
+\newcommand{\Osign}{\mathcal{O}_\mathsf{sign}}
+\newcommand{\Odecrypt}{\mathcal{O}_\mathsf{decrypt}}
+\newcommand{\Odecaps}{\mathcal{O}_\mathsf{decaps}}
+\newcommand{\OregH}{\mathcal{O}_\mathsf{regH}}
+\newcommand{\OregC}{\mathcal{O}_\mathsf{regC}}
+\newcommand{\Oreveal}{\mathcal{O}_\mathsf{reveal}}
+\newcommand{\Oibedecaps}{\mathcal{O}_\mathsf{decaps}(\cdot, \cdot)}
+\newcommand{\Osim}{\mathcal{O}_\mathsf{sim}}
+\newcommand{\Oenc}{\mathcal{O}_\mathsf{enc}}
+\newcommand{\Oext}{\mathcal{O}_\mathsf{ext}}
+\newcommand{\Oeval}{\mathcal{O}_\mathsf{eval}}
+\newcommand{\Oconstrain}{\mathcal{O}_\mathsf{constrain}}
+\newcommand{\Oevalempty}{\mathcal{O}_\mathsf{eval}(\$)}
+
+\newcommand{\Oracle}{\mathcal{O}}
+\newcommand{\TBA}{\blue{To be add more ...}}
+
+\newcommand{\poly}{\textup{poly}}
+\newcommand{\polylog}{\textup{polylog}}
+\newcommand{\loglog}{\textup{loglog}}
+% \newcommand{\MA}{\mathbf{MA}}
+% \newcommand{\PSAPCE}{\mathbf{PSPACE}}
+% \newcommand{\NEXT}{\mathbf{NEXT}}
+
+
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\redcross}{{\tikz[x=1.4ex, y=1.4ex, line width=.2ex, red] \draw (0,0) -- (2,2) (0,2) -- (2,0);}}%
+
+\newcommand{\redul}{\bgroup\markoverwith{\textcolor{red}{\rule[-0.5ex]{2pt}{0.4pt}}}\ULon} % 红色下划线
+\newcommand{\blueul}{\bgroup\markoverwith{\textcolor{blue}{\rule[-0.5ex]{2pt}{0.4pt}}}\ULon} % 蓝色下划线
+\newcommand{\blackul}{\bgroup\markoverwith{\textcolor{black}{\rule[-0.5ex]{2pt}{0.4pt}}}\ULon} % 黑色下划线
+
+
+\newcommand{\qed}{\hfill \ensuremath{\Box}}
+
+%%%%By QIN Baodong===Begin
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\Faff}{\mathcal{F}_{\text{aff}}}
+\newcommand{\Fpolyd}{\mathcal{F}_{\text{poly}}^{d}}
+\newcommand{\AIAE}{\mathsf{AIAE}}
+\newcommand{\prmAIAE}{pp_{\text{AIAE}}}
+\newcommand{\KAIAE}{\mathcal{K}_{\text{AIAE}}}
+\newcommand{\gra} {\textcolor[RGB]{180, 180, 180}}
+\definecolor{gra}{RGB}{220, 220, 220}
+\newcommand{\grabox}{\colorbox{gra}}
+\newcommand{\hpt}{\hspace{1pt}}
+%\newcommand{\dslash}{/\hspace{-2pt}/\hspace{2pt}}
+%%%%===End

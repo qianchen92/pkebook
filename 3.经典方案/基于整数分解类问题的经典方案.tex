@@ -1,0 +1,101 @@
+\section{基于数论问题的经典方案}
+\subsection{Goldwasser-Micali PKE}
+Goldwasser和Micali~\cite{GM-JCSS-1984}在1984年基于QR假设构造出首个可证明安全的公钥加密方案. 
+该方案仅能加密一比特消息, 设计的思想可类比编码: 当明文为0时, 随机选取二次剩余元素作为密文; 
+当明文为1时, 随机选取Jacobi符号为+1的非二次剩余元素作为密文.  
+\begin{construction}[Goldwasser-Micali PKE]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 全局参数生成$pp$, 包含对明文空间$M = \{0,1\}$的描述. 
+
+\item $\mathsf{KeyGen}(pp)$: 从$pp$中解析出$\kappa$, 运行$\mathsf{GenModulus}(1\kappa) \rightarrow (N, p, q)$, 
+	随机选取$z \in \mathcal{QNR}_N^{+1}$, 输出公钥$pk = (N, z)$和私钥$sk = (p, q)$. 
+
+\item $\mathsf{Encrypt}(pk, m)$: 以公钥$pk = (N, z)$和明文$m \in \{0,1\}$为输入, 随机选择$x \sample \mathbb{Z}_N^*$, 
+	输出密文$c = z^m \cdot x^2 \bmod N$. 
+
+\item $\mathsf{Decrypt}(sk, c)$: 以私钥$sk = (p, q)$和密文$c$为输入, 利用私钥判定$c$是否是模$N$的二次剩余. 
+	若是, 输出0; 否则输出1.  
+\end{itemize}
+\end{construction} 
+
+Goldwasser-Micali PKE的正确性显然, 安全性由以下定理保证. 
+\begin{theorem}\label{theorem:Goldwasser-Micali-PKE-CPA}
+如果QR假设成立, 那么Goldwasser-Micali PKE是IND-CPA安全的. 
+\end{theorem}
+
+\begin{proof}
+令$S_i$表示敌手在$\text{Game}_i$中成功概率. 以游戏序列的方式组织证明如下: 
+
+\begin{trivlist}
+\item $\text{Game}_0$: 该游戏是标准的IND-CPA游戏, 挑战者$\mathcal{CH}$和敌手$\mathcal{A}$交互如下: 
+\begin{itemize}
+	\item 初始化: $\mathcal{CH}$运行$\mathsf{Setup}(1^\kappa)$生成公开参数$pp$, 
+		同时运行$\mathsf{KeyGen}(pp)$生成公私钥对$pk = (N, z)$和$sk = (p, q)$. 
+		$\mathcal{CH}$将$(pp, pk)$发送给$\mathcal{A}$. 
+
+	\item 挑战: $\mathcal{A}$选择$m_0, m_1 \in \mathbb{G}$并发送给$\mathcal{CH}$. 
+		$\mathcal{CH}$选择随机比特$\beta \in \{0,1\}$, 随机选择$x \in \mathbb{Z}_N^*$, 
+		计算$c^* = z^{m_\beta} \cdot x^2 \bmod N$并发送给$\mathcal{A}$.  
+
+	\item 猜测: $\mathcal{A}$输出对$\beta$的猜测$\beta'$. $\mathcal{A}$成功当且仅当$\beta' = \beta$. 
+\end{itemize} 
+根据定义, 我们有: 
+\begin{equation*}
+	\AdvA(\kappa) = |\Pr[S_0] - 1/2|
+\end{equation*}
+
+\item $\text{Game}_1$: 与$\text{Game}_0$的唯一不同在于密钥对的生成方式, 
+	$\mathcal{CH}$将$pk$中元素$z$的选取由Jacobi符号为+1的随机非二次剩余元素切换为随机二次剩余元素. 
+	在$\text{Game}_1$中, 无论$m_\beta$是0还是1, 密文分布均是$\mathcal{QR}_N$上的均匀分布, 完美掩盖了$\beta$的信息. 
+	因此, 即使对于拥有无穷计算能力的敌手, 我们也有:   
+\begin{equation*}
+	\AdvA(\kappa) = |\Pr[S_1] - 1/2| = 0
+\end{equation*}
+\end{trivlist}
+
+\begin{lemma}
+如果QR假设成立, 那么对于任意PPT敌手我们均有$|\Pr[S_0]-\Pr[S_1]| \leq \mathsf{negl}(\kappa)$. 
+\end{lemma}
+
+\begin{proof}
+证明的思路是反证. 若存在PPT敌手$\mathcal{A}$在$\text{Game}_0$和$\text{Game}_1$中成功的概率之差不可忽略, 
+则可构造出PPT算法$\mathcal{B}$打破QR困难问题. 
+令$\mathcal{B}$的QR挑战实例为$(N, z)$, $\mathcal{B}$的目标是区分挑战实例$z$选自$\mathcal{QNR}_N^{+1}$还是$\mathcal{QR}_N$上的均匀分布.  
+为此$\mathcal{B}$扮演IND-CPA游戏中的挑战者与$\mathcal{A}$交互如下: 
+\begin{itemize}
+	\item 初始化: $\mathcal{B}$根据它的挑战实例生成$pp$, 令$pk = (N, z)$, 将$(pp, pk)$发送给$\mathcal{A}$.   
+
+	\item 挑战: $\mathcal{A}$选择$m_0, m_1 \in \mathbb{G}$并发送给$\mathcal{B}$.  
+		$\mathcal{B}$随机选择$\beta \sample \{0,1\}$, 随机选取$x \in \mathbb{Z}_N^*$
+		设置$c^* = z^{m_\beta} \cdot x^2$并发送给$\mathcal{A}$.   
+
+	\item 猜测: $\mathcal{A}$输出对$\beta$的猜测$\beta'$. 如果$\beta' = \beta$, $\mathcal{B}$输出1. 
+\end{itemize} 
+对上述交互分析可知, 如果$z \sample \mathcal{QNR}_N^{+1}$, 那么$\mathcal{B}$完美的模拟了$\text{Game}_0$; 
+如果$z \sample \mathcal{QR}_N$, 那么$\mathcal{B}$完美的模拟了$\text{Game}_1$. 
+因此, $\mathcal{B}$解决QR挑战的优势$\mathsf{Adv}_\mathcal{B}^\text{QR}(\kappa) = |\Pr[S_0]-\Pr[S_1]|$. 
+如果QR假设成立, 我们有$|\Pr[S_0]-\Pr[S_1]| \leq \mathsf{negl}(\kappa)$. 
+\end{proof}
+综上, 定理得证. \qed
+\end{proof}
+
+\subsection{Rabin PKE}
+Rabin~\cite{Rabin-TechReport-1979}在1979年基于SQR假设构造出$\mathcal{QR}_N$上的单向陷门置换$f_N \define [x^2 \bmod N]$, 
+称为Rabin TDP. 可以证明, 最低有效位(lsb, least significant bit)函数是Rabin TDP的hardcore谓词. 
+基于Rabin TDP, 可以构造公钥加密方案如下: 
+\begin{definition}[Rabin PKE]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 全局参数生成$pp$, 包含对明文空间$M = \{0,1\}$的描述. 
+
+\item $\mathsf{KeyGen}(pp)$: 从$pp$中解析出$\kappa$, 运行$\mathsf{GenModulus}(1\kappa) \rightarrow (N, p, q)$, 
+	其中$N$是Blum整数. 输出公钥$pk = N$和私钥$sk = (p, q)$. 
+
+\item $\mathsf{Encrypt}(pk, m)$: 以公钥$pk = N$和明文$m \in \{0,1\}$为输入, 随机选择$x \sample \mathcal{QR}_N$, 
+	计算$c_0 = x^2 \bmod N$, 计算$c_1 = m \oplus \mathsf{lsb}(x)$, 输出$c = (c_0, c_1)$作为密文. 
+
+\item $\mathsf{Decrypt}(sk, c)$: 以私钥$sk = (p, q)$和密文$c = (c_0, c_1)$为输入, 
+	计算$x$满足$x^2 = c_0 \bmod N$, 输出$m' = c_1 \oplus \mathsf{lsb}(x)$.
+\end{itemize}
+\end{definition}
+
+Rabin PKE的正确性由$f_N \define [x^2 \bmod N]$是陷门置换这一事实保证, IND-CPA安全性由陷门置换的单向性保证. 

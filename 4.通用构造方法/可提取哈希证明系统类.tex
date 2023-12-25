@@ -1,0 +1,886 @@
+\section{可提取哈希证明系统类}
+\begin{center}
+    事要知其所以然.  \\
+                \hfill --- 《朱子语类·卷九·论行知》
+\end{center}
+
+
+1991年, Rackoff和Simon~\cite{RS-CRYPTO-1991}提出了构造CCA安全PKE的另一条技术路线: 
+\begin{enumerate}
+	\item 发送方随机选择会话密钥$k$并使用接收方的公钥对其加密得到密文$c$, 同时生成关于$k$的非交互零知识知识证明$\pi$, 将$c$和$\pi$一起发送给接收方;  
+	\item 接收方先验证$\pi$的正确性, 若验证通过则利用私钥解密恢复会话密钥; 
+\end{enumerate}
+该条技术路线被称为Rackoff-Simon范式, 与Naor-Yung范式/Sahai范式的不同之处是前者需要使用非交互零知识知识的证明(NIZKPoK), 而后者使用的势非交互零知识证明(NIZK). 
+
+Cramer和Shoup于2002年正式提出的哈希证明系统是NIZK的弱化: 公开可验证弱化为指定验证者, 表达能力由任意$\mathcal{NP}$语言限制为群论语言, 证明的形式特化为哈希值. 
+2010年, Wee~\cite{Wee-CRYPTO-2010}提出了可提取哈希证明系统(EHPS, extractable hash proof system), 
+并展示了如何基于EHPS以一种简洁、模块化的方式构造CCA安全的PKE. 该构造范式统一了几乎所有已知的基于计算性假设的CCA安全PKE方案.  
+相对HPS是NIZK的弱化, EHPS是NIZKPoK的弱化. 以下首先介绍EHPS的定义和相关性质. 
+
+\begin{definition}[可提取哈希证明系统]
+EHPS包含以下多项式时间算法:
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 以安全参数$\kappa$为输入, 输出公开参数$pp = (\mathsf{H}, PK, SK, L, W, \Pi)$, 
+	其中$L$是由困难关系$\mathsf{R}_L$定义的平凡$\mathcal{NP}$语言, 
+	$\mathsf{H}: PK \times L \rightarrow \Pi$是由公钥集合$PK$索引的一族带密钥哈希函数. 
+	关系$\mathsf{R}_L$支持随机采样, 即存在PPT算法$\mathsf{SampRel}$以随机数$r$为输入, 输出随机的``实例-证据''元组$(x, w) \in \mathsf{R}_L$.  
+	为了方便后续的应用, $\mathsf{SampRel}$可以进一步分解为$\mathsf{SampIns}$和$\mathsf{SampWit}$, 前者随机采样语言中的实例, 后者随机采样证据, 
+	对于任意随机数$r \in R$, 我们有$(\mathsf{SampIns}(r), \mathsf{SampWit}(r)) \in \mathsf{R}_L$. 
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 输出公钥$pk$和私钥$sk$. 
+
+\item $\mathsf{PubEval}(pk, x, r)$: 以公钥$pk$、$x \in L$和随机数$r$为输入, 输出证明$\pi \in \Pi$. 
+	正确性要求是当$r$是采样$x$的随机数时(即$(x, w) \leftarrow \mathsf{SampRel}(r)$), 算法正确计算出哈希证明: $\pi = \mathsf{H}_{pk}(x)$. 
+	注意, 当给定采样随机数$r$时, 可以运行算法$\mathsf{SampRel}$恢复$x$, 因此算法的第2项输入$x$可以省去.   
+
+\item $\mathsf{Ext}(sk, x, \pi)$: 以私钥$sk$, $x \in L$和证明$\pi \in \Pi$为输入, 输出证据$w \in W \cup \bot$. 
+	正确性要求是: 
+	\begin{equation*}
+		\pi = \mathsf{H}_{pk}(x) \iff (x, \mathsf{Ext}(sk, x, \pi)) \in \mathsf{R}_L
+	\end{equation*}
+
+\item $\mathsf{KeyGen}'(pp)$: 以公开参数$pp$为输入, 输出公钥$pk$和私钥$sk'$. 
+
+\item $\mathsf{PrivEval}(sk', x)$: 以私钥$sk$和$x \in L$为输入, 输出证明$\pi \in \Pi$. 
+	正确性要求是$\mathsf{PrivEval}$正确计算出哈希证明: $\pi = \mathsf{H}_{pk}(x)$. 
+\end{itemize}
+以上算法中, $\mathsf{KeyGen}$、$\mathsf{PubEval}$和$\mathsf{Ext}$工作在真实模式, 
+$\mathsf{KeyGen}'$和$\mathsf{PrivEval}$工作在模拟模式, 两种模式共享同一个$\mathsf{Setup}$算法生成公开参数. 
+两种模式之间的关联是公钥的分布统计不可区分, 即: 
+\begin{equation*}
+	\mathsf{KeyGen}(pp)[1] \approx_s \mathsf{KeyGen}'(pp)[1]
+\end{equation*}
+\end{definition}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+	\node [textnode, name=setup] {$pp \leftarrow \mathsf{Setup}(1^\kappa)$}; 	
+
+    \node [circlenode, name = W, draw = none, fill=cyan, minimum size=3em, below of = setup, xshift=-5em, yshift=-3em] {$W$}; 
+    \node [circlenode, name = L, below of = W, draw=none, fill=violet!70, minimum size=3em, yshift=-8em] {$L$}; 
+    \node [circlenode, name = Pi, right of = L, draw=none, fill=blue!20, minimum size=3em, xshift=16em] {$\Pi$}; 
+
+    \node [textnode, name=sample, below of = W, xshift=-6em, yshift=-4em] {$\mathsf{SampRel}(r)$}; 
+
+    \draw[decorate, decoration={brace,raise=2pt, amplitude=6pt}, thin]
+    ($(sample.west)+(-1em, 2em)$)--($(sample.west)+(-1em, -2em)$); 
+
+    \node [textnode, name=SampWit, left of = sample, xshift=-6.5em, yshift=2em] {$\mathsf{SampWit}(r)$}; 
+    \node [textnode, name=SampIns, left of = sample, xshift=-6.5em, yshift=-2em] {$\mathsf{SampIns}(r)$}; 
+
+    \draw (sample.east) edge[->] node[above] {$w$} (W); 
+    \draw (sample.east) edge[->] node[below] {$x$} (L);
+
+    \node [textnode, name=Gen, left of = W, xshift=-10em, color=blue] {$\mathsf{KeyGen}(pp) \rightarrow (pk, sk)$}; 
+    \node [textnode, name=Genprime, left of = L, xshift=-10em, color=red] {$\mathsf{KeyGen}'(pp) \rightarrow (pk, sk')$}; 
+
+
+    \draw (W) edge[<->] node[right] {$\mathsf{R}_L$} (L); 
+    \draw (L) edge[->] node[above] {$\mathsf{H}_{pk}(x)$} (Pi); 
+    \draw (L) edge[->, bend left=35, color=blue] node[above] {\blue{$\mathsf{PubEval}(pk, x, r)$}} (Pi); 
+    \draw (Pi) edge[->, bend right=35, color=blue] 
+        node[above, xshift=2em, yshift=1em] {\blue{$\mathsf{Ext}(sk, x, \pi)$}} (W); 
+
+    \draw (L) edge[->, bend right=50, color=blue] (W); 
+    \draw (L) edge[->, bend right=30, color=red] node[below] {\red{$\mathsf{PrivEval}(sk', x)$}} (Pi); 
+\end{tikzpicture}
+\end{center}
+\caption{EHPS的示意图}
+\end{figure}
+
+
+\subsection{起源释疑}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+	\node [textnode, name=Setup] {$\mathsf{Setup}(1^\kappa) \rightarrow pp$}; 
+    \node [textnode, name=KeyGen, below of = Setup, yshift=-3em] {$\mathsf{KeyGen}(pp) \rightarrow (\red{pk}, \blue{sk})$};
+    \node [roundnode, fill=blue!10, name=ZKGen, below of=KeyGen, yshift=-3em, minimum width=10em, minimum height=2em] 
+    	{$\mathsf{Gen}(pp) \rightarrow (\red{crs}, \blue{td})$};
+    \draw (KeyGen) edge[->] (ZKGen);
+
+	\node [textnode, name=SampR, below of=ZKGen, xshift=-9em, yshift=-2em] {$\mathsf{SampRel}(r) \rightarrow (x, w)$};
+	\node [textnode, name=Prover, below of=ZKGen, xshift=-10em, yshift=-3.5em] {$P(x, w; r)$};
+	\node [textnode, below of=ZKGen, xshift=-9em, yshift=-4.5em, color=red, font=\small] 
+    	{require $r$ as aux info};
+	\node [textnode, name=Verifier, below of=ZKGen, xshift=9em, yshift=-3.5em] {$V(sk)$};  
+	\node [textnode, name=check, below of=Verifier, yshift=-2em] {
+		$w' \leftarrow \blue{\mathsf{Ext}(sk, x, \pi)}$ \\ $(x, w') \in ? \mathsf{R}_L$};
+	\draw (Prover) edge[->] node[above] {$x$, $\pi \leftarrow \blue{\mathsf{Pub}(pk, x, r)}$} (Verifier);
+\end{tikzpicture}
+\end{center}
+\caption{从DV-NIZKPoK的视角解析EHPS}
+\end{figure}
+
+\begin{note}
+上图解释了EHPS的命名渊源, 其本质上是指定验证者零知识知识的证明, 证明的形式是实例的哈希值, 故名可提取哈希证明系统. 
+\begin{itemize}
+\item DV-NIZKPoK的完备性和可提取性由$\mathsf{Ext}$的正确性保证, 即在正常模式下,  
+	\begin{equation*}
+    	\pi = \mathsf{H}_{pk}(x) \iff (x, \blue{\mathsf{Ext}(sk, x, \pi)}) \in \mathsf{R}_L
+	\end{equation*} 
+其中$\mathsf{KeyGen}(pp) \rightarrow (pk, sk)$.
+
+\item DV-NIZKPoK的零知识性论证如下, 令$\mathsf{KeyGen}(pp) \rightarrow (\blue{pk}, sk')$, 
+	$\mathsf{KeyGen}'(pp) \rightarrow (\red{pk}, sk')$, 对于$\forall x \in L$, 我们有: 
+	\begin{equation*}
+		\blue{pk} \approx_s \red{pk} \Rightarrow (\blue{pk}, \mathsf{H}_{\blue{pk}}(x)) \approx_s (\red{pk}, \mathsf{H}_{\red{pk}}(x))
+	\end{equation*} 
+	再由秘密求值算法的正确性$\mathsf{H}_{\red{pk}}(x) = \mathsf{PrivEval}(sk', x)$可以得到:  
+	\begin{equation*}
+		(\blue{pk}, \mathsf{H}_{\blue{pk}}(x)) \approx_s (\red{pk}, \mathsf{PrivEval}(sk', x))
+	\end{equation*} 
+\end{itemize}
+\end{note}
+
+\subsection{EHPS的构造}
+我们以针对$L_\text{CDH}$语言的EHPS构造为例, 获得对EHPS设计方式的直观认识. 
+令$(\mathbb{G}, p, g)$是算法$\mathsf{GroupGen}(1^\kappa)$的输出, 其中$\mathbb{G}$是阶位素数$p$的群, 
+$g$是生成元. 随机选取$\mathbb{G}$中的另一生成元$g^\alpha$, 其中$\alpha \sample \mathbb{Z}_p$. 
+令$pp = (\mathbb{G}, p, g, g^\alpha)$是公开参数, 定义由$pp$索引的平凡$\mathcal{NP}$语言如下:  
+\begin{equation*}
+	L_\text{CDH} = \{x \in X: \exists w \in W \text{~s.t.~} w = x^\alpha\}
+\end{equation*}
+其中$L = X = \mathbb{G}$, $W = \mathbb{G}$. 
+定义$L_\text{CDH}$的二元关系为$\mathsf{R}_\text{CDH}$,	$(x, w) \in \mathsf{R}_\text{CDH} \iff w = x^\alpha$. 
+容易验证: 
+\begin{itemize}
+	\item $\mathsf{R}_\text{CDH}$基于CDH假设是困难的. 
+	
+	\item $\mathsf{R}_\text{CDH}$是高效可采样的: 存在PPT采样算法$\mathsf{SampRel}$随机选取$r \sample \mathbb{Z}_p$, 
+		输出 $(g^r, (g^{\alpha})^r) \in \mathsf{R}_\text{CDH}$. 
+
+    \item 如果$\mathbb{G}$是双线性映射群, 则$\mathsf{R}_\text{CDH}$是公开可验证的.  
+\end{itemize}
+
+\begin{construction}[$L_\text{CDH}$语言的EHPS构造]
+$L_\text{CDH}$的EHPS构造如下, 如图所示: 
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 以安全参数$\kappa$为输入, 输出公开参数$pp = (\mathbb{G}, p, g, g^\alpha)$. 
+	其中$pp$还包括了对$SK = \mathbb{Z}_p$, $PK = \mathbb{G}$, $L_\text{CDH} = X = \mathbb{G}$和$W = \mathbb{G}$的描述. 
+
+\item $\mathsf{KeyGen}(pp)$: 以公开参数$pp$为输入, 随机采样$sk \sample \mathbb{Z}_p$, 
+	计算$pk = g^{sk} \in \mathbb{G}$, 输出$(pk, sk)$. 
+
+\item $\mathsf{PubEval}(pk, x, r)$: 以公钥$pk$、实例$x \in L_\text{CDH}$和$r \in \mathbb{Z}_p$为输入, 输出$\pi \leftarrow (g^{\alpha} \cdot pk)^r$. 
+
+\item $\mathsf{Ext}(sk, x, \pi)$: 以私钥$sk$、实例$x \in L_\text{CDH}$和$\pi$为输入, 计算$w \leftarrow \pi /x^{sk}$, 
+	如果$(x, w) \in \mathsf{R}_L$则返回$w$, 否则返回$\bot$. 正确性由以下公式保证: 
+	\begin{equation*}
+		\pi /x^{sk} = (g^{\alpha} \cdot pk)^r /x^{sk} = (g^{\alpha} \cdot g^{sk})^r /g^{r \cdot sk} = (g^\alpha)^r = w 
+	\end{equation*}
+
+\item $\mathsf{KeyGen}'(pp)$: 以公开参数$pp$为输入, 随机采样$sk' \sample \mathbb{Z}_p$, 计算$pk \leftarrow g^{sk'}/g^\alpha$. 
+
+\item $\mathsf{PrivEval}(sk', x)$: 以私钥$sk'$和实例$x \in L_\text{CDH}$为输入, 输出$w \leftarrow x^{sk'}$.  正确性由以下公式保证: 
+	\begin{equation*}
+		\mathsf{H}_{pk}(x) = (g^\alpha \cdot pk)^r = (g^{\alpha} \cdot \underline{g^{sk'}/g^\alpha})^r = (g^{sk'})^r = x^{sk'}
+	\end{equation*}	
+\end{itemize}
+
+容易验证, 两种模式下生成的$pk$服从同样的分布—$\mathbb{G}$上的均匀分布. 
+\end{construction}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+    \node [textnode, name=sample] {$\mathsf{SampRel}(r)$};
+    \node [circlenode, name=W, right of = sample, xshift=5em, yshift=3.5em, fill=cyan, minimum size=3em] {$W$}; 
+    \node [circlenode, name=L, right of = sample, xshift=5em, yshift=-3.5em, fill=violet!70, minimum size=3em] {$L$}; 
+    \node [circlenode, name=Pi, right of = L, xshift=18em, fill=blue!20, minimum size=3em] {$\Pi$}; 
+
+    \draw (L) edge[<->] (W); 
+    \draw (L) edge[->] node[above] {$\mathsf{H}_{pk}(x)$} (Pi); 
+    \draw (L) edge[->, color=blue, bend left=30] node[above] {$\mathsf{Pub}(pk, x, r) = (g^\alpha \cdot pk)^r$} (Pi); 
+    \draw (Pi) edge[->, color=blue, bend right=40] node[above, xshift=2.5em, yshift=0.5em] {$\mathsf{Ext}(sk, x, \pi) = \pi/x^{sk}$} (W); 
+    \draw (L) edge[->, color=red, bend right=30] node[below] {$\mathsf{Priv}(sk', x) = x^{sk'}$} (Pi); 
+    
+    \draw (sample) edge[->] node[above] {$(g^\alpha)^r$} (W); 
+    \draw (sample) edge[->] node[below] {$g^r$} (L); 
+
+    \draw (W) edge[<->] node[right] {$\mathsf{R}_L$} (L); 
+\end{tikzpicture}
+\end{center}
+\caption{$L_\text{CDH}$的EHPS}
+\end{figure}
+
+
+\subsection{基于EHPS构造IND-CPA KEM}
+作为暖场应用, 我们首先介绍如何基于EHPS构造CPA安全的KEM. 设计的思路源自Rackoff-Simon范式.
+令$\mathsf{R}_L$为定义在$X \times W$上的单向关系, $\mathsf{hc}: W \rightarrow K$为相应的hardcore function. 
+\begin{itemize}
+\item 发送方扮演EHPS中的证明者, 运行$\mathsf{SampRel}(r)$算法随机采样$(x, w) \in \mathsf{R}_L$, 
+    利用公钥$pk$和随机数$r$计算$x$的哈希证明$\pi$, 生成密文$c = (x, \pi)$, 计算证据$w$的hardcore function值作为会话密钥$k$. 
+
+\item 接收方扮演EHPS中的验证者: 使用私钥$sk$从密文$(x, \pi)$中恢复$w$, 进而恢复会话密钥.
+\end{itemize}
+
+\begin{construction}[基于EHPS的CPA安全KEM]\label{construction:CPA-KEM-from-EHPS}
+从语言$L$的EHPS出发, 构造CPA安全的KEM如下:
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$pp \leftarrow \text{EHPS}.\mathsf{Setup}(1^\kappa)$, 
+	输出$pp = (\mathsf{H}, SK, PK, X, L, W, \Pi)$作为公开参数, 
+	其中$X \times \Pi$作为密文空间, $\mathsf{R}_L$hardcore function的值域$K$作为会话密钥空间.   
+
+\item $\mathsf{KeyGen}(pp)$: 运行$(pk, sk) \leftarrow \text{EHPS}.\mathsf{KeyGen}(\lambda)$, 输出公钥$pk$和私钥$sk$. 
+
+\item $\mathsf{Encaps}(pk;r)$: 以公钥$pk$和随机数$r$为输入, 执行如下步骤: 
+\begin{enumerate}
+	\item 运行$(x, w) \leftarrow \mathsf{SampRel}(r)$生成随机实例和相应证据;
+     
+    \item 通过$\text{EHPS}.\mathsf{Pub}(pk, x, r)$计算实例$x$的哈希证明$\pi \leftarrow \mathsf{H}_{pk}(x)$;  
+    
+    \item 输出$(x, \pi)$作为密文, 计算$k \leftarrow \mathsf{hc}(w)$作为会话密钥. 
+\end{enumerate}
+
+\item $\mathsf{Decaps}(sk, c)$: 以私钥$sk$和密文$c = (x, \pi)$为输入, 
+	计算$w \leftarrow \text{EHPS}.\mathsf{Ext}(sk, x, \pi)$, 
+    如果$(x, w) \notin \mathsf{R}_L$则输出$\bot$, 否则输出$k \leftarrow \mathsf{hc}(w)$. 
+\end{itemize}
+\end{construction} 
+
+KEM的正确性由EHPS的完备性和$\mathsf{R}_L$的单射性保证, 安全性由如下定理保证. 
+
+\begin{theorem}
+如果$\mathsf{R}_L$是单向的, 那么构造~\ref{construction:CPA-KEM-from-EHPS}中的KEM是IND-CPA安全的. 
+\end{theorem}
+
+\begin{proof}
+证明的目标是论证会话密钥$\mathsf{hc}(w^*)$在敌手$\mathcal{A}$的视图中是伪随机的, 其中$\mathcal{A}$的视图包括: 
+
+\begin{itemize}
+	\item 公开参数$pp$; 
+	\item 公钥$pk$: 与$w^*$无关; 
+    \item 密文$c^* = (x^*, \pi^*)$: $\mathsf{R}_L$的单向性保证了$x^*$隐藏了$w^*$, 
+    	EHPS的零知识性进一步保证了$\pi^*$(相对于$x^*$)不会额外泄漏关于$w^*$的信息. 
+\end{itemize}
+
+我们通过以下的游戏序列组织证明.
+\begin{trivlist}
+\item $\text{Game}_0$: 对应真实的游戏. $\mathcal{CH}$在真实模式下运行EHPS与敌手$\mathcal{A}$交互.
+\begin{itemize}
+\item 初始化: $\mathcal{CH}$计算$pp \leftarrow \text{EHPS}.\mathsf{Setup}(1^\kappa)$, 
+	\redul{$(pk, sk) \leftarrow \text{EHPS}.\mathsf{KeyGen}(pp)$}, 将$pp$和$pk$发送给$\mathcal{A}$. 
+        
+\item 挑战: $\mathcal{CH}$按照以下步骤生成挑战 
+\begin{enumerate}
+    \item 随机采样$(x^*, w^*) \leftarrow \mathsf{SampRel}(r^*)$;  
+    \item 通过\redul{$\text{EHPS}.\mathsf{PubEval}(pk, x^*, r^*)$}公开计算$\pi^* \leftarrow \mathsf{H}_{pk}(x^*)$; 
+    \item 计算$k_0^* \leftarrow \mathsf{hc}(w^*)$, 随机采样$k_1^* \sample K$; 
+    \item 随机选取$\beta \sample \{0,1\}$, 将$(c^* = (x^*, \pi^*), k_\beta^*)$发送给$\mathcal{A}$作为挑战. 
+\end{enumerate}
+
+\item 应答: $\mathcal{A}$输出对$\beta$的猜测$\beta'$, $\mathcal{A}$成功当且仅当$\beta' = \beta$. 
+\end{itemize}
+
+为了利用EHPS的零知识性论证$\pi^*$不额外泄漏关于$w^*$的信息, 需要将EHPS由真实模式切换到模拟模式. 
+\item $\text{Game}_1$: $\mathcal{CH}$在模拟模式下运行EHPS与敌手$\mathcal{A}$交互. 
+\begin{itemize}
+\item 初始化: $\mathcal{CH}$计算\redul{$(pk, sk') \leftarrow \text{EHPS}.\mathsf{KeyGen}'(pp)$}. 
+\item 挑战: $\mathcal{CH}$在第二步通过\redul{$\text{EHPS}.\mathsf{Priv}(sk', x^*)$}计算$\pi^* \leftarrow \mathsf{H}_{pk}(x^*)$.
+\end{itemize}
+\end{trivlist}
+敌手$\mathcal{A}$在游戏中的视图为$(pp, pk, x^*, k_\beta^*)$. 容易验证, EHPS的零知识性保证了$\text{Game}_0 \approx_s \text{Game}_1$: 
+
+
+\begin{claim}
+如果$\mathsf{R}_L$是单向的, $\AdvA^{\text{Game}_1} = \mathsf{negl}(\kappa)$. 
+\end{claim}
+
+\begin{proof}
+证明思路是如果存在$\mathcal{A}$以不可忽略的优势赢得$\text{Game}_1$, 那么可以构造出$\mathcal{B}$以不可忽略的优势打破$\mathsf{hc}$的伪随机性, 从而与单向性假设冲突. 
+给定关于$\mathsf{hc}$的伪随机性挑战$pp$和$(x^*, k_\beta^*)$, 其中$(x^*, w^*) \leftarrow \mathsf{SampRel}(r^*)$, 
+$\mathcal{B}$模拟$\text{Game}_1$中的挑战者$\mathcal{CH}$与$\mathcal{A}$交互, 目标是猜测$\beta$. 
+\begin{itemize}
+\item $\mathcal{B}$运行EHPS的模拟模式与$\mathcal{A}$在$\text{Game}_1$进行交互, 
+	在初始化阶段不再采样$x^*$而是直接嵌入接收到的$x^*$, 在挑战阶段将$\mathsf{R}_L$的挑战$(x^*, k_\beta^*)$作为$\mathcal{A}$的KEM挑战. 
+    最终, $\mathcal{B}$输出$\mathcal{A}$的猜测$\beta'$. 
+\end{itemize} 
+容易验证, $\mathcal{B}$在$\text{Game}_1$中的模拟是完美的. 因此$\mathcal{B}$打破$\mathsf{R}_L$伪随机性的优势与$\AdvA^{\text{Game}_1}$相同.  
+断言得证! \qed
+\end{proof}
+
+综上, 定理得证! \qed
+\end{proof}
+
+
+\subsection{基于EHPS构造IND-CCA KEM}
+我们首先从安全归约的角度分析基于EHPS构造IND-CCA KEM的难点. 
+EHPS模拟模式下的$sk'$可以在不知晓采样实例$x$随机数的情况下正确计算出相应的哈希证明, 但无法提取出证据, 因此归约算法无法应答解密询问.  
+因此, 为了构造IND-CCA的KEM, 需要赋予EHPS更丰富的功能. 
+
+PKE/KEM的选择密文安全游戏是``全除一''(ABO, all-but-one)式的—$\mathcal{A}$可以发起除挑战密文$x^*$以外的任意解密/解封装询问. 
+Wee~\cite{Wee-CRYPTO-2010}引入了量身定制的ABO-EHPS. 
+
+\begin{definition}{ABO-EHPS}
+ABO-EHPS与EHPS的定义差别集中在模拟模式, 真实模式下完全相同. 与EHPS相比, ABO-EHPS在模拟模式下的功能更加丰富.  
+\begin{itemize}
+    \item $\mathsf{KeyGen}'(pp, x^*)$: 以公开参数$pp$和$x^* \in L$为输入, 输出$(pk, sk')$. 
+
+    \item $\mathsf{PrivEval}(sk', x^*)$: 以私钥$sk'$和$x^*$为输出, 输出证明$\pi^* = \mathsf{H}_{pk}(x^*)$. 
+
+    \item $\mathsf{Ext}'(sk', x, \pi)$: 以私钥$sk'$、$x \neq x^*$和$\pi \in \Pi$为输入, 输出证据$w \in W$. 
+    	正确性的要求是:  
+    \begin{equation*}
+        \pi  = \mathsf{H}_{pk}(x) \iff (x, \mathsf{Ext}'(sk', x, \pi)) \in \mathsf{R}_L
+    \end{equation*}
+\end{itemize}
+
+$\mathsf{KeyGen}'$算法以预先嵌入的点$x^*$为输入, 输出相应的密钥对$(pk, sk')$. 
+ABO的含义是模拟模式中的$sk'$具备以下功能: 
+\begin{itemize}
+    \item ``一除全''哈希求值(one-out-all evaluation): $sk'$可以计算$x^*$的哈希值$\mathsf{H}_{pk}(x^*)$. 
+    \item ``全除一''证据抽取(all-but-one extraction): $sk'$可以从除$x^*$以外的点$x$和相应的证明中正确抽取出证据$\mathsf{Ext}'(sk', x, \pi)$.  
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+模拟模式下$sk'$的功能在CCA安全归约中起到如下作用: 
+\begin{itemize}
+	\item ``一除全''哈希求值允许归约算法$\mathcal{R}$生成挑战密文$c^* = (x^*, \pi^*)$. 
+
+    \item ``全除一''证据抽取允许归约算法$\mathcal{R}$回答所有合法的解封装询问$c \neq c^*$.
+\end{itemize}
+\end{remark}
+
+Wee~\cite{Wee-CRYPTO-2010}展示了如何基于EHPS构造ABO-EHPS. 
+\begin{construction}[基于EHPS的ABO-EHPS构造]
+\begin{trivlist}
+	\item 起点: 二元关系$\mathsf{R}_L$的EHPS 
+	\item 设计目标: 二元关系$\mathsf{R}_L$的ABO-EHPS
+	\item 设计思路: 不妨设$L$中每个实例均可编码为$n$长的比特串, 利用DDN结构~\cite{DDN-STOC-1991}实现ABO功能. 具体构造如下:
+	
+	\begin{itemize}
+		\item $\mathsf{Setup}(1^\kappa)$: 运行$pp \leftarrow \text{EHPS}.\mathsf{Setup}(1^\kappa)$;
+
+		\item $\mathsf{KeyGen}(pp)$: 独立运行$\text{EHPS}.\mathsf{KeyGen}(pp)$算法$2n$次, 
+			生成$\{(pk_{i,b}, sk_{i,b})\}_{i \in [n], b \in \{0,1\}}$, 
+			输出公钥$pk = \{pk_{i,0}, pk_{i,1}\}_{i \in [n]}$和私钥$sk = \{sk_{i,0}, sk_{i,1}\}_{i \in [n]}$. 
+
+		\item $\mathsf{PubEval}(pk, x, r)$: 对所有的$i \in [n]$计算$\pi_i \leftarrow \text{EHPS}.\mathsf{PubEval}(pk_{i, x_i}, x, r)$, 
+			输出$\pi = (\pi_1, \dots, \pi_n)$. 
+
+		\item $\mathsf{Ext}(sk, x, \pi)$: 对所有的$i \in [n]$计算$w_i \leftarrow \text{EHPS}.\mathsf{Ext}(sk_{i, x_i}, x, \pi_i)$,   
+			如果所有结果一致则输出, 否则返回$\bot$. 
+
+		\item $\mathsf{KeyGen}'(pp, x^*)$: 独立运行$\text{EHPS}.\mathsf{KeyGen}'(pp)$算法$n$次生成$\{(pk_{i,x^*_i}, sk_{i,x^*_i})\}_{i \in [n]}$, 
+    		独立运行$\text{EHPS}.\mathsf{KeyGen}(pp)$算法$n$次生成$\{(pk_{i,1-x^*_i}, sk_{i,1-x^*_i})\}_{i \in [\ell]}$, 
+    		输出$pk = (pk_{i,0}, pk_{i,1})_{i \in [n]}$ and $sk' = (sk_{i,0}, sk_{i,1})_{i \in [n]}$.
+
+		\item $\mathsf{PrivEval}(sk', x^*)$: 对所有的$i \in [n]$计算$\pi_i \leftarrow \text{EHPS}.\mathsf{Priv}'(sk_{i, x^*_i}, x^*)$, 
+    		输出$\pi = (\pi_1, \dots, \pi_n)$. 
+
+		\item $\mathsf{Ext}'(sk', x, \pi)$: 对所有满足$x_i^* = x_i$的索引$i \in [n]$验证
+			$\pi_i = \text{EHPS}.\mathsf{PrivEval}(sk_{i,x_i}, x_i)$是否成立, 
+			如果否则输出$\bot$, 如果是则继续对所有满足$x_i^* \neq x_i$的索引$i \in [n]$
+			计算$\text{EHPS}.\mathsf{Ext}(sk_{i, x_i}, x, \pi_i)$, 如果提取结果一致则输出, 否则输出$\bot$. 
+	\end{itemize}
+\end{trivlist}
+\end{construction}
+% \begin{remark}
+% $\text{EHPS}.\mathsf{Ext}$算法已经包含了提取后检验证据合法性的操作, 
+% $\text{ABO-EHPS}.\mathsf{Ext}$和$\text{ABO-EHPS}.\mathsf{Ext}'$
+% 则通过调用$\text{EHPS}.\mathsf{Ext}$隐式的完成了提取后检验的操作. 
+% \end{remark}
+
+
+ABO-EHPS真实模式下算法的正确性由EHPS对应算法保证. 
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+    \node [name=x, textnode] {$n = 3$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=1.3em] {$pk_{1,0}$\\$sk_{1,0}$}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=-1.3em] {$pk_{1,1}$\\$sk_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=10em, yshift=1.3em] {$pk_{2,0}$\\ $sk_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=10em, yshift=-1.3em] {$pk_{2,1}$\\ $sk_{2,1}$}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=1.3em] {$pk_{3,0}$\\  $sk_{3,0}$}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=-1.3em] {$pk_{3,1}$\\$sk_{3,1}$}; 
+\end{tikzpicture}
+\end{center}
+\caption{真实模式下$n=3$时密钥结构图示}
+\end{figure}
+
+\begin{figure}[!hbtp]
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=x, textnode] {$x = 100$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=1.3em] {$pk_{1,0}$\\$sk_{1,0}$}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick, 
+        right of = x, xshift=5em, yshift=-1.3em] {$pk_{1,1}$\\$sk_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,  
+        right of = x, xshift=10em, yshift=1.3em] {$pk_{2,0}$\\ $sk_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=10em, yshift=-1.3em] {$pk_{2,1}$\\ $sk_{2,1}$}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,
+        right of = x, xshift=15em, yshift=1.3em] {$pk_{3,0}$\\ $sk_{3,0}$}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=-1.3em] {$pk_{3,1}$\\$sk_{3,1}$}; 
+
+
+    \node [name = x1, above of = ek10, yshift=1.5em] {$x$}; 
+    \node [name = x2, above of = ek20, yshift=1.5em] {$x$}; 
+    \node [name = x3, above of = ek30, yshift=1.5em] {$x$}; 
+
+    \draw (x1) edge[->] (ek10); 
+    \draw (x2) edge[->] (ek20); 
+    \draw (x3) edge[->] (ek30); 
+
+    \node [name = pi1, below of = ek11, yshift=-1.5em] {$\pi_1$}; 
+    \node [name = pi2, below of = ek21, yshift=-1.5em] {$\pi_2$}; 
+    \node [name = pi3, below of = ek31, yshift=-1.5em] {$\pi_3$}; 
+
+    \draw (ek11) edge[->] (pi1); 
+    \draw (ek21) edge[->] (pi2); 
+    \draw (ek31) edge[->] (pi3); 
+\end{tikzpicture}
+\caption{真实模式下$x=010$时哈希证明计算图示}
+\end{minipage}
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=x, textnode] {$x = 100$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=1.3em] {$pk_{1,0}$\\$sk_{1,0}$}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,
+        right of = x, xshift=5em, yshift=-1.3em] {$pk_{1,1}$\\$sk_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick, 
+        right of = x, xshift=10em, yshift=1.3em] {$pk_{2,0}$\\ $sk_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=10em, yshift=-1.3em] {$pk_{2,1}$\\ $sk_{2,1}$}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,
+        right of = x, xshift=15em, yshift=1.3em] {$pk_{3,0}$\\  $sk_{3,0}$}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=-1.3em] {$pk_{3,1}$\\$sk_{3,1}$}; 
+
+
+    \node [name = w1, above of = ek10, yshift=1.5em] {$w_1$}; 
+    \node [name = w2, above of = ek20, yshift=1.5em] {$w_2$}; 
+    \node [name = w3, above of = ek30, yshift=1.5em] {$w_3$}; 
+
+    \draw (w1) edge[<-] (ek10); 
+    \draw (w2) edge[<-] (ek20); 
+    \draw (w3) edge[<-] (ek30); 
+
+    \node [name = pi1, below of = ek11, yshift=-1.5em] {$\pi_1$}; 
+    \node [name = pi2, below of = ek21, yshift=-1.5em] {$\pi_2$}; 
+    \node [name = pi3, below of = ek31, yshift=-1.5em] {$\pi_3$}; 
+
+    \draw (ek11) edge[<-] (pi1); 
+    \draw (ek21) edge[<-] (pi2); 
+    \draw (ek31) edge[<-] (pi3); 
+\end{tikzpicture}
+\caption{真实模式下$x=010$时证据提取图示}
+\end{minipage}
+\end{figure}
+
+ABO-EHPS模拟模式下算法的正确性由DDN结构和EHPS对应算法保证. 
+ABO-EHPS两种模式下公钥分布的统计不可区分性由EHPS两种模式下公钥分布的统计不可区分性与各公钥分量生成的独立性保证. 
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+    \node [name=xstar, textnode] {$x^* = 010$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=1.3em] {$pk_{1,0}$\\\blue{$sk_{1,0}'$}}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=-1.3em] {$pk_{1,1}$\\$sk_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=10em, yshift=1.3em] {$pk_{2,0}$\\ $sk_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=10em, yshift=-1.3em] {$pk_{2,1}$\\\blue{$sk_{2,1}'$}}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=1.3em] {$pk_{3,0}$\\ \blue{$sk_{3,0}'$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=-1.3em] {$pk_{3,1}$\\$sk_{3,1}$}; 
+\end{tikzpicture}
+\end{center}
+\caption{模拟模式下$n=3$, $x^*=010$时的密钥生成}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=x, textnode] {$x^* = 010$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,  
+        right of = x, xshift=5em, yshift=1.3em] {$pk_{1,0}$\\\blue{$sk_{1,0}'$}}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=-1.3em] {$pk_{1,1}$\\$sk_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=10em, yshift=1.3em] {$pk_{2,0}$\\ $sk_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,  
+        right of = x, xshift=10em, yshift=-1.3em] {$pk_{2,1}$\\ \blue{$sk_{2,1}'$}}; 
+
+	\node [textnode, above of = ek20, yshift=6em] {不知晓随机数, 使用$\mathsf{PrivEval}(sk', x^*)$计算}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,
+        right of = x, xshift=15em, yshift=1.3em] {$pk_{3,0}$\\ \blue{$sk_{3,0}'$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=-1.3em] {$pk_{3,1}$\\$sk_{3,1}$}; 
+
+    \node [name = x1, above of = ek10, yshift=1.5em] {$x^*$}; 
+    \node [name = x2, above of = ek20, yshift=1.5em] {$x^*$}; 
+    \node [name = x3, above of = ek30, yshift=1.5em] {$x^*$}; 
+
+    \draw (x1) edge[->] (ek10); 
+    \draw (x2) edge[->] (ek20); 
+    \draw (x3) edge[->] (ek30); 
+
+    \node [name = pi1, below of = ek11, yshift=-1.5em] {$\pi_1^*$}; 
+    \node [name = pi2, below of = ek21, yshift=-1.5em] {$\pi_2^*$}; 
+    \node [name = pi3, below of = ek31, yshift=-1.5em] {$\pi_3^*$}; 
+
+    \draw (ek11) edge[->] (pi1); 
+    \draw (ek21) edge[->] (pi2); 
+    \draw (ek31) edge[->] (pi3); 
+\end{tikzpicture}
+\caption{模拟模式下$x^* = 010$时哈希证明计算}
+\end{minipage}
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}
+    \node [name=x, textnode] {$x=100$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.6em, draw,  
+        right of = x, xshift=5em, yshift=1.3em] {$pk_{1,0}$\\\blue{$sk_{1,0}'$}}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,
+        right of = x, xshift=5em, yshift=-1.3em] {$pk_{1,1}$\\$sk_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,
+        right of = x, xshift=10em, yshift=1.3em] {$pk_{2,0}$\\ $sk_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.6em, draw,  
+        right of = x, xshift=10em, yshift=-1.3em] {$pk_{2,1}$\\ \blue{$sk_{2,1}'$}}; 
+	\node [textnode, above of = ek20, yshift=6em] {知晓随机数, 使用$\mathsf{PubEval}(pk, x, r)$计算}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.6em, draw, thick,
+        right of = x, xshift=15em, yshift=1.3em] {$pk_{3,0}$\\ \blue{$sk_{3,0}'$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=-1.3em] {$pk_{3,1}$\\$sk_{3,1}$}; 
+
+    \node [name = x1, above of = ek10, yshift=1.5em] {$x$}; 
+    \node [name = x2, above of = ek20, yshift=1.5em] {$x$}; 
+    \node [name = x3, above of = ek30, yshift=1.5em] {$x$}; 
+
+    \draw (x1) edge[->] (ek10); 
+    \draw (x2) edge[->] (ek20); 
+    \draw (x3) edge[->] (ek30); 
+
+    \node [name = pi1, below of = ek11, yshift=-1.5em] {$\pi_1$}; 
+    \node [name = pi2, below of = ek21, yshift=-1.5em] {$\pi_2$}; 
+    \node [name = pi3, below of = ek31, yshift=-1.5em] {$\pi_3$}; 
+
+    \draw (ek11) edge[->] (pi1); 
+    \draw (ek21) edge[->] (pi2); 
+    \draw (ek31) edge[->] (pi3); 
+\end{tikzpicture}
+\caption{模拟模式下$x=100$时哈希证明计算}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+    \node [name=xstar, textnode] {$x^*=010$\\$x=100$}; 
+
+    \node [name=ek10, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=1.3em] {$pk_{1,0}$\\\blue{$sk_{1,0}'$}}; 
+    \node [name=ek11, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=5em, yshift=-1.3em] {$pk_{1,1}$\\$sk_{1,1}$}; 
+
+    \node [name=ek20, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=10em, yshift=1.3em] {$pk_{2,0}$\\ $sk_{2,0}$}; 
+    \node [name=ek21, rectanglenode, minimum width=5em, minimum height=2.6em, draw,  
+        right of = x, xshift=10em, yshift=-1.3em] {$pk_{2,1}$\\ \blue{$sk_{2,1}'$}}; 
+
+    \node [name=ek30, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=1.3em] {$pk_{3,0}$\\ \blue{$sk_{3,0}'$}}; 
+    \node [name=ek31, rectanglenode, minimum width=5em, minimum height=2.6em, draw, 
+        right of = x, xshift=15em, yshift=-1.3em] {$pk_{3,1}$\\$sk_{3,1}$}; 
+
+    \node [name = w1, above of = ek10, yshift=1.5em] {$w_1$}; 
+    \node [name = w2, above of = ek20, yshift=1.5em] {$w_2$}; 
+    \node [name = x3, above of = ek30, yshift=1.5em] {$x$}; 
+
+    \draw (w1) edge[<-] (ek10); 
+    \draw (w2) edge[<-] (ek20); 
+    \draw (x3) edge[->] (ek30); 
+
+    \node [name = pi1, below of = ek11, yshift=-1.5em] {$\pi_1$}; 
+    \node [name = pi2, below of = ek21, yshift=-1.5em] {$\pi_2$}; 
+    \node [name = pi3, below of = ek31, yshift=-1.5em] {$\pi_3$}; 
+
+    \draw (ek11) edge[<-] (pi1); 
+    \draw (ek21) edge[<-] (pi2); 
+    \draw (ek31) edge[->] (pi3); 
+
+    \node [textnode, right of = x, xshift=30em] {$w_1 \leftarrow \text{EHPS}.\mathsf{Ext}(sk_{1,1}, \pi_1)$\\
+    	$w_2 \leftarrow \text{EHPS}.\mathsf{Ext}(sk_{2,0}, \pi_2)$\\
+    	check $w_1 \stackrel{?}{=} w_2$\\
+    	check $\pi_3 \stackrel{?}{=} \text{EHPS}.\mathsf{PrivEval}(\blue{sk_{3,0}'}, x)$}; 
+\end{tikzpicture}
+\end{center}
+\caption{模拟模式下$x=100$时证据提取过程}
+\end{figure}
+
+基于ABO-EHPS设计IND-CCA KEM的方式与构造~\ref{construction:CPA-KEM-from-EHPS}完全相同. 
+KEM构造的正确性由ABO-EHPS的正确性和$\mathsf{R}_L$的单射性保证, 安全性由以下定理保证.  
+\begin{theorem}
+如果$\mathsf{R}_L$是单向的, 那么KEM是IND-CCA安全的.  
+\end{theorem}
+
+\begin{proof}
+证明的思路仍然是首先由真实模式切换到模拟模式, 再在模拟模式下利用零知识性证明安全性. 
+证明的要点是保证两种模式下对解密谕言机$\mathcal{O}_\text{decap}$回复的一致性. 
+以下通过游戏序列完成定理证明:
+
+\begin{trivlist}
+\item $\text{Game}_0$: 对应真实的游戏. $\mathcal{CH}$在真实模式下运行ABO-EHPS与敌手$\mathcal{A}$交互. 
+\begin{itemize}
+\item 初始化: $\mathcal{CH}$计算$pp \leftarrow \mathsf{Setup}(1^\kappa)$, 
+	\redul{$(pk, sk) \leftarrow \mathsf{KeyGen}(\lambda)$}, 将$pp$和$pk$发送$\mathcal{A}$. 
+
+\item 挑战: $\mathcal{CH}$按照以下步骤生成挑战
+    \begin{enumerate}
+        \item 随机采样$(x^*, w^*) \leftarrow \mathsf{SampRel}(r^*)$;  
+        \item 通过\redul{$\mathsf{PubEval}(pk, x^*, r^*)$}公开计算
+        	$\pi^* \leftarrow \mathsf{H}_{pk}(x^*)$; 
+        \item 计算$k_0^* \leftarrow \mathsf{hc}(w^*)$, 随机采样$k_1^* \sample K$; 
+        \item 随机选取$\beta \sample \{0,1\}$, 将$(c^* = (x^*, \pi^*), k_\beta^*)$发送给$\mathcal{A}$作为挑战. 
+    \end{enumerate}
+
+\item 解封装询问$c = (x, \pi) \neq c^*$: 计算\redul{$w \leftarrow \mathsf{Ext}(sk, x, \pi)$}, 
+    如果$(x, w) \in \mathsf{R}_L$则输出$\mathsf{hc}(w)$, 否则输出$\bot$.
+
+\item 应答: $\mathcal{A}$输出对$\beta$的猜测$\beta'$, $\mathcal{A}$成功当且仅当$\beta'= \beta$.
+\end{itemize}
+为了利用ABO-EHPS的零知识性论证$\pi^*$和解封装询问不额外泄漏关于$w^*$的信息, 
+需要将ABO-EHPS由真实模式切换到模拟模式. 为此, 先引入以下游戏作为过渡.
+
+\item $\text{Game}_1$: 与$\text{Game}_0$完全相同, 
+	惟一的区别是$\mathcal{CH}$将$(x^*, w^*) \leftarrow \mathsf{SampRel}(r^*)$由挑战阶段提前至初始化阶段. 
+	显然, 该变化不会对敌手的视图有任何改变. 因此有:
+	\begin{equation*}
+    	\text{Game}_0 \equiv \text{Game}_1
+	\end{equation*}
+
+\item $\text{Game}_2$: 本游戏对解封装应答方式稍加改动, 以便于后续游戏将密文的ABO解封装询问转化为ABO-EHPS相对于$x^*$的ABO证据抽取. 
+	对于解封装询问$c = (x, \pi) \neq c^*$, $\mathcal{CH}$应答如下: 
+    \begin{itemize} 
+        \item $x = x^* \wedge \pi \neq \pi^*$: 直接返回$\bot$.
+        \item $x \neq x^*$: 计算$w \leftarrow \mathsf{Ext}(sk, x, \pi)$, 
+        	如果$(x, w) \in \mathsf{R}_L$则返回$\mathsf{hc}(w)$, 否则返回$\bot$.  
+    \end{itemize}
+	由于$\mathsf{H}_{pk}$是确定性算法, 因此$\text{Game}_2$与$\text{Game}_1$中的解封装应答完全相同. 
+
+
+\item $\text{Game}_3$: $\mathcal{CH}$在模拟模式下运行ABO-EHPS与敌手$\mathcal{A}$交互. 
+\begin{itemize}
+    \item 初始化: $\mathcal{CH}$与上一游戏的区别在于通过\redul{$(pk, sk') \leftarrow \mathsf{KeyGen}'(pp, x^*)$}生成密钥对.
+
+    \item 挑战: $\mathcal{CH}$与上一游戏的区别在于通过\redul{$\mathsf{PrivEval}(sk', x^*)$} 
+    	计算$\pi^* \leftarrow \mathsf{H}_{pk}(x^*)$.
+
+    \item 解封装询问$c = (x, \pi) \neq c^*$: $\mathcal{CH}$应答如下
+    \begin{itemize} 
+        \item $x = x^* \wedge \pi \neq \pi^*$: 直接返回$\bot$.
+        \item $x \neq x^*$: 计算\redul{$w \leftarrow \mathsf{Ext}'(sk', x, \pi)$}, 
+        	如果$(x, w) \in \mathsf{R}_L$则返回$\mathsf{hc}(w)$, 否则返回$\bot$.
+    \end{itemize}
+\end{itemize}
+
+\item 基于以下事实, 我们有: $\text{Game}_2 \approx_s \text{Game}_3$
+\begin{itemize}
+    \item $\mathsf{KeyGen}(pp)[1] \approx_s \mathsf{KeyGen}'(pp, x^*)[1]$
+    
+    \item $\mathsf{PubEval}(pk, x^*, r^*) = \mathsf{H}_{pk}(x^*) = \mathsf{PrivEval}(sk', x^*)$
+
+    \item 对于解封装询问$c = (x, \pi)$: 当$x = x^*$时, 均返回$\bot$; 
+    	当$x \neq x^*$时, ABO-EHPS真实模式和模拟模式的正确性以及解封装算法``提取-检验''的设计保证了应答一致. 
+\end{itemize}
+\end{trivlist}
+
+\begin{claim}
+如果$\mathsf{R}_L$是单向的, 那么$\AdvA^{\text{Game}_3} = \mathsf{negl}(\kappa)$. 
+\end{claim}
+
+\begin{proof}
+证明思路是如果存在$\mathcal{A}$以不可忽略的优势赢得$\text{Game}_3$, 
+那么可以构造出$\mathcal{B}$以不可忽略的优势打破$\mathsf{hc}$的伪随机性, 从而与$\mathsf{R}_L$的单向性假设冲突. 
+给定关于$\mathsf{hc}$的伪随机性挑战$pp$和$(x^*, k_\beta^*)$, 其中$(x^*, w^*) \leftarrow \mathsf{SampRel}(r^*)$, 
+$\mathcal{B}$模拟$\text{Game}_3$中的挑战者$\mathcal{CH}$与$\mathcal{A}$交互, 目标是猜测$\beta$. 
+\begin{itemize}
+    \item $\mathcal{B}$运行ABO-EHPS的模拟模式与$\mathcal{A}$进行交互, 其在初始化阶段不再采样$x^*$而是直接嵌入接收到的$x^*$, 
+    	在挑战阶段将$\mathsf{hc}$的挑战$(x^*, k_\beta^*)$作为$\mathcal{A}$的KEM挑战. 
+    	最终, $\mathcal{B}$输出$\mathcal{A}$的猜测$\beta'$. 
+\end{itemize} 
+容易验证, $\mathcal{B}$在$\text{Game}_3$中的模拟是完美的. 因此$\mathcal{B}$打破$\mathsf{hc}$伪随机性的优势与$\AdvA^{\text{Game}_3}$相同. 
+断言得证! 
+\end{proof}
+综上, 定理得证!
+\end{proof}
+
+Wee~\cite{Wee-CRYPTO-2010}展示了ABO-EHPS蕴含ATDR.
+\begin{construction}[基于ABO-EHPS的ATDR构造]
+\begin{itemize}
+\item $\mathsf{Setup}(1^\kappa)$: 运行$pp \leftarrow \text{ABO-EHPS}.\mathsf{Setup}(1^\kappa)$. 
+
+\item $\mathsf{KeyGen}(pp)$: 运行$(pk, sk) \leftarrow \text{ABO-EHPS}.\mathsf{KeyGen}(pp)$, 
+	令$pk$为求值公钥$ek$, $sk$为求逆陷门$td$. 
+
+\item $\mathsf{Sample}(pk; r)$: 运行$(x, w) \leftarrow \mathsf{SampRel}(r)$, 
+   	通过$\text{ABO-EHPS}.\mathsf{PubEval}(pk, x, r)$计算$\pi \leftarrow \mathsf{H}_{pk}(x)$, 输出$(w, (x, \pi))$.  
+
+\item $\mathsf{TdInv}(td, (x, \pi))$: 计算$w \leftarrow \text{ABO-EHPS}.\mathsf{Ext}(sk, (x, \pi))$,  
+    如果$(x, w) \in \mathsf{R}$则返回$w$, 否则返回$\bot$.
+\end{itemize}
+\end{construction}
+上述ATDR构造的自适应单向性由ABO-EHPS的性质$\mathsf{R}_L$的单向性保证. 
+该构造也在更抽象的层面解释了基于ABO-EHPS设计CCA安全KEM的实质是在构造ATDR.  
+
+
+\subsection{小结}
+EHPS的重要理论意义在于它阐释统一了一大类标准模型下的基于计算性假设的
+IND-CCA PKE方案~\cite{Kiltz-PKC-2007, CKS-EUROCRYPT-2008, HK-EUROCRYPT-2009, HJKS-PKC-2010}. 
+绝大多数标准模型下的PKE构造都可纳入EHPS和HPS的设计范式, 这也从公钥加密的角度再次证实了零知识证明的强大威力. 
+目前尚未知晓如何基于lattice上的困难问题构造EHPS.   
+\begin{center}
+\begin{tikzpicture}
+    \node [roundnode, name=EHPS, fill=blue!20, minimum height=2em, minimum width=5em] {EHPS};
+    \node [textnode, name=CPAKEM, below of = EHPS, yshift=-6em] {IND-CPA KEM}; 
+    \draw (EHPS) edge[->, thin] (CPAKEM);
+
+    \node [roundnode, name=ABOEHPS, right of = EHPS, xshift=10em, fill=blue!60, minimum height=2em, minimum width=5em] {ABO-EHPS};
+    \node [textnode, name=ATDR, below of = ABOEHPS, yshift=-3em] {ATDR};
+    \node [textnode, name=CCAKEM, below of = ATDR, yshift=-3em] {IND-CCA KEM}; 
+    \draw (ABOEHPS) edge[->, thin] (ATDR);
+    \draw (ATDR) edge[->, thin] (CCAKEM);
+    \draw (EHPS) edge[->, thin, color=red] node [above] {DDN} (ABOEHPS);
+
+    \node [name=factoring, above of = ABOEHPS, xshift=-12em, yshift=6em, textnode] {\cite{HK-EUROCRYPT-2009}\\factoring};
+    \node [name=CDH, above of = ABOEHPS, xshift=-6em, yshift=6em, textnode] {\cite{Kiltz-PKC-2007}\\gap-CDH};
+    \node [name=twinCDH, above of = ABOEHPS, xshift=0em, yshift=6em, textnode] {\cite{CKS-EUROCRYPT-2008}\\twin CDH};
+    \node [name=BCDH, above of = ABOEHPS, xshift=6em, yshift=6em, textnode] {\cite{HJKS-PKC-2010}\\BCDH};
+
+    \draw (factoring) edge[->] (ABOEHPS);
+    \draw (CDH) edge[->] (ABOEHPS);
+    \draw (twinCDH) edge[->] (ABOEHPS);
+    \draw (BCDH) edge[->] (ABOEHPS);
+
+    \node[name=lattice, above of=ABOEHPS, textnode, xshift=12em, yshift=6em, color=gray] {lattice?};
+    \draw (lattice) edge[->, color=gray] node[auto]{?} (ABOEHPS);
+\end{tikzpicture}
+\end{center}
+
+\subsubsection{HPS与EHPS的分析比较}
+\begin{trivlist}
+\item 相同点
+\begin{itemize}
+    \item 均可看成指定验证者的零知识证明系统(DV-NIZK). 
+    \item 证明的形式是哈希值.  
+\end{itemize}
+
+\item 不同点
+\begin{itemize}
+    \item HPS是标准的证明系统, 而EHPS是知识的证明系统. 
+
+    \item HPS中哈希函数族$\mathsf{H}_{sk}$由私钥索引, EHPS中哈希函数族$\mathsf{H}_{pk}$有公钥索引. 
+
+    \item 在基于HPS的PKE构造中, 密文$c$是实例$x$, 会话密钥$k$是证明$\pi$. 
+    \begin{itemize}
+        \item HPS的正确性保证了PKE的正确性 
+        \item HPS的合理性(哈希函数的平滑性、一致性)与SMP问题的困难性保证了PKE的安全性, 
+        	在证明过程中, 挑战实例需要从语言$L$上切换到语言外$X \backslash L$. 
+    \end{itemize}
+
+    \item 在基于EHPS的PKE构造中, 密文$c$由实例$x$和证明$\pi$组成, 会话密钥$k$是证据$w$.
+    \begin{itemize}
+        \item EHPS的知识提取性质保证了PKE的正确性
+        \item EHPS的零知识性和二元关系的单向性保证了PKE的安全性, 在证明过程中, EHPS需要由真实模式切换为模拟模式. 
+    \end{itemize}
+\end{itemize}
+\end{trivlist}
+
+% \begin{frame}{Key Technique Towards CCA Security}
+% \begin{itemize}
+% \uncover<1->{
+%     \item CPA game: $pk$ and $c^*$ do not leak $k^*$
+% }
+% \uncover<2->{
+%     \item CCA game: $\mathcal{A}$ can query $\mathcal{O}_\mathsf{dec}$ with any $c \neq c^*$
+% }
+
+% \uncover<3->{
+%     \item High-level strategy for CCA: \red{making $\mathcal{O}_\mathsf{dec}$ useless}
+% }
+% \end{itemize}
+
+% \begin{columns}[onlytextwidth]
+% \uncover<4->{
+% \begin{column}{0.49\textwidth}
+% \begin{tikzpicture}
+%     \draw [color=black] (0,0) circle (1.5cm);
+%     \draw (-1.5,1.5) node {$C$};
+%     \draw (0,0) node [color=red] {$*$}; 
+
+%     \draw (-0.8,0) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (0,0.8) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (-0.56,0.56) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (0,-0.8) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (-0.56,-0.56) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (0.56,-0.56) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (0.8,0) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (0.56,0.56) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+% \end{tikzpicture}
+% \mdblue{All-But-One technique}\\ 
+% make the rest ciphertexts independent of $c^*$: 
+% $c \neq c^*$ are safe, e.g. ATDF, EHPS 
+% \end{column}
+% }
+
+% \uncover<5->{
+% \begin{column}{0.49\textwidth}
+% \begin{tikzpicture}
+%     \draw [color=black] (0,0) circle (1.5);
+%     \draw (-1.5,1.5) node {$C$};
+%     \draw (0,0) node [color=red] {$*$}; 
+%     \draw (-0.8,0) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (0,0.8) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (-0.56,0.56) node {\includegraphics [width=0.12in] {\path/Image/cartoon/bomb-1.jpg}};
+%     \draw (0,-0.8) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (-0.56,-0.56) node {\includegraphics [width=0.12in] {\path/Image/cartoon/bomb-1.jpg}};
+%     \draw (0.56,-0.56) node {\includegraphics [width=0.12in] {\path/Image/cartoon/bomb-1.jpg}};
+%     \draw (0.8,0) node {\includegraphics [width=0.14in] {\path/Image/cartoon/smiley-face.png}};
+%     \draw (0.56,0.56) node {\includegraphics [width=0.12in] {\path/Image/cartoon/bomb-1.jpg}};
+% \end{tikzpicture}
+% \mdblue{Hard-to-Ask technique}\\ some of the rest ciphertexts are dangerous, 
+% make $\mathcal{A}$ unable to generate one, e.g. HPS
+% \end{column}
+% }
+% \end{columns}
+
+
+
+
+
+
+

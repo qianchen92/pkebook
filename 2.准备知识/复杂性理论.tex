@@ -1,0 +1,128 @@
+\section{复杂性理论初步}
+在复杂性理论中, 困难问$P$通常定义在$L \subseteq X$上, $X$是所有实例的集合, $L$是$X$中满足特定性质的一个子集. 
+我们称$P$是可高效判定/求解的, 如果存在确定性时间的Turing机$M$满足: 
+\begin{equation*}
+	x \in L \iff M(x) = 1  
+\end{equation*}
+所有可高效判定/求解问题的合集组成$\mathcal{P}$复杂性类. 
+
+\begin{note}
+实例集合$X$的学术术语是词(words), 子集$L$对应的学术术语是语言(language). 
+术语的来源是一个自然的类比: 不妨设世界上所有的词汇构成一个集合, 那么汉语、英语、法语、德语、C++语言、Rust语言等多种多样的语言自然构成了这个集合的各个子集.  
+通常, 称语言内的元素为Yes实例, 语言外的元素为No实例. 
+\end{note}
+
+密码学中的困难问题可以分为计算和判定两类: 
+\begin{itemize}
+	\item 计算类(也称搜索类)问题要求计算出问题的解: 如RSA问题、离散对数问题、计算Diffie-Hellman问题、短整数解问题等. 
+	\item 判定类问题要求判定是或否: 如二次剩余问题、判定Diffie-Hellman问题、判定LWE问题等. 
+\end{itemize}
+从解空间的角度理解, 判定问题可以看做计算问题的特例, 即输出解为1比特. 通常, 同一个问题的计算版本难于判定版本, 对应的计算假设弱于判定假设.    
+
+困难的二元关系是对密码学中各种计算类困难问题的抽象.  
+\begin{definition}[二元关系(binary relation)]
+令$L \subseteq X$是一个$\mathcal{NP}$语言. 
+$L$由二元关系$\mathsf{R}_L: X \times W$定义, 其中$W$之证据集合: 
+\begin{equation*}
+    x \in L \Leftrightarrow \exists w \in W \text{~s.t.~} (x, w) \in \mathsf{R}_L
+\end{equation*}
+
+如果$\mathsf{R}_L$满足如下两个性质, 则称其是困难的(hard):
+\begin{itemize}
+    \item 易采样 (easy to sample):  $\exists$ PPT算法$\mathsf{SampR}$对关系$\mathsf{R}_L$进行随机采样, 
+    	其以公开参数$pp$为输入, 输出``实例-证据''元组$(x, w) \in \mathsf{R}_L$. 
+
+    \item 难抽取 (hard to extract): $\forall$ PPT敌手$\mathcal{A}$:
+    \begin{equation*} 
+    	\Pr[(x, \mathcal{A}(x) = w') \in \mathsf{R}_L: (x, w) \leftarrow \mathsf{SampR}(pp)] \leq \mathsf{negl}(\kappa)
+    \end{equation*}
+\end{itemize} 
+\end{definition}
+
+\begin{note}
+单向函数自然诱导了一个困难的二元关系. 
+易采样的性质由单向函数的定义域可高效采样和单向函数可高效求值两点保证, 难抽取的性质由单向函数的单向性保证.
+\end{note}
+
+\begin{figure}[!htbp]
+\begin{center}
+\begin{tikzpicture}
+    \node [name = X, circlenode, fill=gray!40, minimum size=5.5em, label={[xshift=0em, yshift=-1.5em]$X$}] {}; 
+    \node [name = L, circlenode, fill=violet!70, minimum size=2em, inner sep = 0em] {$L$};
+    \node [name = W, circlenode, fill=cyan, right of = L, xshift = 10em, minimum size=2em, inner sep=0em] {$W$}; 
+    \node [name = SampR, textnode, right of = X, xshift = 5em, yshift=-2.5em] {$\mathsf{SampR}(pp)$}; 
+
+    \node [textnode, above of = L, yshift=5em, xshift=5em] 
+        {\red{问题任务:} 计算/搜索 \quad \quad \mdblue{解空间:} $\{0,1\}^{\mathsf{poly}(\kappa)}$};  
+
+    \draw (L) edge[<->] node[above] {$\mathsf{R}_L$} (W); 
+    \draw (SampR) edge[->] (L); 
+    \draw (SampR) edge[->] (W);
+\end{tikzpicture}
+\end{center}
+\caption{计算类困难问题图示}
+\end{figure}
+ 
+% \begin{block}{Computation Assumption $\Leftarrow$ Hard Relation}
+% \begin{itemize}
+%     \item problem --- instance 
+%     \item solution --- witness 
+%     \item Given $x \sample L$, it is hard to find $w$ s.t. $(x, w) \in \mathsf{R}_L$. 
+% \end{itemize}
+% \end{block}
+
+
+
+子集成员判定问题(SMP, Subset Membership Problem)则是密码学中各种判定类问题的抽象. 
+
+\begin{definition}[子集成员判定问题]
+令$L \subset X$是一个语言, 公开参数是$pp$. 定义以3个PPT采样算法:
+\begin{itemize}
+	\item $\mathsf{SampAll}(pp)$: 输出$X$中的随机元素. 
+	\item $\mathsf{SampYes}(pp)$: 输出$L$中的随机元素, 即随机Yes实例. 
+	\item $\mathsf{SampNo}(pp)$: 输出$X \backslash L$中的随机元素, 即随机No实例. 
+\end{itemize} 
+
+SMP问题有两种类型: 
+\begin{itemize}
+    \item Type 1: $U_X \approx_c U_L$
+    \item Type 2: $U_{X \backslash L} \approx_c U_L$
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+定义$\rho = |L|/|X|$为语言$L$相对于$X$的密度. 容易证明: 
+\begin{itemize}
+    \item 当$\rho = \mathsf{negl}(\kappa)$时: Type 1 $\iff$ Type 2
+    \item 当$\rho$已知时: Type 2 $\Rightarrow$ Type 1 
+    \begin{itemize}
+    	\item 归约的方法是对给定分布和$U_L$分布根据$\rho$进行加权重构: 
+    		如果给定分布是$U_{X \backslash L}$, 则重构结果$U_X$; 如果给定分布是$U_L$, 则重构结果仍为$U_L$. 
+    		因此, Type 2的实例可以归约到Type 1的实例. 
+    \end{itemize}
+\end{itemize}
+\end{remark}
+
+\begin{figure}[!htbp]
+\begin{center}
+\begin{tikzpicture}
+    \node [name = X, circlenode, fill=gray!40, minimum size=5.5em, label={[xshift=0em, yshift=-1.5em]$X$}] {}; 
+    \node [name = L, circlenode, fill=violet!70, minimum size=2em, inner sep = 0em] {$L$};
+    \node [name = SampAll, textnode, left of = X, xshift=-7em, yshift=2.5em] {$\mathsf{SampAll}(pp)$};
+    \node [name = SampYes, textnode, left of = X, xshift=-7em, yshift=0em] {$\mathsf{SampYes}(pp)$}; 
+    \node [name = SampNo, textnode, left of = X, xshift=-7em, yshift=-2.5em] {$\mathsf{SampNo}(pp)$}; 
+
+    \node [textnode, above of = X, yshift=5em, xshift=3em] 
+        {\red{问题任务:} 区分/判定 \quad \quad \mdblue{解空间:} $\{0,1\}$};  
+
+    \draw (SampAll) edge[->] (X); 
+    \draw (SampYes) edge[->] (L); 
+    \draw (SampNo) edge[->] ($(L.south)+(-1em, -0.2em)$); 
+\end{tikzpicture}
+\end{center}
+\caption{判定类计算问题示例}
+\end{figure}
+ 
+
+
+
