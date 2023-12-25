@@ -9,20 +9,22 @@
 \setCJKmainfont{STSongti-SC-Regular}
 
 # 云端与本地的同步
-* 首次: 在本地某处运行以下命令克隆项目到本地
+* 首次: 本地运行以下命令克隆项目到本地文件夹your-directory
 
 ``` 
+   cd your-directory
    git clone https://github.com/yuchen1024/pkebook.git
 ```
 * 本地可以修改编辑, 完成后执行以下命令将本地修改同步至远程库
 
 ```
+   cd your-directory
    git add .
    git commit -m "brief summary of your modification"
    git push -u origin main
 ```
 
-* 下次再进行本地更新之前, 一定先去执行以下命令拉取远程库的最新内容(合作者可能又更新了)
+* 下次再进行本地更新之前, 一定先去执行以下命令拉取远程库的最新内容 (合作者可能又更新了)
 
 ```
    git pull
