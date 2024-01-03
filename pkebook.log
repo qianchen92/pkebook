@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.6.3)  30 DEC 2023 15:51
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.6.3)  3 JAN 2024 10:16
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2405,21 +2405,24 @@ LaTeX Font Warning: Font shape `TU/STFangsong(0)/b/n' undefined
 
 
 
-] [31]) [32]
+] [31] [32]
+LaTeX Font Info:    Font shape `TU/TeXGyreTermesX(0)/m/n' will be
+(Font)              scaled to size 8.0pt on input line 305.
+) [33]
 \openout2 = `3.经典方案/基于格问题的经典方案.aux'.
 
 
-(./3.经典方案/基于格问题的经典方案.tex [33
+(./3.经典方案/基于格问题的经典方案.tex [34
 
 
 
-] [34] [35]) [36]
+] [35] [36]) [37]
 Chapter 4.
 LaTeX Font Info:    Trying to load font information for U+ding on input line 73
 .
 (/usr/local/texlive/2022/texmf-dist/tex/latex/bbding/Uding.fd
 File: Uding.fd 1996/02/01 v1.0 BBding font definitions
-) [37
+) [38
 
 
 
@@ -2427,42 +2430,40 @@ File: Uding.fd 1996/02/01 v1.0 BBding font definitions
 \openout2 = `4.通用构造方法/单向陷门函数类.aux'.
 
 
-(./4.通用构造方法/单向陷门函数类.tex [38
+(./4.通用构造方法/单向陷门函数类.tex [39
 
 ]
 LaTeX Font Info:    Font shape `TU/TeXGyreTermesX(0)/m/n' will be
-(Font)              scaled to size 8.0pt on input line 115.
-LaTeX Font Info:    Font shape `TU/TeXGyreTermesX(0)/m/n' will be
 (Font)              scaled to size 6.0pt on input line 115.
- [39] [40] [41] [42]
+ [40] [41] [42] [43]
 Overfull \hbox (6.38167pt too wide) in paragraph at lines 462--463
  [] 
  []
 
-[43] [44] [45] [46] [47] [48]
+[44] [45] [46] [47] [48] [49]
 
-LaTeX Warning: Citation 'zhihu-essay' on page 49 undefined on input line 887.
+LaTeX Warning: Citation 'zhihu-essay' on page 50 undefined on input line 887.
 
-[49] [50]
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-[51]
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
+[50] [51]
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
 [52]
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+[53]
 Overfull \hbox (1.66667pt too wide) in paragraph at lines 1209--1296
 [][] [] 
  []
 
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
-[53]
+[54]
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
 Missing character: There is no 1 ("31) in font nullfont!
@@ -2472,22 +2473,22 @@ Overfull \hbox (1.66667pt too wide) in paragraph at lines 1379--1449
 [][] [] 
  []
 
-[54]
+[55]
 Overfull \hbox (1.66667pt too wide) in paragraph at lines 1601--1688
 [][] [] 
  []
 
-[55] [56]
+[56] [57]
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
-) [57] [58]
+) [58] [59]
 \openout2 = `4.通用构造方法/哈希证明系统类.aux'.
 
- (./4.通用构造方法/哈希证明系统类.tex [59
+ (./4.通用构造方法/哈希证明系统类.tex [60
 
 
 
-] [60]
+] [61]
 Overfull \hbox (14.59624pt too wide) in paragraph at lines 154--158
 []\TU/SongtiSCLight(0)/m/n/10 我 们 首 先 以 针 对 $\OML/cmm/m/it/10 L[]$ \TU/SongtiSC
 Light(0)/m/n/10 语 言 的 \TU/TeXGyreTermesX(0)/m/n/10 HPS \TU/SongtiSCLight(0)/m/n
@@ -2498,15 +2499,15 @@ sb/m/n/10 G\OML/cmm/m/it/10 ; p; g\OT1/cmr/m/n/10 )$ \TU/SongtiSCLight(0)/m/n/1
 0 是 算 法 $[]\OT1/cmr/m/n/10 (1[])$
  []
 
-[61] [62] [63] [64]
+[62] [63] [64] [65]
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
-[65] [66]) [67]
+[66] [67]) [68]
 \openout2 = `4.通用构造方法/可提取哈希证明系统类.aux'.
 
- (./4.通用构造方法/可提取哈希证明系统类.tex [68
+ (./4.通用构造方法/可提取哈希证明系统类.tex [69
 
 
 
@@ -2521,7 +2522,7 @@ XGyreTermesX(0)/m/n/10 . \TU/SongtiSCLight(0)/m/n/10 令 $\OT1/cmr/m/n/10 (\U/ms
 是 算 法 $[]\OT1/cmr/m/n/10 (1[])$
  []
 
-[69] [70] [71]
+[70] [71] [72]
 Underfull \hbox (badness 1546) in paragraph at lines 368--371
 []$[][]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 pp; x[]\OT1/cmr/m/n/10 )$\TU/TeXGyreTe
 rmesX(0)/m/n/10 : \TU/KaitiSC(0)/m/n/10 独 立 运 行 $[]\OML/cmm/m/it/10 :[][]\OT1/c
@@ -2531,7 +2532,7 @@ L/cmm/m/it/10 n$ \TU/KaitiSC(0)/m/n/10 次 生 成 $\OMS/cmsy/m/n/10 f\OT1/cmr/m
 ermesX(0)/m/n/10 , \TU/KaitiSC(0)/m/n/10 独 立 运 行
  []
 
-[72]
+[73]
 Overfull \hbox (1.66667pt too wide) in paragraph at lines 415--491
 [][] [] 
  []
@@ -2541,12 +2542,12 @@ Overfull \hbox (1.66667pt too wide) in paragraph at lines 521--598
 [][] [] 
  []
 
-[73]
+[74]
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
-[74] [75]
+[75] [76]
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
 Missing character: There is no 1 ("31) in font nullfont!
@@ -2555,7 +2556,7 @@ Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
-) [76]
+) [77]
 \openout2 = `4.通用构造方法/程序混淆类.aux'.
 
  (./4.通用构造方法/程序混淆类.tex
@@ -2563,7 +2564,7 @@ File: figure/code.png Graphic file (type bmp)
 <figure/code.png>
 File: figure/obf.png Graphic file (type bmp)
 <figure/obf.png>
- [77
+ [78
 
 
 
@@ -2585,7 +2586,7 @@ C[]$ \TU/KaitiSC(0)/m/n/10 和 $\OML/cmm/m/it/10 C[]$\TU/TeXGyreTermesX(0)/m/n/1
  , \TU/KaitiSC(0)/m/n/10 均 有
  []
 
-[78] [79] [80]
+[79] [80] [81]
 File: figure/adversary.png Graphic file (type bmp)
 <figure/adversary.png>
 File: figure/challenger.png Graphic file (type bmp)
@@ -2594,35 +2595,35 @@ File: figure/adversary.png Graphic file (type bmp)
 <figure/adversary.png>
 File: figure/challenger.png Graphic file (type bmp)
 <figure/challenger.png>
- [81] [82] [83]
+ [82] [83] [84]
 Overfull \hbox (20.0pt too wide) in paragraph at lines 725--739
 []$[]$ 
  []
 
-[84]
+[85]
 Overfull \hbox (20.0pt too wide) in paragraph at lines 779--794
 []$[]$ 
  []
 
-) [85]
+) [86]
 \openout2 = `4.通用构造方法/可公开求值伪随机函数.aux'.
 
- (./4.通用构造方法/可公开求值伪随机函数.tex [86
+ (./4.通用构造方法/可公开求值伪随机函数.tex [87
 
 
 
-] [87] [88] [89] [90] [91] [92]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 631.
-
+] [88] [89] [90] [91] [92] [93]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 631.
 
-[93]) [94]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 631.
+
+[94]) [95]
 Chapter 5.
-[95
+[96
 
 
 
@@ -2644,9 +2645,9 @@ File: figure/attacks/openssl-heartbleed.png Graphic file (type bmp)
 <figure/attacks/openssl-heartbleed.png>
 File: figure/attacks/meltdown.png Graphic file (type bmp)
 <figure/attacks/meltdown.png>
- [96
+ [97
 
-] [97] [98]
+] [98] [99]
 Overfull \hbox (29.21428pt too wide) in paragraph at lines 184--186
 []\TU/STFangsong(0)/m/n/10 对 于 分 布 $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 pk; x; k;
  []\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^Y; s\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 ; 
@@ -2658,7 +2659,7 @@ OMS/cmsy/m/n/10 j\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 pk; x; []\OT1/cmr/m/n/10 ))
 \OMS/cmsy/m/n/10 ^^U
  []
 
-[99]
+[100]
 LaTeX Font Info:    Font shape `TU/TeXGyreTermesX(0)/m/it' will be
 (Font)              scaled to size 7.0pt on input line 242.
 LaTeX Font Info:    Font shape `TU/TeXGyreTermesX(0)/m/it' will be
@@ -2667,7 +2668,7 @@ LaTeX Font Info:    Font shape `TU/TeXGyreTermesX(0)/m/it' will be
 
 LaTeX Font Warning: Command \small invalid in math mode on input line 244.
 
-[100]
+[101]
 Overfull \hbox (161.64604pt too wide) in paragraph at lines 265--266
 []\TU/SongtiSCLight(0)/m/n/10 下 面 介 绍 如 何 利 用 \TU/TeXGyreTermesX(0)/m/n/10 1-un
 iversal HPS \TU/SongtiSCLight(0)/m/n/10 和 \TU/TeXGyreTermesX(0)/m/n/10 OT-LF \T
@@ -2676,7 +2677,7 @@ Light(0)/m/n/10 安 全 的 公 钥 加 密 方 案。|  令 $[] \OT1/cmr/m/n/10
 0 :[]; []:[]; []:[]; []:[]\OT1/cmr/m/n/10 )$
  []
 
-[101] [102]
+[102] [103]
 Overfull \hbox (15.38966pt too wide) in paragraph at lines 342--343
 []$[][]$\TU/TeXGyreTermesX(0)/m/n/10 : \TU/STFangsong(0)/m/n/10 该 游 戏 与 $[][]$ 
 的 唯 一 不 同 之 处 在 于 挑 战 密 文 中 随 机 实 例 $\OML/cmm/m/it/10 x[]$ \TU/STFangsong(0)/m/
@@ -2685,7 +2686,7 @@ n/10 的 选 取 方 式\TU/TeXGyreTermesX(0)/m/n/10 . \TU/STFangsong(0)/m/n/10 
 /10 (\OML/cmm/m/it/10 r\OT1/cmr/m/n/10 )$
  []
 
-[103]
+[104]
 Overfull \hbox (11.47098pt too wide) in paragraph at lines 373--374
 []\TU/STFangsong(0)/m/n/10 因 此\TU/TeXGyreTermesX(0)/m/n/10 , \TU/STFangsong(0)/
 m/n/10 利 用 $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^W \OMS/cmsy/m/n/10 ^^@ \OML/cmm
@@ -2711,7 +2712,7 @@ m/m/it/10 F$ \TU/STFangsong(0)/m/n/10 表 示 在 游 戏 $[][]$ 中\TU/TeXGyreT
 1/cmr/m/n/10 )\OML/cmm/m/it/10 ; t[]\OT1/cmr/m/n/10 )$
  []
 
-[104]
+[105]
 Overfull \hbox (13.57912pt too wide) in paragraph at lines 416--418
 \TU/STFangsong(0)/m/n/10 只 有 $\OT1/cmr/m/n/10 2[]$ \TU/STFangsong(0)/m/n/10 和 $
 \OT1/cmr/m/n/10 2[]$ \TU/STFangsong(0)/m/n/10 个 可 能 的 取 值\TU/TeXGyreTermesX(0)/
@@ -2725,7 +2726,7 @@ m/m/it/10 td[]; \OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x[]; s[];  []\OT1/cmr/m/n/10
 
 File: ./figure/ParallelHPS.png Graphic file (type bmp)
 <./figure/ParallelHPS.png>
-[105] [106]
+[106] [107]
 Overfull \hbox (3.45538pt too wide) in paragraph at lines 584--585
 \TU/SongtiSCLight(0)/b/n/10 全 除 一 规 则 有 损 函 数\TU/TeXGyreTermesX(0)/b/n/10 . \TU
 /SongtiSCLight(0)/m/n/10 类 似 于 全 除 一 有 损 函 数 \TU/TeXGyreTermesX(0)/m/n/10 (ABO-
@@ -2733,11 +2734,11 @@ LFs), \TU/SongtiSCLight(0)/m/n/10 规 则 有 损 函 数 也 可 以 推 广 �
 /TeXGyreTermesX(0)/m/n/10 (ABO-
  []
 
-[107] [108]
+[108] [109]
 
-LaTeX Warning: Citation 'PW2008' on page 109 undefined on input line 674.
+LaTeX Warning: Citation 'PW2008' on page 110 undefined on input line 674.
 
-[109] [110]
+[110] [111]
 Underfull \hbox (badness 1337) in paragraph at lines 796--799
 []$[]\OT1/cmr/m/n/10 ([]\OML/cmm/m/it/10 ; b[]\OT1/cmr/m/n/10 )$\TU/TeXGyreTerm
 esX(0)/m/n/10 : \TU/KaitiSC(0)/m/n/10 以 公 开 参 数 $[] \OT1/cmr/m/n/10 = (\OML/cmm
@@ -2747,7 +2748,7 @@ U/TeXGyreTermesX(0)/m/n/10 , \TU/KaitiSC(0)/m/n/10 运 行 $\OT1/cmr/m/n/10 (\OM
 mm/m/it/10 x; w\OT1/cmr/m/n/10 ) \OMS/cmsy/m/n/10  
  []
 
-[111] [112] [113] [114] [115] [116]
+[112] [113] [114] [115] [116] [117]
 Overfull \hbox (67.01921pt too wide) in paragraph at lines 1121--1125
 []\TU/STFangsong(0)/m/n/10 由 于 $\OML/cmm/m/it/10 k[] \OMS/cmsy/m/n/10   []\OT1/
 cmr/m/n/10 (^^C[](\OML/cmm/m/it/10 x[]\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 ; s[]\O
@@ -2761,7 +2762,7 @@ X(0)/m/n/10 -\TU/STFangsong(0)/m/n/10 强 提 取 器\TU/TeXGyreTermesX(0)/m/n/1
 OT1/cmr/m/n/10 )] \OMS/cmsy/m/n/10 ^^T
  []
 
-[117] [118] [119]
+[118] [119] [120]
 Overfull \hbox (26.05737pt too wide) in paragraph at lines 1328--1330
 []$[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^T\OT1/cmr/m/n/10 )$\TU/TeXGyreTermesX(
 0)/m/n/10 : \TU/SongtiSCLight(0)/m/n/10 运 行 $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 
@@ -2775,7 +2776,7 @@ m/it/10 ^^U\OT1/cmr/m/n/10 )$\TU/TeXGyreTermesX(0)/m/n/10 , $\OML/cmm/m/it/10 k
 OT1/cmr/m/n/10 (\OML/cmm/m/it/10 k[]; \OT1/cmr/m/n/10 0[])$
  []
 
-[120]
+[121]
 Overfull \hbox (34.1511pt too wide) in paragraph at lines 1425--1429
 []\TU/TeXGyreTermesX(0)/b/n/10 Game 2. \TU/STFangsong(0)/m/n/10 该 游 戏 与 \TU/TeX
 GyreTermesX(0)/m/n/10 Game 1 \TU/STFangsong(0)/m/n/10 的 不 同 之 处 在 于\TU/TeXGyreT
@@ -2785,7 +2786,7 @@ cmm/m/it/10 k[]; \OT1/cmr/m/n/10 0[])$\TU/TeXGyreTermesX(0)/m/n/10 .
  []
 
 
-LaTeX Warning: Reference `fig:ch5-improved-PPEPRF-PrivEval-star' on page 121 un
+LaTeX Warning: Reference `fig:ch5-improved-PPEPRF-PrivEval-star' on page 122 un
 defined on input line 1435.
 
 
@@ -2802,16 +2803,16 @@ Missing character: There is no 始 ("59CB) in font cmr10!
 Missing character: There is no 化 ("5316) in font cmr10!
 Missing character: There is no 阶 ("9636) in font cmr10!
 Missing character: There is no 段 ("6BB5) in font cmr10!
-[121]) [122]
+[122]) [123]
 \openout2 = `5.安全性增强/抗篡改安全.aux'.
 
- (./5.安全性增强/抗篡改安全.tex [123
+ (./5.安全性增强/抗篡改安全.tex [124
 
 
 
-] [124]
+] [125]
 
-LaTeX Warning: Reference `definition:Wee-PKE' on page 125 undefined on input li
+LaTeX Warning: Reference `definition:Wee-PKE' on page 126 undefined on input li
 ne 115.
 
 
@@ -2826,7 +2827,7 @@ m/n/10 对 于 敌 手 的 任 意 询 问 $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^
  sk\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 ; C\OT1/cmr/m/n/10 )$
  []
 
-[125] [126] [127] [128] [129] [130]
+[126] [127] [128] [129] [130] [131]
 Overfull \hbox (31.17072pt too wide) in paragraph at lines 464--465
 []\TU/STFangsong(0)/m/n/10 攻 击\TU/TeXGyreTermesX(0)/m/n/10 : $\OMS/cmsy/m/n/10 
 A$ \TU/STFangsong(0)/m/n/10 输 出 一 对 元 素 $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^^;
@@ -2850,65 +2851,65 @@ L/cmm/m/it/10 ; vk[]\OT1/cmr/m/n/10 )$
  []
 
 
-LaTeX Warning: Reference `lemma:chain-rule' on page 131 undefined on input line
+LaTeX Warning: Reference `lemma:chain-rule' on page 132 undefined on input line
  499.
 
 
-LaTeX Warning: Citation 'ChenQZDC22' on page 131 undefined on input line 501.
+LaTeX Warning: Citation 'ChenQZDC22' on page 132 undefined on input line 501.
 
 
-LaTeX Warning: Citation 'ChenQZDC22' on page 131 undefined on input line 503.
+LaTeX Warning: Citation 'ChenQZDC22' on page 132 undefined on input line 503.
 
-[131]
+[132]
 
-LaTeX Warning: Citation 'FaustMVW14' on page 132 undefined on input line 518.
+LaTeX Warning: Citation 'FaustMVW14' on page 133 undefined on input line 518.
 
-[132] [133]) [134]
+[133] [134]) [135]
 \openout2 = `5.安全性增强/消息依赖密钥安全.aux'.
 
  (./5.安全性增强/消息依赖密钥安全.tex
 
-LaTeX Warning: Citation 'BRS2002' on page 135 undefined on input line 4.
+LaTeX Warning: Citation 'BRS2002' on page 136 undefined on input line 4.
 
 
-LaTeX Warning: Citation 'BHHO2008' on page 135 undefined on input line 6.
+LaTeX Warning: Citation 'BHHO2008' on page 136 undefined on input line 6.
 
 
-LaTeX Warning: Citation 'ACPS2009' on page 135 undefined on input line 6.
+LaTeX Warning: Citation 'ACPS2009' on page 136 undefined on input line 6.
 
 
-LaTeX Warning: Citation 'BG2010' on page 135 undefined on input line 6.
+LaTeX Warning: Citation 'BG2010' on page 136 undefined on input line 6.
 
 
-LaTeX Warning: Citation 'MTY2011-EUROCRYPT' on page 135 undefined on input line
+LaTeX Warning: Citation 'MTY2011-EUROCRYPT' on page 136 undefined on input line
  6.
 
 
-LaTeX Warning: Citation 'CCS2009' on page 135 undefined on input line 6.
+LaTeX Warning: Citation 'CCS2009' on page 136 undefined on input line 6.
 
 
-LaTeX Warning: Citation 'Hofheinz2013-EUROCRYPT' on page 135 undefined on input
+LaTeX Warning: Citation 'Hofheinz2013-EUROCRYPT' on page 136 undefined on input
  line 6.
 
 
-LaTeX Warning: Citation 'CGH2012' on page 135 undefined on input line 13.
+LaTeX Warning: Citation 'CGH2012' on page 136 undefined on input line 13.
 
-[135
+[136
 
 
 
 ]
 Missing character: There is no （ ("FF08) in font cmr10!
-[136] [137] [138]
+[137] [138] [139]
 
-LaTeX Warning: Citation 'LLJ2015' on page 139 undefined on input line 194.
+LaTeX Warning: Citation 'LLJ2015' on page 140 undefined on input line 194.
 
 
-LaTeX Warning: Citation 'LLJ2015' on page 139 undefined on input line 194.
+LaTeX Warning: Citation 'LLJ2015' on page 140 undefined on input line 194.
 
 LaTeX Font Info:    Font shape `TU/TeXGyreTermesX(0)/m/sc' will be
 (Font)              scaled to size 10.0pt on input line 221.
-[139]
+[140]
 LaTeX Font Info:    Font shape `TU/texgyreheros(0)/m/n' will be
 (Font)              scaled to size 8.99994pt on input line 286.
 
@@ -2920,7 +2921,7 @@ n/10 )$ \TU/SongtiSCLight(0)/m/n/10 见 图[][]\TU/TeXGyreTermesX(0)/m/n/10 5.17
 0 :=
  []
 
-[140]
+[141]
 File: ./figure//HanKEM.pdf Graphic file (type pdf)
 <use ./figure//HanKEM.pdf>
 
@@ -2935,7 +2936,7 @@ iSCLight(0)/m/n/10 的 实 验 中\TU/TeXGyreTermesX(0)/m/n/10 , $[]\OML/cmm/m/i
 ]$
  []
 
-[141] [142]
+[142] [143]
 Overfull \hbox (7.06271pt too wide) in paragraph at lines 515--516
 []\TU/SongtiSCLight(0)/m/n/10 根 据 \TU/TeXGyreTermesX(0)/m/n/10 IV$[]$ \TU/Songt
 iSCLight(0)/m/n/10 假 设\TU/TeXGyreTermesX(0)/m/n/10 , \TU/SongtiSCLight(0)/m/n/1
@@ -2946,22 +2947,22 @@ iSCLight(0)/m/n/10 假 设\TU/TeXGyreTermesX(0)/m/n/10 , \TU/SongtiSCLight(0)/m/
  []
 
 
-LaTeX Warning: Citation 'BG2010' on page 143 undefined on input line 529.
+LaTeX Warning: Citation 'BG2010' on page 144 undefined on input line 529.
 
-[143]
+[144]
 File: figure/KDM-Fun.pdf Graphic file (type pdf)
 <use figure/KDM-Fun.pdf>
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[144]
+[145]
 
-LaTeX Warning: Citation 'CramerS03' on page 145 undefined on input line 603.
+LaTeX Warning: Citation 'CramerS03' on page 146 undefined on input line 603.
 
-[145]) [146] [147]
+[146]) [147] [148]
 Chapter 6.
-[148
+[149
 
 
 
@@ -2970,25 +2971,25 @@ Chapter 6.
 
  (./6.功能性扩展/确定性公钥加密.tex
 
-LaTeX Warning: Citation 'BBO2007' on page 149 undefined on input line 4.
+LaTeX Warning: Citation 'BBO2007' on page 150 undefined on input line 4.
 
 
-LaTeX Warning: Citation 'BFO2008' on page 149 undefined on input line 4.
+LaTeX Warning: Citation 'BFO2008' on page 150 undefined on input line 4.
 
 
-LaTeX Warning: Citation 'FOR2012' on page 149 undefined on input line 4.
+LaTeX Warning: Citation 'FOR2012' on page 150 undefined on input line 4.
 
 
-LaTeX Warning: Citation 'XXZ2012' on page 149 undefined on input line 4.
+LaTeX Warning: Citation 'XXZ2012' on page 150 undefined on input line 4.
 
 
-LaTeX Warning: Citation 'BS2011' on page 149 undefined on input line 7.
+LaTeX Warning: Citation 'BS2011' on page 150 undefined on input line 7.
 
-[149
+[150
 
-] [150]
+] [151]
 
-LaTeX Warning: Citation 'BrakerskiG10' on page 151 undefined on input line 88.
+LaTeX Warning: Citation 'BrakerskiG10' on page 152 undefined on input line 88.
 
 
 Overfull \hbox (24.6268pt too wide) in paragraph at lines 110--111
@@ -3004,9 +3005,9 @@ r/m/n/10 (\OML/cmm/m/it/10 pk; M[]\OT1/cmr/m/n/10 )$\TU/TeXGyreTermesX(0)/m/n/1
 0 ,
  []
 
-[151]
+[152]
 
-LaTeX Warning: Citation 'BS2011' on page 152 undefined on input line 144.
+LaTeX Warning: Citation 'BS2011' on page 153 undefined on input line 144.
 
 
 Overfull \hbox (0.57436pt too wide) in paragraph at lines 146--147
@@ -3021,20 +3022,20 @@ TermesX(0)/m/n/10 , $\OML/cmm/m/it/10 g[]; [] ; g[]$\TU/TeXGyreTermesX(0)/m/n/1
  []
 
 
-LaTeX Warning: Citation 'BonehHHO08' on page 152 undefined on input line 151.
+LaTeX Warning: Citation 'BonehHHO08' on page 153 undefined on input line 151.
 
 LaTeX Font Info:    Font shape `TU/TeXGyreTermesX(0)/b/n' will be
 (Font)              scaled to size 8.0pt on input line 151.
-) [152]
+) [153]
 \openout2 = `6.功能性扩展/可搜索公钥加密.aux'.
 
  (./6.功能性扩展/可搜索公钥加密.tex
 
-LaTeX Warning: Citation 'BDOP2004' on page 153 undefined on input line 6.
+LaTeX Warning: Citation 'BDOP2004' on page 154 undefined on input line 6.
 
 File: figure/ch6-PEKSModel.png Graphic file (type bmp)
 <figure/ch6-PEKSModel.png>
-[153
+[154
 
 
 
@@ -3051,7 +3052,7 @@ sX(0)/m/n/10 /\TU/SongtiSCLight(0)/m/n/10 私 钥 $\OT1/cmr/m/n/10 (\OML/cmm/m/i
  []
 
 
-LaTeX Warning: Citation 'AbdallaBCKKLMNPS08' on page 154 undefined on input lin
+LaTeX Warning: Citation 'AbdallaBCKKLMNPS08' on page 155 undefined on input lin
 e 45.
 
 
@@ -3062,15 +3063,15 @@ Overfull \hbox (41.35095pt too wide) in paragraph at lines 45--47
 10 . Abdalla \TU/SongtiSCLight(0)/m/n/10 等 人 \TU/TeXGyreTermesX(0)/m/n/10 [[]]
  []
 
-[154]
+[155]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[155]
+[156]
 
-LaTeX Warning: Citation 'Abdalla2005' on page 156 undefined on input line 137.
+LaTeX Warning: Citation 'Abdalla2005' on page 157 undefined on input line 137.
 
-[156] [157]
+[157] [158]
 Overfull \hbox (16.2117pt too wide) in paragraph at lines 226--227
 \OML/cmm/m/it/10 H[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 e\OT1/cmr/m/n/10 (\OML/cm
 m/m/it/10 H[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 w[]\OT1/cmr/m/n/10 )\OML/cmm/m/i
@@ -3087,14 +3088,14 @@ r/m/n/10 (\OML/cmm/m/it/10 H[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 w[]\OT1/cmr/m/n
 /10 )\OML/cmm/m/it/10 ; u[]\OT1/cmr/m/n/10 ) =
  []
 
-[158]
+[159]
 
-LaTeX Warning: Citation 'BSS2006' on page 159 undefined on input line 289.
+LaTeX Warning: Citation 'BSS2006' on page 160 undefined on input line 289.
 
 
-LaTeX Warning: Citation 'ZI2007' on page 159 undefined on input line 289.
+LaTeX Warning: Citation 'ZI2007' on page 160 undefined on input line 289.
 
-[159] [160]
+[160] [161]
 Underfull \hbox (badness 1127) in paragraph at lines 371--372
 []$[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 ^^T\OT1/cmr/m/n/10 )$\TU/TeXGyreTermesX(
 0)/m/n/10 : \TU/SongtiSCLight(0)/m/it/10 运 行 $\OML/cmm/m/it/10 pp[] \OMS/cmsy/m
@@ -3105,7 +3106,7 @@ TU/TeXGyreTermesX(0)/m/n/10 , \TU/SongtiSCLight(0)/m/it/10 输 出 系 统 参 �
 m/m/it/10 pp \OT1/cmr/m/n/10 =
  []
 
-[161]
+[162]
 Overfull \hbox (4.74084pt too wide) in paragraph at lines 412--414
 []\TU/SongtiSCLight(0)/b/n/10 证 明[] []\TU/STFangsong(0)/m/n/10 如 果 $[]\OML/cmm/
 m/it/10 :[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 vk; c\OMS/cmsy/m/n/10 jj\OML/cmm/m
@@ -3129,7 +3130,7 @@ angsong(0)/m/n/10 其 中 $\OML/cmm/m/it/10 pp[] \OMS/cmsy/m/n/10   []\OML/cmm/m
 X(0)/m/n/10 ),
  []
 
-[162]
+[163]
 Overfull \hbox (38.43286pt too wide) in paragraph at lines 455--456
 []\TU/STFangsong(0)/m/n/10 初 始 化\TU/TeXGyreTermesX(0)/b/n/10 : \TU/STFangsong(0
 )/m/n/10 输 入 \TU/TeXGyreTermesX(0)/m/n/10 HIBE \TU/STFangsong(0)/m/n/10 的 公 开 参
@@ -3147,7 +3148,7 @@ Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
 Missing character: There is no 1 ("31) in font nullfont!
 Missing character: There is no 2 ("32) in font nullfont!
-[163]
+[164]
 Overfull \hbox (25.5802pt too wide) in paragraph at lines 528--530
 []\TU/STFangsong(0)/m/n/10 初 始 化\TU/TeXGyreTermesX(0)/m/n/10 : \TU/STFangsong(0
 )/m/n/10 输 入 安 全 参 数 $\OML/cmm/m/it/10 ^^T$ \TU/STFangsong(0)/m/n/10 和 一 次 签 名 
@@ -3175,14 +3176,14 @@ U/STFangsong(0)/m/n/10 然 后 将 解 密 结 果 $[]\OML/cmm/m/it/10 :[]\OT1/c
 ML/cmm/m/it/10 dk; c\OT1/cmr/m/n/10 )$
  []
 
-[164]
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
 [165]
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+[166]
 Overfull \hbox (4.74084pt too wide) in paragraph at lines 665--667
 []\TU/SongtiSCLight(0)/b/n/10 证 明[] []\TU/STFangsong(0)/m/n/10 如 果 $[]\OML/cmm/
 m/it/10 :[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 vk; c\OMS/cmsy/m/n/10 jj\OML/cmm/m
@@ -3206,7 +3207,7 @@ angsong(0)/m/n/10 其 中 $\OML/cmm/m/it/10 pp[] \OMS/cmsy/m/n/10   []\OML/cmm/m
 X(0)/m/n/10 ),
  []
 
-[166]
+[167]
 Overfull \hbox (26.15887pt too wide) in paragraph at lines 708--709
 []\TU/STFangsong(0)/m/n/10 初 始 化\TU/TeXGyreTermesX(0)/b/n/10 : \TU/STFangsong(0
 )/m/n/10 输 入 \TU/TeXGyreTermesX(0)/m/n/10 IBE \TU/STFangsong(0)/m/n/10 的 公 开 参 
@@ -3236,7 +3237,7 @@ ML/cmm/m/it/10 vk$ \TU/STFangsong(0)/m/n/10 对 应 的 解 密 密 钥 $\OML/cm
 10 :[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 dk; c\OT1/cmr/m/n/10 )$
  []
 
-[167]
+[168]
 Overfull \hbox (25.5802pt too wide) in paragraph at lines 786--788
 []\TU/STFangsong(0)/m/n/10 初 始 化\TU/TeXGyreTermesX(0)/m/n/10 : \TU/STFangsong(0
 )/m/n/10 输 入 安 全 参 数 $\OML/cmm/m/it/10 ^^T$ \TU/STFangsong(0)/m/n/10 和 一 次 签 名 
@@ -3248,20 +3249,20 @@ angsong(0)/m/n/10 其 中 $\OML/cmm/m/it/10 pp[] \OMS/cmsy/m/n/10   []\OML/cmm/m
 X(0)/m/n/10 ),
  []
 
-[168]
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
-Missing character: There is no 1 ("31) in font nullfont!
-Missing character: There is no 2 ("32) in font nullfont!
 [169]
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+Missing character: There is no 1 ("31) in font nullfont!
+Missing character: There is no 2 ("32) in font nullfont!
+[170]
 Missing character: There is no （ ("FF08) in font cmr10!
 
 Overfull \hbox (10.84744pt too wide) detected at line 864
@@ -3269,15 +3270,15 @@ Overfull \hbox (10.84744pt too wide) detected at line 864
  []
 
 
-LaTeX Warning: Citation 'BDOP2004' on page 170 undefined on input line 874.
+LaTeX Warning: Citation 'BDOP2004' on page 171 undefined on input line 874.
 
 File: figure/ch6-RegPEKS.png Graphic file (type bmp)
 <figure/ch6-RegPEKS.png>
 
-LaTeX Warning: Citation 'BSS2008' on page 170 undefined on input line 887.
+LaTeX Warning: Citation 'BSS2008' on page 171 undefined on input line 887.
 
 
-LaTeX Warning: Citation 'RPSL2009' on page 170 undefined on input line 887.
+LaTeX Warning: Citation 'RPSL2009' on page 171 undefined on input line 887.
 
 File: figure/ch6-dPEKS.png Graphic file (type bmp)
 <figure/ch6-dPEKS.png>
@@ -3286,18 +3287,18 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 File: figure/ch6-PAEKS.png Graphic file (type bmp)
 <figure/ch6-PAEKS.png>
-[170] [171] [172]
+[171] [172] [173]
 File: figure/ch6-MultiUserPAEKS.png Graphic file (type bmp)
 <figure/ch6-MultiUserPAEKS.png>
 
 
-LaTeX Warning: Citation 'table:ch6-PAEKS-CI' on page 173 undefined on input lin
+LaTeX Warning: Citation 'table:ch6-PAEKS-CI' on page 174 undefined on input lin
 e 979.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[173]
+[174]
 Underfull \hbox (badness 1092) in paragraph at lines 1039--1040
 []$[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 sk[]; pk[]; w\OT1/cmr/m/n/10 )$\TU/TeXGy
 reTermesX(0)/m/n/10 : \TU/SongtiSCLight(0)/m/it/10 数 据 接 收 者 计 算 并 输 出 关 键 词 $\
@@ -3306,15 +3307,15 @@ OML/cmm/m/it/10 w$ \TU/SongtiSCLight(0)/m/it/10 的 检 索 令 牌 $\OML/cmm/m/
 tiSCLight(0)/m/it/10 其 中 $\OML/cmm/m/it/10 h \OT1/cmr/m/n/10 =
  []
 
-[174]
+[175]
 
-LaTeX Warning: Citation 'AbdallaBR01' on page 175 undefined on input line 1051.
+LaTeX Warning: Citation 'AbdallaBR01' on page 176 undefined on input line 1051.
 
 
 
-LaTeX Warning: Citation 'QinCZZ21' on page 175 undefined on input line 1060.
+LaTeX Warning: Citation 'QinCZZ21' on page 176 undefined on input line 1060.
 
-[175] [176] [177]
+[176] [177] [178]
 Overfull \hbox (4.4143pt too wide) in paragraph at lines 1163--1164
 []$\OML/cmm/m/it/10 H[]$\TU/TeXGyreTermesX(0)/b/n/10 -\TU/STFangsong(0)/m/n/10 
 询 问\TU/TeXGyreTermesX(0)/b/n/10 : $\OMS/cmsy/m/n/10 B$ \TU/STFangsong(0)/m/n/10
@@ -3343,34 +3344,34 @@ OT1/cmr/m/n/10 )$
  []
 
 
-LaTeX Warning: Citation 'BDOP2004' on page 178 undefined on input line 1197.
+LaTeX Warning: Citation 'BDOP2004' on page 179 undefined on input line 1197.
 
-[178]
+[179]
 File: ./figure/ch6-PAEKSApp.png Graphic file (type bmp)
 <./figure/ch6-PAEKSApp.png>
-) [179]
+) [180]
 Chapter 7.
-[180
+[181
 
 
 
 ]
 \openout2 = `7.标准化与工程实践/标准化与工程实践.aux'.
 
- (./7.标准化与工程实践/标准化与工程实践.tex [181
+ (./7.标准化与工程实践/标准化与工程实践.tex [182
 
-] [182] [183]) [184]
+] [183] [184]) [185]
 Overfull \hbox (34.17567pt too wide) in paragraph at lines 115--115
 []\TU/TeXGyreTermesX(0)/m/n/10 Martin Albrecht et al. \TU/TeXGyreTermesX(0)/m/i
 t/10 Homomorphic Encryption Security Standard\TU/TeXGyreTermesX(0)/m/n/10 . Tec
 h. rep. [][]$[][][][][] [] [] [] [][][][][][][][][][][][][][][][][][][][][] []
  []
 
-[185
+[186
 
 
 
-] [186] [187]
+] [187] [188]
 Overfull \hbox (0.25735pt too wide) in paragraph at lines 115--115
 []\TU/TeXGyreTermesX(0)/m/n/10 Shafi Goldwasser and Silvio Micali. “  Probabili
 stic Encryption ”. In: \TU/TeXGyreTermesX(0)/m/it/10 J. Comput. Syst. Sci. \TU/
@@ -3383,7 +3384,7 @@ Overfull \hbox (3.4611pt too wide) in paragraph at lines 115--115
 ient Public-Key Encryption from Computational Diffie-Hellman
  []
 
-[188] [189] [190]
+[189] [190] [191]
 Overfull \hbox (7.08447pt too wide) in paragraph at lines 115--115
 []\TU/TeXGyreTermesX(0)/m/n/10 Baodong Qin et al. “  Improved Security Model fo
 r Public-Key Authenticated Encryption with Keyword Search ”.
@@ -3396,10 +3397,10 @@ ndard Curves and Curve Generation\TU/TeXGyreTermesX(0)/m/n/10 . [][]$[][][][][]
  [] [] [] [][][][][][][][][][][] []
  []
 
-[191] [192]
+[192] [193]
 \openout2 = `后记.aux'.
 
- (./后记.tex) [193
+ (./后记.tex) [194
 
 
 
@@ -3419,7 +3420,7 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `pkebook.out' has not changed.
-(rerunfilecheck)             Checksum: 7E0AB7B2606ACDAA3216B25F9784DEB4;22267.
+(rerunfilecheck)             Checksum: E289DFE9C5E935856AD4A7FBD9C125F8;22267.
 
 Package biblatex Warning: Please (re)run BibTeX on the file(s):
 (biblatex)                pkebook
@@ -3430,12 +3431,12 @@ Package logreq Info: Writing requests to 'pkebook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 62088 strings out of 476179
- 1397862 string characters out of 5809545
- 2299890 words of memory out of 5000000
- 81503 multiletter control sequences out of 15000+600000
+ 62098 strings out of 476179
+ 1398110 string characters out of 5809545
+ 2300167 words of memory out of 5000000
+ 81513 multiletter control sequences out of 15000+600000
  487526 words of font info for 174 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  103i,38n,109p,1832b,5411s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on pkebook.pdf (199 pages).
+Output written on pkebook.pdf (200 pages).

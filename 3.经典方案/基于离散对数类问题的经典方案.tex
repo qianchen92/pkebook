@@ -98,13 +98,22 @@ ElGamal PKE构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 明文�
 \subsection{Twisted ElGamal PKE}
 近半个世纪, 随着网络技术的飞速发展, 计算模式逐渐由集中式迁移分布式. 新型计算模式对加密方案的需求也从单一的机密性保护扩展到对隐私计算的支持. 
 上一节注记中提到的Exponential ElGamal PKE支持$\mathbb{Z}_p$上的模加运算``+''同态, 适用于密态计算场景. 
-在区块链和机器学习等涉及恶意敌手的计算场景中, 还需要加法同态加密方案具有零知识证明友好的特性, 即易与零知识证明协议进行套接, 
-证明密文加密的明文满足声称的约束关系, 如在指定的区间内. 
+在区块链和机器学习等涉及恶意敌手的计算场景中, 还常需要以隐私保护的方式证明密文加密的明文满足声称的约束关系, 特别的, 在指定的区间内, 
+我们称之为零知识密态区间范围证明. 
+
+零知识密态区间范围证明又可以根据证明者的角色分为两类: 
+\begin{enumerate}
+    \item 证明者为密文生成方: 证明者知晓加密随机数$r$和加密消息$m$. 
+    \item 证明者为密文接收方: 证明者知晓解密私钥$sk$和加密消息$m$.  
+\end{enumerate}
+我们称上面两种情形下完成密态证明的组件为Gadget-1和Gadget-2. 下面详细讨论Gadget-1的构造, Gadget-2的设计可以通过重加密技术归结为Gadget-2. 
 
 当前最高效的零知识区间范围证明系统是构建在离散对数群上的Bulletproof~\cite{Bunz-BulletProof-SP-2018}, 其接受的断言类型为Pedersen承诺. 
-仅管exponential ElGamal PKE密文的第二项$pk^r \cdot g^m$也是Pedersen承诺的形式, 但是若证明者为密文发送方, 
-则其知晓承诺密钥$(pk, g)$之间的离散对数关系, 从而无法调用Bulletproof完成证明(合理性得不到保证). 
+尽管exponential ElGamal PKE密文的第二项$pk^r \cdot g^m$也是Pedersen承诺的形式, 
+但是若证明者为密文生成方, 则其知晓承诺密钥$(pk, g)$之间的离散对数关系, 因此无法调用Bulletproof完成证明(合理性得不到保证), 
+如图~\ref{figure:ElGamal-cannot-link-Bulletproof}所示. 
 
+\begin{figure}[!hbtp]
 \begin{center}
 \begin{tikzpicture}
     \node [textnode, name=ElGamal] {ElGamal};
@@ -115,21 +124,24 @@ ElGamal PKE构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 明文�
     \node[ellipse callout, color=red, draw, above of = C2, xshift=2em, yshift = 1em, 
         callout absolute pointer={(C2.north)}, font=\scriptsize] {oblivious\\[-0.5em]trapdoor};  
 
-    \node [shapenode, right of = ElGamal, xshift=28em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
-    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=28em] {Bulletproof};
+    \node [shapenode, right of = ElGamal, xshift=32em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
+    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=32em] {Bulletproof};
     \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
     \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
 
     \draw (C2) edge[-] node[midway] {\redcross} (input.west);  
 \end{tikzpicture}
 \end{center}
-
+\caption{ElGamal无法与Bulletproof直接对接}\label{figure:ElGamal-cannot-link-Bulletproof}
+\end{figure}
 
 解决该问题有两种技术手段: 
 \begin{enumerate}
-\item 文献~\cite{Quisquis-ASIACRYPT-2019}中的方法: 证明者引入新的Pedersen承诺作为桥接, 并设计$\Sigma$协议证明新承诺的消息与明文的一致性, 再调用Bulletproof对桥接承诺进行证明. 
-	该方法的缺点是需要引入桥接承诺的额外的$\Sigma$协议, 增大了证明和验证的开销. 
+\item 文献~\cite{Quisquis-ASIACRYPT-2019}中的方法: 证明者首先使用NIZKPoK证明其知晓密文的随机数和消息, 
+    再引入新的Pedersen承诺作为桥接, 并设计$\Sigma$协议证明新承诺的消息与明文的一致性(注: 该Sigma协议可与第一步的NIZKPoK协议合并设计), 再调用Bulletproof对桥接承诺进行证明, 如图~\ref{figure:ElGamal-bridge-Bulletproof}所示. 
+    该方法的缺点是需要引入桥接承诺的额外的$\Sigma$协议, 增大了证明和验证的开销. 
 
+\begin{figure}[!hbtp]
 \begin{center}
 \begin{tikzpicture}
     \node [textnode, name=ElGamal] {ElGamal};
@@ -138,25 +150,33 @@ ElGamal PKE构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 明文�
     \draw ($(ElGamal.south)$) edge[-] (C1); 
     \draw ($(ElGamal.south)$) edge[-] (C2);  
 
+    \draw (C1.south) [decorate, decoration={brace, mirror, raise=2pt, amplitude=8pt}] -- (C2.south);
+    \node [shapenode, draw = none, fill = gray!30, name=NIZKPoK, below of = ElGamal, yshift=-7.5em] {$\Sigma$ protocol}; 
+    \node [textnode, right of=NIZKPoK, xshift=9em] {proof of knowledge $(r, m)$}; 
 
-    \node [shapenode, right of = ElGamal, xshift=28em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
-    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=28em] {Bulletproof};
+    \node [shapenode, right of = ElGamal, xshift=32em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
+    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=32em] {Bulletproof};
     \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
     \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
 
-    \node [shapenode, draw = none, fill = orange, name=sigma, right of = C2, xshift=8em] {$\Sigma$ protocol}; 
-    \node [textnode, above of=sigma, yshift=2em] {consistency\\[-0.5em]proof}; 
-    \node [shapenode, draw=none, fill = darkgreen!30, name=commitment, right of = sigma, xshift=8em, minimum width=4em] {$g^r h^m$};
-    \node [textnode, above of=commitment, yshift=2em] {Pedersen\\[-0.5em]commitment};  
+    \node [shapenode, draw = none, fill = orange, name=sigma, right of = C2, xshift=10em] {$\Sigma$ protocol}; 
+    \node [textnode, above of=sigma, yshift=2em] {proof of consistency}; 
+    \node [shapenode, draw=none, fill = darkgreen!30, name=commitment, right of = sigma, xshift=10em, minimum width=4em] 
+        {$g^{r'} h^m$};
+    \node [textnode, above of=commitment, yshift=2em] {Pedersen commitment};  
 
     \draw (commitment) edge[-] (input); 
     \draw (sigma) edge[->] (C2); 
     \draw (sigma) edge[->] (commitment); 
 \end{tikzpicture}
 \end{center}
+\caption{ElGamal PKE的密态区间范围证明组件Gadget-1之设计方法一}\label{figure:ElGamal-bridge-Bulletproof}
+\end{figure}
 
-\item 文献~\cite{Zether-FC-2020}中的方法: 结合待证明的ElGamal PKE密文对Bulletproof进行重新设计, 使用特制的$\Sigma$-Bulletproof完成证明. 
-	该方法的缺点是需要对Bulletproof进行定制化的改动, 不具备模块化.  
+\item 文献~\cite{Zether-FC-2020}中的方法: 结合待证明的ElGamal PKE密文对Bulletproof进行重新设计, 
+    使用量身定制的$\Sigma$-Bulletproof完成证明, 如图~\ref{figure:ElGamal-dissect-Bulletproof}所示. 
+	该方法的缺点是需要对Bulletproof进行定制化的改动, 不具备模块化特性.  
+\begin{figure}[!hbtp]
 \begin{center}
 \begin{tikzpicture}
     \node [textnode, name=ElGamal] {ElGamal};
@@ -166,8 +186,8 @@ ElGamal PKE构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 明文�
     \draw ($(ElGamal.south)$) edge[-] (C2);  
 
 
-    \node [shapenode, right of = ElGamal, xshift=28em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
-    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=28em] {Bulletproof};
+    \node [shapenode, right of = ElGamal, xshift=32em, fill=blue!20, yshift=-2.5em, minimum width=6em, minimum height=7em] {};
+    \node [textnode, name=Bulletproof, right of = ElGamal, xshift=32em] {Bulletproof};
     \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
     \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
 
@@ -178,12 +198,12 @@ ElGamal PKE构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 明文�
     \draw ($(input.west)+(-1.8em, 2.5em)$) edge[->] ($(input2.east)+(3em, 2.5em)$);  
 \end{tikzpicture}
 \end{center}
+\caption{ElGamal PKE的密态区间范围证明组件Gadget-1之设计方法二}\label{figure:ElGamal-dissect-Bulletproof}
+\end{figure}
 \end{enumerate}
 
-上述两种技术手段均存在不足. 针对这一问题, Chen等~\cite{Chen-ESORICS-2020}对exponential ElGamal PKE进行变形扭转, 将封装密文与会话密钥的位置对调, 
-同时更改同构映射编码的基底, 得到twisted ElGamal PKE. 
-新的加密方案与exponential ElGamal PKE的性能和安全性相当, 同样满足$\mathbb{Z}_q$上的模加同态; 
-特别的, 密文的第二部分恰好是标准的Pedersen承诺形态(承诺密钥陷门未知), 因此可无缝对接Bulletproof等区间范围证明, 具备零知识证明友好的特性. 
+上述两种技术手段均存在不足. 为了解决这一问题, Chen等~\cite{Chen-ESORICS-2020}对exponential ElGamal PKE进行变形扭转, 
+将封装密文$g^r$与会话密钥$pk^r$的位置对调, 同时更改同构映射编码的基底, 得到twisted ElGamal PKE. 
 
 \begin{definition}[Twisted ElGamal PKE]
 \begin{itemize}
@@ -201,36 +221,10 @@ ElGamal PKE构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 明文�
 \end{itemize}
 \end{definition} 
 
-\begin{center}
-\begin{tikzpicture}
-    \node [textnode, name=twisted_ElGamal] {twisted ElGamal};
-    \node [textnode, name=C1, below of=twisted_ElGamal, xshift=-3em, yshift=-3em] {$\blue{g^r}$};
-    \node [textnode, name=C2, below of=twisted_ElGamal, xshift=3em, yshift=-3em] {$\red{pk^r} g^m$};
-    \draw ($(ElGamal.south)$) edge[-, dashed] (C1); 
-    \draw ($(ElGamal.south)$) edge[-, dashed] (C2);  
-
-    \node [textnode, name=C1_new, below of=C1, yshift=-5em] {$\red{pk^r}$};
-    \node [textnode, name=C2_new, below of=C2, yshift=-5em] {$\blue{g^r} h^m$};
-    \draw (C1_new) edge[<-] (C2); 
-    \draw (C2_new) edge[<-] (C1); 
-    \draw ($(C2.south)+(0.5em, 0em)$) edge[->, dotted] ($(C2_new.north)+(0.5em, 0em)$); 
-
-    \node[ellipse callout, color=darkgreen, draw, above of = C2_new, xshift=3em, yshift = 0.5em, 
-        callout absolute pointer={(C2_new.north)+(1em, 0em)}, font=\scriptsize] {no\\[-0.5em]trapdoor};  
-
-    \node [shapenode, right of = twisted_ElGamal, xshift=28em, fill=blue!20, yshift=-5.3em, minimum width=6em, minimum height=7em] {};
-    \node [textnode, name=Bulletproof, right of = twisted_ElGamal, yshift=-2.8em, xshift=28em] {Bulletproof};
-    \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
-    \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
-
-    \draw (C2_new) edge[-] (input.west);  
-\end{tikzpicture}
-\end{center}
-
 \begin{trivlist}
 \item \textbf{正确性.} 以下公式~\ref{equation:twisted-ElGamal-PKE-correctness}说明方案具有完美正确性: 
 \begin{equation}\label{equation:twisted-ElGamal-PKE-correctness}
-	c_1/c_0^{sk^{-1}} = g^r \cdot h^m/(pk^r)^{sk^{-1}} = h^m
+    c_1/c_0^{sk^{-1}} = g^r \cdot h^m/(pk^r)^{sk^{-1}} = h^m
 \end{equation}
 \end{trivlist}
 
@@ -241,5 +235,75 @@ ElGamal PKE构建在$q$阶循环群$\mathbb{G} = \langle g \rangle$上, 明文�
 
 \begin{note}
 为获得$\mathbb{Z}_q$上的加法同态, exponential ElGamal PKE和twisted ElGamal PKE均将明文空间设定为$\mathbb{Z}_q$, 加密时必须先进行同构编码, 
-解密时则在最后需要进行解码. 解码的过程等同于求解离散对数, 因此为了确保解密高效, 必须将明文空间限制在较小的范围内, 如$[2^{40}]$. 
+解密时则在最后需要进行解码. 解码的过程等同于求解离散对数, 因此为了确保解密高效, 必须将明文空间限制在较小的范围内, 如$[0, 2^{40}]$. 
 \end{note} 
+
+\begin{trivlist}
+\item \textbf{零知识证明友好特性.} 新的加密方案与exponential ElGamal PKE的性能和安全性相当, 
+    同样满足$\mathbb{Z}_q$上的模加同态. 特别的, 密文的第二部分恰好是标准的Pedersen承诺形态(承诺密钥陷门未知), 
+    可无缝对接Bulletproof等一系列断言类型为Pedersen commitment的区间范围证明, 如图~\ref{figure:twisted-ElGamal-Bulletproof}所示. 
+    我们称公钥加密方案的这种性质为零知识证明友好. 
+\end{trivlist}
+
+\begin{figure}[!hbtp]
+\begin{center}
+\begin{tikzpicture}
+    \node [textnode, name=twisted_ElGamal] {twisted ElGamal};
+    \node [textnode, name=C1, below of=twisted_ElGamal, xshift=-3em, yshift=-3em] {$\blue{g^r}$};
+    \node [textnode, name=C2, below of=twisted_ElGamal, xshift=3em, yshift=-3em] {$\red{pk^r} g^m$};
+    \draw ($(ElGamal.south)$) edge[-, dashed] (C1); 
+    \draw ($(ElGamal.south)$) edge[-, dashed] (C2);  
+
+
+    \node [textnode, name=C1_new, below of=C1, yshift=-5em] {$\red{pk^r}$};
+    \node [textnode, name=C2_new, below of=C2, yshift=-5em] {$\blue{g^r} h^m$};
+    \draw (C1_new) edge[<-] (C2); 
+    \draw (C2_new) edge[<-] (C1); 
+    \draw ($(C2.south)+(0.5em, 0em)$) edge[->, dotted] ($(C2_new.north)+(0.5em, 0em)$); 
+
+    \draw (C1_new.south) [decorate, decoration={brace, mirror, raise=2pt, amplitude=8pt}] -- (C2_new.south);
+    \node [shapenode, draw = none, fill = gray!30, name=NIZKPoK, below of = ElGamal, yshift=-10.5em] {$\Sigma$ protocol}; 
+    \node [textnode, right of=NIZKPoK, xshift=9em] {proof of knowledge $(r, m)$}; 
+
+    \node[ellipse callout, color=darkgreen, draw, above of = C2_new, xshift=3em, yshift = 0.5em, 
+        callout absolute pointer={(C2_new.north)+(1em, 0em)}, font=\scriptsize] {no\\[-0.2em]trapdoor};  
+
+    \node [shapenode, right of = twisted_ElGamal, xshift=32em, fill=blue!20, yshift=-5.3em, minimum width=6em, minimum height=7em] {};
+    \node [textnode, name=Bulletproof, right of = twisted_ElGamal, yshift=-2.8em, xshift=32em] {Bulletproof};
+    \node [textnode, name=input, below of = Bulletproof, yshift=-5em] {$g^r h^m$};
+    \node [textnode, above of = input, yshift=1.5em] {断言类型}; 
+
+    \draw (C2_new) edge[-] (input.west);  
+\end{tikzpicture}
+\end{center}
+\caption{Twisted ElGamal PKE的密态区间范围证明组件Gadget-1}\label{figure:twisted-ElGamal-Bulletproof}
+\end{figure}
+
+Twisted ElGamal PKE的密态证明组件Gadget-2的设计可以通过如下步骤完成: 
+\begin{enumerate}
+    \item 证明者使用$sk$对密文$(pk^r, g^r h^m)$进行部分解密得到$h^m$; 
+    \item 证明者选取新的随机数对$m$进行重加密得到新密文$(pk^{r^*}, g^{r^*} h^m)$; 
+    \item 证明者设计NIZK协议证明新旧密文的一致性, 即均是对同一个消息的加密(具体可通过证明DDH元组的Sigma协议实现); 
+    \item 证明者调用Gadget-1对新密文完成密态证明. 
+\end{enumerate}
+
+相比标准的ElGamal, twisted ElGamal的显著优势就在于零知识证明友好, 下表对比了两者的密态证明组件的效率. 
+\begin{table}[H]
+\caption{标准ElGamal和twisted ElGamal与Bulletproof对接开销的对比}
+\begin{center}
+\begin{tabular}{ccccc}
+\hline
+对接开销 & PKE & 证明大小 & 证明者开销 & 验证者开销 \\
+\hline
+\multirow{2}*{Gadgets-1/2} & 标准ElGamal & $n(2|\mathbb{G}|+\mathbb{Z}_p)$ & $n$(4Exp+2Add) & $n$(3Exp+2Add) \\
+\cline{2-5}
+ & twisted ElGamal & \blue{0} & \blue{0} & \blue{0} \\
+\hline
+\end{tabular}
+\end{center}
+\begin{tablenotes}
+\item[a] \footnotesize{在统计证明者和验证者开销时, 省去了数域上的操作, 因其代价相比椭圆曲线群上的操作相比可忽略. $n$是需要证明的密文数. 在很多实际应用中, 单个证明者需要对多个密文通过gadgets-1/2进行区间范围证明. 
+当密文数量为百万量级时, 使用twisted ElGamal带来的性能提升是相当可观的.} 
+\end{tablenotes}
+\end{table}
+

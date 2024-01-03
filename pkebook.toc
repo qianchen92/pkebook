@@ -29,114 +29,114 @@
 \contentsline {section}{\numberline {3.2}基于离散对数类问题的经典方案}{30}{section.3.2}%
 \contentsline {subsection}{\numberline {3.2.1}ElGamal PKE}{30}{subsection.3.2.1}%
 \contentsline {subsection}{\numberline {3.2.2}Twisted ElGamal PKE}{31}{subsection.3.2.2}%
-\contentsline {section}{\numberline {3.3}基于格问题的经典方案}{33}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Regev PKE}{33}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}GPV PKE}{34}{subsection.3.3.2}%
-\contentsline {chapter}{\numberline {第四章}通用构造方法}{37}{chapter.4}%
-\contentsline {section}{\numberline {4.1}单向陷门函数类}{38}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}单向陷门函数}{38}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}有损陷门函数}{41}{subsection.4.1.2}%
-\contentsline {subsection}{\numberline {4.1.3}相关积单向陷门函数}{47}{subsection.4.1.3}%
-\contentsline {subsection}{\numberline {4.1.4}自适应单向陷门函数}{49}{subsection.4.1.4}%
-\contentsline {section}{\numberline {4.2}哈希证明系统类}{59}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}起源释疑}{60}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}HPS的构造}{61}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}基于HPS构造IND-CPA KEM}{63}{subsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.2.4}基于HPS构造IND-CCA KEM}{64}{subsection.4.2.4}%
-\contentsline {section}{\numberline {4.3}可提取哈希证明系统类}{68}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}起源释疑}{68}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}EHPS的构造}{69}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}基于EHPS构造IND-CPA KEM}{70}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.3.4}基于EHPS构造IND-CCA KEM}{72}{subsection.4.3.4}%
-\contentsline {subsection}{\numberline {4.3.5}小结}{75}{subsection.4.3.5}%
-\contentsline {subsubsection}{\numberline {4.3.5.1}HPS与EHPS的分析比较}{75}{subsubsection.4.3.5.1}%
-\contentsline {section}{\numberline {4.4}程序混淆类}{77}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}背景知识}{77}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}受限伪随机函数}{79}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.4.3}基于不可区分混淆的KEM构造}{82}{subsection.4.4.3}%
-\contentsline {section}{\numberline {4.5}可公开求值伪随机函数类}{86}{section.4.5}%
-\contentsline {subsection}{\numberline {4.5.1}定义与安全性}{86}{subsection.4.5.1}%
-\contentsline {subsection}{\numberline {4.5.2}基于PEPRF的KEM构造}{88}{subsection.4.5.2}%
-\contentsline {subsection}{\numberline {4.5.3}PEPRF的构造}{89}{subsection.4.5.3}%
-\contentsline {subsubsection}{\numberline {4.5.3.1}基于DDH假设的PEPRF}{89}{subsubsection.4.5.3.1}%
-\contentsline {subsubsection}{\numberline {4.5.3.2}基于QR假设的PEPRF}{89}{subsubsection.4.5.3.2}%
-\contentsline {subsubsection}{\numberline {4.5.3.3}基于TDF的PEPRF}{90}{subsubsection.4.5.3.3}%
-\contentsline {subsubsection}{\numberline {4.5.3.4}基于HPS的PEPRF构造}{91}{subsubsection.4.5.3.4}%
-\contentsline {subsubsection}{\numberline {4.5.3.5}基于EHPS的PEPRF构造}{92}{subsubsection.4.5.3.5}%
-\contentsline {subsubsection}{\numberline {4.5.3.6}基于$i\mathcal {O}$的PEPRF构造}{93}{subsubsection.4.5.3.6}%
-\contentsline {subsection}{\numberline {4.5.4}小结}{94}{subsection.4.5.4}%
-\contentsline {chapter}{\numberline {第五章}公钥加密的安全性增强}{95}{chapter.5}%
-\contentsline {section}{\numberline {5.1}抗泄漏安全}{96}{section.5.1}%
-\contentsline {subsection}{\numberline {5.1.1}安全模型}{97}{subsection.5.1.1}%
-\contentsline {subsection}{\numberline {5.1.2}NS09方案}{97}{subsection.5.1.2}%
-\contentsline {subsubsection}{\numberline {5.1.2.1}基于哈希证明系统的通用构造}{97}{subsubsection.5.1.2.1}%
-\contentsline {subsubsection}{\numberline {5.1.2.2}基于DDH问题的实例化方案}{99}{subsubsection.5.1.2.2}%
-\contentsline {subsection}{\numberline {5.1.3}QL13方案}{100}{subsection.5.1.3}%
-\contentsline {subsubsection}{\numberline {5.1.3.1}一次有损过滤器}{100}{subsubsection.5.1.3.1}%
-\contentsline {subsubsection}{\numberline {5.1.3.2}基于一次有损过滤器的通用构造}{101}{subsubsection.5.1.3.2}%
-\contentsline {subsubsection}{\numberline {5.1.3.3}基于DDH问题的实例化方案}{105}{subsubsection.5.1.3.3}%
-\contentsline {subsection}{\numberline {5.1.4}CQX18方案}{106}{subsection.5.1.4}%
-\contentsline {subsubsection}{\numberline {5.1.4.1}规则有损函数及扩展}{106}{subsubsection.5.1.4.1}%
-\contentsline {subsubsection}{\numberline {5.1.4.2}全除一规则有损函数的具体构造}{108}{subsubsection.5.1.4.2}%
-\contentsline {subsubsection}{\numberline {5.1.4.3}全除一规则有损函数的通用构造}{110}{subsubsection.5.1.4.3}%
-\contentsline {subsubsection}{\numberline {5.1.4.4}规则有损函数的应用}{112}{subsubsection.5.1.4.4}%
-\contentsline {subsection}{\numberline {5.1.5}CWZ18方案}{117}{subsection.5.1.5}%
-\contentsline {subsubsection}{\numberline {5.1.5.1}LR-PEPRFs的定义}{117}{subsubsection.5.1.5.1}%
-\contentsline {subsubsection}{\numberline {5.1.5.2}LR-PEPRFs的构造}{118}{subsubsection.5.1.5.2}%
-\contentsline {subsubsection}{\numberline {5.1.5.3}LR-PEPRFs的应用}{122}{subsubsection.5.1.5.3}%
-\contentsline {section}{\numberline {5.2}抗篡改安全}{123}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}安全模型}{123}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}Wee12方案}{123}{subsection.5.2.2}%
-\contentsline {subsubsection}{\numberline {5.2.2.1}自适应单向陷门关系的特殊性质}{123}{subsubsection.5.2.2.1}%
-\contentsline {subsubsection}{\numberline {5.2.2.2}基于自适应单向陷门关系的RKA-CCA方案}{124}{subsubsection.5.2.2.2}%
-\contentsline {subsection}{\numberline {5.2.3}CQZ+22方案}{126}{subsection.5.2.3}%
-\contentsline {subsubsection}{\numberline {5.2.3.1}不可延展函数}{127}{subsubsection.5.2.3.1}%
-\contentsline {subsubsection}{\numberline {5.2.3.2}不可延展性与单向性之间的关系}{128}{subsubsection.5.2.3.2}%
-\contentsline {subsubsection}{\numberline {5.2.3.3}不可延展函数的构造}{130}{subsubsection.5.2.3.3}%
-\contentsline {subsubsection}{\numberline {5.2.3.4}不可延展函数的应用}{132}{subsubsection.5.2.3.4}%
-\contentsline {section}{\numberline {5.3}消息依赖密钥安全}{135}{section.5.3}%
-\contentsline {subsection}{\numberline {5.3.1}安全模型}{135}{subsection.5.3.1}%
-\contentsline {subsection}{\numberline {5.3.2}Wee16方案}{136}{subsection.5.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.2.1}同态平滑仿射哈希}{136}{subsubsection.5.3.2.1}%
-\contentsline {subsubsection}{\numberline {5.3.2.2}基于同态平滑仿射哈希的KDM-CPA方案}{137}{subsubsection.5.3.2.2}%
-\contentsline {subsection}{\numberline {5.3.3}HLL16方案}{139}{subsection.5.3.3}%
-\contentsline {subsubsection}{\numberline {5.3.3.1}支持辅助输入的认证加密方案}{139}{subsubsection.5.3.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.3.2}KDM-CCA方案的通用设计方法}{141}{subsubsection.5.3.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.3.3}实例化方案}{142}{subsubsection.5.3.3.3}%
-\contentsline {subsection}{\numberline {5.3.4}QLH13方案}{144}{subsection.5.3.4}%
-\contentsline {subsubsection}{\numberline {5.3.4.1}KDM函数族定义}{144}{subsubsection.5.3.4.1}%
-\contentsline {subsubsection}{\numberline {5.3.4.2}KDM-CCA安全的Cramer-Shoup方案}{145}{subsubsection.5.3.4.2}%
-\contentsline {chapter}{\numberline {第六章}公钥加密的功能性扩展}{148}{chapter.6}%
-\contentsline {section}{\numberline {6.1}确定性公钥加密}{149}{section.6.1}%
-\contentsline {subsection}{\numberline {6.1.1}安全模型}{149}{subsection.6.1.1}%
-\contentsline {subsection}{\numberline {6.1.2}基于对偶仿射哈希的DPKE方案}{149}{subsection.6.1.2}%
-\contentsline {subsubsection}{\numberline {6.1.2.1}对偶仿射哈希}{149}{subsubsection.6.1.2.1}%
-\contentsline {subsubsection}{\numberline {6.1.2.2}DPKE方案的构造}{150}{subsubsection.6.1.2.2}%
-\contentsline {subsection}{\numberline {6.1.3}基于DLIN的实例化方案}{152}{subsection.6.1.3}%
-\contentsline {section}{\numberline {6.2}可搜索公钥加密}{153}{section.6.2}%
-\contentsline {subsection}{\numberline {6.2.1}PEKS方案}{153}{subsection.6.2.1}%
-\contentsline {subsubsection}{\numberline {6.2.1.1}形式化定义}{153}{subsubsection.6.2.1.1}%
-\contentsline {subsubsection}{\numberline {6.2.1.2}安全模型}{155}{subsubsection.6.2.1.2}%
-\contentsline {subsubsection}{\numberline {6.2.1.3}PEKS与IBE之间的关系}{155}{subsubsection.6.2.1.3}%
-\contentsline {subsubsection}{\numberline {6.2.1.4}方案构造}{156}{subsubsection.6.2.1.4}%
-\contentsline {subsection}{\numberline {6.2.2}PKE-PEKS方案}{159}{subsection.6.2.2}%
-\contentsline {subsubsection}{\numberline {6.2.2.1}形式化定义}{159}{subsubsection.6.2.2.1}%
-\contentsline {subsubsection}{\numberline {6.2.2.2}安全模型}{160}{subsubsection.6.2.2.2}%
-\contentsline {subsubsection}{\numberline {6.2.2.3}方案构造}{161}{subsubsection.6.2.2.3}%
-\contentsline {subsection}{\numberline {6.2.3}PAEKS方案}{170}{subsection.6.2.3}%
-\contentsline {subsubsection}{\numberline {6.2.3.1}形式化定义}{171}{subsubsection.6.2.3.1}%
-\contentsline {subsubsection}{\numberline {6.2.3.2}安全模型}{172}{subsubsection.6.2.3.2}%
-\contentsline {subsubsection}{\numberline {6.2.3.3}方案构造}{174}{subsubsection.6.2.3.3}%
-\contentsline {subsubsection}{\numberline {6.2.3.4}应用}{179}{subsubsection.6.2.3.4}%
-\contentsline {chapter}{\numberline {第七章}标准化及工程实践}{180}{chapter.7}%
-\contentsline {section}{\numberline {7.1}标准化与工程实践}{181}{section.7.1}%
-\contentsline {subsection}{\numberline {7.1.1}公钥加密的标准化}{181}{subsection.7.1.1}%
-\contentsline {subsubsection}{\numberline {7.1.1.1}国内外标准化组织简介}{181}{subsubsection.7.1.1.1}%
-\contentsline {subsubsection}{\numberline {7.1.1.2}公钥加密标准方案}{182}{subsubsection.7.1.1.2}%
-\contentsline {subsection}{\numberline {7.1.2}公钥加密的工程实践}{183}{subsection.7.1.2}%
-\contentsline {subsubsection}{\numberline {7.1.2.1}重要方案的优秀开源实现}{183}{subsubsection.7.1.2.1}%
-\contentsline {subsubsection}{\numberline {7.1.2.2}重要的开源密码库}{183}{subsubsection.7.1.2.2}%
-\contentsline {subsection}{\numberline {7.1.3}公钥密码学的工程实践经验}{184}{subsection.7.1.3}%
-\contentsline {chapter}{参考文献}{185}{chapter*.87}%
+\contentsline {section}{\numberline {3.3}基于格问题的经典方案}{34}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Regev PKE}{34}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}GPV PKE}{35}{subsection.3.3.2}%
+\contentsline {chapter}{\numberline {第四章}通用构造方法}{38}{chapter.4}%
+\contentsline {section}{\numberline {4.1}单向陷门函数类}{39}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}单向陷门函数}{39}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}有损陷门函数}{42}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}相关积单向陷门函数}{48}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.4}自适应单向陷门函数}{50}{subsection.4.1.4}%
+\contentsline {section}{\numberline {4.2}哈希证明系统类}{60}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}起源释疑}{61}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}HPS的构造}{62}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}基于HPS构造IND-CPA KEM}{64}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}基于HPS构造IND-CCA KEM}{65}{subsection.4.2.4}%
+\contentsline {section}{\numberline {4.3}可提取哈希证明系统类}{69}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}起源释疑}{69}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}EHPS的构造}{70}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}基于EHPS构造IND-CPA KEM}{71}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}基于EHPS构造IND-CCA KEM}{73}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}小结}{76}{subsection.4.3.5}%
+\contentsline {subsubsection}{\numberline {4.3.5.1}HPS与EHPS的分析比较}{76}{subsubsection.4.3.5.1}%
+\contentsline {section}{\numberline {4.4}程序混淆类}{78}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}背景知识}{78}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}受限伪随机函数}{80}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}基于不可区分混淆的KEM构造}{83}{subsection.4.4.3}%
+\contentsline {section}{\numberline {4.5}可公开求值伪随机函数类}{87}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}定义与安全性}{87}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}基于PEPRF的KEM构造}{89}{subsection.4.5.2}%
+\contentsline {subsection}{\numberline {4.5.3}PEPRF的构造}{90}{subsection.4.5.3}%
+\contentsline {subsubsection}{\numberline {4.5.3.1}基于DDH假设的PEPRF}{90}{subsubsection.4.5.3.1}%
+\contentsline {subsubsection}{\numberline {4.5.3.2}基于QR假设的PEPRF}{90}{subsubsection.4.5.3.2}%
+\contentsline {subsubsection}{\numberline {4.5.3.3}基于TDF的PEPRF}{91}{subsubsection.4.5.3.3}%
+\contentsline {subsubsection}{\numberline {4.5.3.4}基于HPS的PEPRF构造}{92}{subsubsection.4.5.3.4}%
+\contentsline {subsubsection}{\numberline {4.5.3.5}基于EHPS的PEPRF构造}{93}{subsubsection.4.5.3.5}%
+\contentsline {subsubsection}{\numberline {4.5.3.6}基于$i\mathcal {O}$的PEPRF构造}{94}{subsubsection.4.5.3.6}%
+\contentsline {subsection}{\numberline {4.5.4}小结}{95}{subsection.4.5.4}%
+\contentsline {chapter}{\numberline {第五章}公钥加密的安全性增强}{96}{chapter.5}%
+\contentsline {section}{\numberline {5.1}抗泄漏安全}{97}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}安全模型}{98}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}NS09方案}{98}{subsection.5.1.2}%
+\contentsline {subsubsection}{\numberline {5.1.2.1}基于哈希证明系统的通用构造}{98}{subsubsection.5.1.2.1}%
+\contentsline {subsubsection}{\numberline {5.1.2.2}基于DDH问题的实例化方案}{100}{subsubsection.5.1.2.2}%
+\contentsline {subsection}{\numberline {5.1.3}QL13方案}{101}{subsection.5.1.3}%
+\contentsline {subsubsection}{\numberline {5.1.3.1}一次有损过滤器}{101}{subsubsection.5.1.3.1}%
+\contentsline {subsubsection}{\numberline {5.1.3.2}基于一次有损过滤器的通用构造}{102}{subsubsection.5.1.3.2}%
+\contentsline {subsubsection}{\numberline {5.1.3.3}基于DDH问题的实例化方案}{106}{subsubsection.5.1.3.3}%
+\contentsline {subsection}{\numberline {5.1.4}CQX18方案}{107}{subsection.5.1.4}%
+\contentsline {subsubsection}{\numberline {5.1.4.1}规则有损函数及扩展}{107}{subsubsection.5.1.4.1}%
+\contentsline {subsubsection}{\numberline {5.1.4.2}全除一规则有损函数的具体构造}{109}{subsubsection.5.1.4.2}%
+\contentsline {subsubsection}{\numberline {5.1.4.3}全除一规则有损函数的通用构造}{111}{subsubsection.5.1.4.3}%
+\contentsline {subsubsection}{\numberline {5.1.4.4}规则有损函数的应用}{113}{subsubsection.5.1.4.4}%
+\contentsline {subsection}{\numberline {5.1.5}CWZ18方案}{118}{subsection.5.1.5}%
+\contentsline {subsubsection}{\numberline {5.1.5.1}LR-PEPRFs的定义}{118}{subsubsection.5.1.5.1}%
+\contentsline {subsubsection}{\numberline {5.1.5.2}LR-PEPRFs的构造}{119}{subsubsection.5.1.5.2}%
+\contentsline {subsubsection}{\numberline {5.1.5.3}LR-PEPRFs的应用}{123}{subsubsection.5.1.5.3}%
+\contentsline {section}{\numberline {5.2}抗篡改安全}{124}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}安全模型}{124}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Wee12方案}{124}{subsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.2.1}自适应单向陷门关系的特殊性质}{124}{subsubsection.5.2.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2.2}基于自适应单向陷门关系的RKA-CCA方案}{125}{subsubsection.5.2.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}CQZ+22方案}{127}{subsection.5.2.3}%
+\contentsline {subsubsection}{\numberline {5.2.3.1}不可延展函数}{128}{subsubsection.5.2.3.1}%
+\contentsline {subsubsection}{\numberline {5.2.3.2}不可延展性与单向性之间的关系}{129}{subsubsection.5.2.3.2}%
+\contentsline {subsubsection}{\numberline {5.2.3.3}不可延展函数的构造}{131}{subsubsection.5.2.3.3}%
+\contentsline {subsubsection}{\numberline {5.2.3.4}不可延展函数的应用}{133}{subsubsection.5.2.3.4}%
+\contentsline {section}{\numberline {5.3}消息依赖密钥安全}{136}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}安全模型}{136}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Wee16方案}{137}{subsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.2.1}同态平滑仿射哈希}{137}{subsubsection.5.3.2.1}%
+\contentsline {subsubsection}{\numberline {5.3.2.2}基于同态平滑仿射哈希的KDM-CPA方案}{138}{subsubsection.5.3.2.2}%
+\contentsline {subsection}{\numberline {5.3.3}HLL16方案}{140}{subsection.5.3.3}%
+\contentsline {subsubsection}{\numberline {5.3.3.1}支持辅助输入的认证加密方案}{140}{subsubsection.5.3.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.3.2}KDM-CCA方案的通用设计方法}{142}{subsubsection.5.3.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3.3}实例化方案}{143}{subsubsection.5.3.3.3}%
+\contentsline {subsection}{\numberline {5.3.4}QLH13方案}{145}{subsection.5.3.4}%
+\contentsline {subsubsection}{\numberline {5.3.4.1}KDM函数族定义}{145}{subsubsection.5.3.4.1}%
+\contentsline {subsubsection}{\numberline {5.3.4.2}KDM-CCA安全的Cramer-Shoup方案}{146}{subsubsection.5.3.4.2}%
+\contentsline {chapter}{\numberline {第六章}公钥加密的功能性扩展}{149}{chapter.6}%
+\contentsline {section}{\numberline {6.1}确定性公钥加密}{150}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}安全模型}{150}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}基于对偶仿射哈希的DPKE方案}{150}{subsection.6.1.2}%
+\contentsline {subsubsection}{\numberline {6.1.2.1}对偶仿射哈希}{150}{subsubsection.6.1.2.1}%
+\contentsline {subsubsection}{\numberline {6.1.2.2}DPKE方案的构造}{151}{subsubsection.6.1.2.2}%
+\contentsline {subsection}{\numberline {6.1.3}基于DLIN的实例化方案}{153}{subsection.6.1.3}%
+\contentsline {section}{\numberline {6.2}可搜索公钥加密}{154}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}PEKS方案}{154}{subsection.6.2.1}%
+\contentsline {subsubsection}{\numberline {6.2.1.1}形式化定义}{154}{subsubsection.6.2.1.1}%
+\contentsline {subsubsection}{\numberline {6.2.1.2}安全模型}{156}{subsubsection.6.2.1.2}%
+\contentsline {subsubsection}{\numberline {6.2.1.3}PEKS与IBE之间的关系}{156}{subsubsection.6.2.1.3}%
+\contentsline {subsubsection}{\numberline {6.2.1.4}方案构造}{157}{subsubsection.6.2.1.4}%
+\contentsline {subsection}{\numberline {6.2.2}PKE-PEKS方案}{160}{subsection.6.2.2}%
+\contentsline {subsubsection}{\numberline {6.2.2.1}形式化定义}{160}{subsubsection.6.2.2.1}%
+\contentsline {subsubsection}{\numberline {6.2.2.2}安全模型}{161}{subsubsection.6.2.2.2}%
+\contentsline {subsubsection}{\numberline {6.2.2.3}方案构造}{162}{subsubsection.6.2.2.3}%
+\contentsline {subsection}{\numberline {6.2.3}PAEKS方案}{171}{subsection.6.2.3}%
+\contentsline {subsubsection}{\numberline {6.2.3.1}形式化定义}{172}{subsubsection.6.2.3.1}%
+\contentsline {subsubsection}{\numberline {6.2.3.2}安全模型}{173}{subsubsection.6.2.3.2}%
+\contentsline {subsubsection}{\numberline {6.2.3.3}方案构造}{175}{subsubsection.6.2.3.3}%
+\contentsline {subsubsection}{\numberline {6.2.3.4}应用}{180}{subsubsection.6.2.3.4}%
+\contentsline {chapter}{\numberline {第七章}标准化及工程实践}{181}{chapter.7}%
+\contentsline {section}{\numberline {7.1}标准化与工程实践}{182}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}公钥加密的标准化}{182}{subsection.7.1.1}%
+\contentsline {subsubsection}{\numberline {7.1.1.1}国内外标准化组织简介}{182}{subsubsection.7.1.1.1}%
+\contentsline {subsubsection}{\numberline {7.1.1.2}公钥加密标准方案}{183}{subsubsection.7.1.1.2}%
+\contentsline {subsection}{\numberline {7.1.2}公钥加密的工程实践}{184}{subsection.7.1.2}%
+\contentsline {subsubsection}{\numberline {7.1.2.1}重要方案的优秀开源实现}{184}{subsubsection.7.1.2.1}%
+\contentsline {subsubsection}{\numberline {7.1.2.2}重要的开源密码库}{184}{subsubsection.7.1.2.2}%
+\contentsline {subsection}{\numberline {7.1.3}公钥密码学的工程实践经验}{185}{subsection.7.1.3}%
+\contentsline {chapter}{参考文献}{186}{chapter*.92}%
 \renewcommand {\cftchappresnum }{附录 }\renewcommand {\cftchapaftersnum }{}
-\contentsline {chapter}{后记}{193}{appendix*.88}%
+\contentsline {chapter}{后记}{194}{appendix*.93}%
